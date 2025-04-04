@@ -14,19 +14,17 @@ import { SyntaxHighlighterProvider } from './react-envelope/contexts/SyntaxHighl
 
 const root = ReactDOM.createRoot(document.getElementById('root'));
 root.render(
-  <React.StrictMode>
     <ThemeProvider>
-      <SyntaxHighlighterProvider>
-        <AuthProvider>
-          <AccountsProvider>
-            <NavigationProvider>
-              <App/>
-            </NavigationProvider>
-          </AccountsProvider>
-        </AuthProvider>
-      </SyntaxHighlighterProvider>
+        <SyntaxHighlighterProvider>
+            <AuthProvider>
+                <AccountsProvider>
+                    <NavigationProvider>
+                        <App />
+                    </NavigationProvider>
+                </AccountsProvider>
+            </AuthProvider>
+        </SyntaxHighlighterProvider>
     </ThemeProvider>
-  </React.StrictMode>
 );
 
 reportWebVitals();

@@ -12,16 +12,13 @@ export const SupplyCalendar = ({ month, year, dailyData, onChange, className }) 
         'Июль', 'Август', 'Сентябрь', 'Октябрь', 'Ноябрь', 'Декабрь'
     ];
 
-    // Получаем количество дней в месяце
     const daysInMonth = new Date(year, month + 1, 0).getDate();
 
-    // Обработчик открытия модалки для дня
     const handleDayClick = (day) => {
         setSelectedDay(day);
         setHourlyInputs(dailyData[day] || {});
     };
 
-    // Обработчик изменения значения часа
     const handleHourChange = (hour, value) => {
         setHourlyInputs(prev => ({
             ...prev,
@@ -29,7 +26,6 @@ export const SupplyCalendar = ({ month, year, dailyData, onChange, className }) 
         }));
     };
 
-    // Обработчик сохранения данных
     const handleSave = () => {
         if (selectedDay !== null) {
             onChange(selectedDay, hourlyInputs);
@@ -37,10 +33,8 @@ export const SupplyCalendar = ({ month, year, dailyData, onChange, className }) 
         }
     };
 
-    // Получаем цвет для дня в зависимости от заполненности данных
     const getDayType = (day) => {
-        // Проверяем, есть ли запись о дне в dailyData
-        if (!(day in dailyData)) return 'flat'; // Не редактировался - серый
+        if (!(day in dailyData)) return 'flat';
 
         const dayData = dailyData[day];
         const hours = Object.values(dayData);
@@ -75,14 +69,6 @@ export const SupplyCalendar = ({ month, year, dailyData, onChange, className }) 
                         <span className={css.dayTitle}>День {selectedDay}</span>
                         <div className={css.hourInputs}>
                             {Array.from({ length: 24 }, (_, i) => i).map(hour => (
-                                // <div key={hour} className={css.hourInput}>
-                                //     <label>{hour}:00</label>
-                                //     <input
-                                //         type="number"
-                                //         value={hourlyInputs[hour] || ''}
-                                //         onChange={(e) => handleHourChange(hour, e.target.value)}
-                                //     />
-                                // </div>
                                 <TextBox key={hour}
                                          value={hourlyInputs[hour]}
                                          onChange={(e) => handleHourChange(hour, e)}
