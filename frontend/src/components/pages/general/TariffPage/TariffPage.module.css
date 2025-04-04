@@ -1,4 +1,23 @@
 .content {
+    margin-top: 20px;
     width: 800px;
     align-self: center;
+}
+
+.inputGroup {
+    display: flex;
+    flex-direction: column;
+    gap: 5px;
+    margin-bottom: 15px;
+}
+
+.inputGroup label {
+    font-weight: bold;
+}
+
+.inputGroup input,
+.inputGroup select {
+    padding: 8px;
+    border: 1px solid #ccc;
+    border-radius: 4px;
 }

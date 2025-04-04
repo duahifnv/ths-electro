@@ -1,0 +1,78 @@
+.calendar {
+    margin-top: 20px;
+
+    max-width: 400px;
+}
+
+.calendarGrid {
+    display: grid;
+    grid-template-columns: repeat(7, 1fr);
+    gap: 10px;
+}
+
+.dayButton {
+    border: 1px solid var(--font-color);
+}
+
+.modal {
+    position: fixed;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    background-color: rgba(0, 0, 0, 0.5);
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    z-index: 1000;
+}
+
+.modalContent {
+    background-color: white;
+    padding: 20px;
+    border-radius: 8px;
+    width: 80%;
+    max-width: 600px;
+    max-height: 80vh;
+    overflow-y: auto;
+}
+
+.hourInputs {
+    display: grid;
+    grid-template-columns: repeat(3, 1fr);
+    gap: 10px;
+    margin: 15px 0;
+}
+
+.hourInput {
+    display: flex;
+    flex-direction: column;
+}
+
+.hourInput label {
+    font-size: 0.8em;
+    margin-bottom: 2px;
+}
+
+.modalButtons {
+    display: flex;
+    justify-content: flex-end;
+    gap: 10px;
+    margin-top: 15px;
+}
+
+.modalButtons button {
+    padding: 8px 15px;
+    border: none;
+    border-radius: 4px;
+    cursor: pointer;
+}
+
+.modalButtons button:first-child {
+    background-color: #f0f0f0;
+}
+
+.modalButtons button:last-child {
+    background-color: #4CAF50;
+    color: white;
+}
