@@ -19,6 +19,7 @@
     width: 100%;
     text-align: center;
     border-bottom: 1px solid var(--accent-color);
+    padding-bottom: 5px;
 }
 
 .dayButton {
