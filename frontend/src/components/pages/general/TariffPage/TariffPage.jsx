@@ -62,6 +62,7 @@ export const TariffPage = () => {
           year={year}
           dailyData={dailyData}
           onChange={handleDayDataChange}
+          className={css.calendar}
         />
       </VBoxPanel>
     </PageBase>

@@ -3,6 +3,7 @@ import ReactDOM from 'react-dom/client';
 import './index.css';
 import './react-envelope/variables.css'
 import './react-envelope/styles.css'
+import './variables.css';
 import App from './App';
 import reportWebVitals from './reportWebVitals';
 import { AuthProvider } from './react-envelope/contexts/AuthContext';

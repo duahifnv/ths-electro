@@ -1,7 +1,11 @@
 .calendar {
     margin-top: 20px;
 
-    max-width: 400px;
+    max-width: 600px;
+
+    display: flex;
+    flex-direction: column;
+    gap: 10px;
 }
 
 .calendarGrid {
@@ -10,8 +14,16 @@
     gap: 10px;
 }
 
+.month {
+    font-size: var(--h2-font-size);
+    width: 100%;
+    text-align: center;
+    border-bottom: 1px solid var(--accent-color);
+}
+
 .dayButton {
-    border: 1px solid var(--font-color);
+    border: 1px solid var(--border-color);
+    width: 50px;
 }
 
 .modal {
