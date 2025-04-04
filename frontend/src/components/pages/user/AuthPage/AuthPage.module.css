@@ -1,0 +1,21 @@
+.body .card {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+
+    height: 100%;
+
+    gap: 20px;
+
+    margin-bottom: var(--header-height);
+}
+
+.home {
+    background-color: var(--body-bk-color);
+    width: 400px;
+    padding: 10px;
+}
+.home:hover {
+    background-color: var(--highlight-light);
+}

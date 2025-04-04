@@ -1,0 +1,131 @@
+server {
+    listen 80;
+    server_name ${DOMAIN} www.${DOMAIN};
+
+    location / {
+        set $upstream_react http://react-app:${REACT_APP_PORT};
+        proxy_pass $upstream_react;
+        proxy_intercept_errors on;
+        error_page 502 = @react_unavailable;
+    }
+
+    location @react_unavailable {
+        return 503 'Frontend Service Unavailable';
+        add_header Content-Type text/plain;
+    }
+}
+
+server {
+    listen 80;
+    server_name api.${DOMAIN} www.api.${DOMAIN};
+    
+    location = / {
+        proxy_pass http://api-gateway:${API_GATEWAY_PORT}/api/swagger-ui;
+    }
+    location / {
+        # Handle OPTIONS requests first
+        if ($request_method = 'OPTIONS') {
+            add_header 'Access-Control-Allow-Origin' '*' always;
+            add_header 'Access-Control-Allow-Methods' '*' always;
+            add_header 'Access-Control-Allow-Headers' '*' always;
+            add_header 'Access-Control-Max-Age' 86400 always; # Cache for 24h
+            add_header 'Content-Type' 'text/plain; charset=utf-8' always;
+            add_header 'Content-Length' 0 always;
+            return 204;
+        }
+
+        set $upstream_api http://api-gateway:${API_GATEWAY_PORT};
+        proxy_pass $upstream_api;
+        proxy_set_header Host $host;
+        proxy_set_header X-Real-IP $remote_addr;
+        proxy_set_header X-Forwarded-For $proxy_add_x_forwarded_for;
+        proxy_set_header X-Forwarded-Proto $scheme;
+
+        # Удаляем дублирующиеся заголовки CORS, если бэкенд их уже отправляет
+        proxy_hide_header 'Access-Control-Allow-Origin';
+        proxy_hide_header 'Access-Control-Allow-Methods';
+        proxy_hide_header 'Access-Control-Allow-Headers';
+
+        # Добавляем CORS только если бэкенд их не установил
+        add_header 'Access-Control-Allow-Origin' '*' always;
+        add_header 'Access-Control-Allow-Methods' 'GET, POST, PUT, PATCH, DELETE, OPTIONS' always;
+        add_header 'Access-Control-Allow-Headers' 'Content-Type, Authorization' always;
+        add_header 'Access-Control-Expose-Headers' 'Authorization' always;
+
+        proxy_intercept_errors on;
+        error_page 502 = @api_unavailable;
+    }
+
+    location @api_unavailable {
+        return 503 'API Service Unavailable';
+        add_header Content-Type text/plain;
+    }
+}
+
+server {
+    listen 80;
+    server_name grafana.${DOMAIN} www.grafana.${DOMAIN};
+
+    location / {
+        set $upstream_grafana http://grafana:${GRAFANA_PORT};
+        proxy_pass $upstream_grafana;
+
+        # Передаем заголовки для корректной работы Grafana
+        proxy_set_header Host $host;
+        proxy_set_header X-Real-IP $remote_addr;
+        proxy_set_header X-Forwarded-For $proxy_add_x_forwarded_for;
+        proxy_set_header X-Forwarded-Proto $scheme;
+        proxy_set_header X-Forwarded-Port $server_port;
+#        proxy_set_header X-Forwarded-Path /;
+        # Добавляем таймауты
+        proxy_connect_timeout 60;
+        proxy_send_timeout 60;
+        proxy_read_timeout 60;
+
+        proxy_intercept_errors on;
+        error_page 502 = @grafana_unavailable;
+    }
+
+    location @grafana_unavailable {
+        return 503 'Monitoring Unavailable';
+        add_header Content-Type text/plain;
+    }
+}
+
+server {
+    listen 80;
+    server_name minio.${DOMAIN} www.minio.${DOMAIN};
+
+    # Проброс API MinIO (порт 9000)
+    location / {
+        proxy_pass http://minio:${MINIO_PORT}/;
+
+        proxy_set_header Host $host;
+        proxy_set_header X-Real-IP $remote_addr;
+        proxy_set_header X-Forwarded-For $proxy_add_x_forwarded_for;
+        proxy_set_header X-Forwarded-Proto $scheme;
+        proxy_set_header X-Forwarded-Path /;
+
+        error_page 502 = @minio_unavailable;
+    }
+
+    # Проброс Web UI MinIO (порт 9001)
+    location /ui/ {
+        proxy_pass http://minio:${MINIO_UI_PORT}/;
+
+        # WebSocket для консоли
+        proxy_http_version 1.1;
+        proxy_set_header Upgrade $http_upgrade;
+        proxy_set_header Connection "upgrade";
+
+        proxy_set_header Host $host;
+        proxy_set_header X-Real-IP $remote_addr;
+
+        error_page 502 = @minio_unavailable;
+    }
+
+    location @minio_unavailable {
+        return 503 'Storage Service Unavailable';
+        add_header Content-Type text/plain;
+    }
+}

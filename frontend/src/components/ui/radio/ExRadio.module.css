@@ -1,0 +1,109 @@
+.radio {
+    width: 24px;
+    height: 24px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    cursor: pointer;
+    border-radius: 50%;
+    transition: all 0.2s ease;
+    color: var(--ex-radio-bk);
+    color: inherit;
+    opacity: 0;
+    transform: scale(0.8);
+}
+
+.radio.mounted {
+    opacity: 1;
+    transform: scale(1);
+    transition: opacity 0.3s ease, transform 0.3s ease, color 0.2s ease;
+}
+
+.radio.animating {
+    transform: scale(0.95);
+}
+
+.icon {
+    width: 100%;
+    height: 100%;
+    box-sizing: border-box;
+    transition: all 0.2s ease;
+    opacity: 1;
+}
+
+.icon.animating {
+    transform: scale(1.1);
+}
+
+.radio:hover {
+    color: var(--ex-radio-hover-bk);
+}
+
+.radio:active {
+    color: var(--ex-radio-active-bk);
+    transform: scale(0.9);
+}
+
+.radio.info {
+    color: var(--accent-color);
+}
+
+.radio.info:hover {
+    color: var(--accent-color-hover);
+}
+
+.radio.info:active {
+    color: var(--accent-color-active);
+}
+
+.radio.success {
+    background-color: var(--success-color);
+    color: #fff;
+}
+
+.radio.success:hover {
+    background-color: var(--success-hover-color);
+}
+
+.radio.success:active {
+    background-color: var(--success-active-color);
+}
+
+.radio.warning {
+    background-color: var(--warning-color);
+    color: #fff;
+}
+
+.radio.warning:hover {
+    background-color: var(--warning-hover-color);
+}
+
+.radio.warning:active {
+    background-color: var(--warning-active-color);
+}
+
+.radio.error {
+    background-color: var(--error-color);
+    color: #fff;
+}
+
+.radio.error:hover {
+    background-color: var(--error-hover-color);
+}
+
+.radio.error:active {
+    background-color: var(--error-active-color);
+}
+
+.radio.tip {
+    background-color: var(--tip-color);
+    color: #fff;
+}
+
+.radio.tip:hover {
+    background-color: var(--tip-hover-color);
+}
+
+.radio.tip:active {
+    background-color: var(--tip-active-color);
+}

@@ -1,0 +1,30 @@
+global:
+  scrape_interval: 2s
+  evaluation_interval: 2s
+
+scrape_configs:
+  # Default job by prometheus
+  - job_name: 'prometheus'
+    static_configs:
+      - targets: [ 'prometheus:9090' ]
+  # Identity service job
+  - job_name: 'identity-service'
+    metrics_path: '/actuator/prometheus'
+    static_configs:
+      - targets: [ 'identity-service:8080' ]
+        labels:
+          applcation: 'Identity service'
+  # Image service job
+  - job_name: 'image-service'
+    metrics_path: '/actuator/prometheus'
+    static_configs:
+      - targets: [ 'image-service:8081' ]
+        labels:
+          applcation: 'Image service'
+  # API-gateway job
+  - job_name: 'api-gateway-service'
+    metrics_path: '/actuator/prometheus'
+    static_configs:
+      - targets: [ 'api-gateway:8090' ]
+        labels:
+          applcation: 'API gateway'

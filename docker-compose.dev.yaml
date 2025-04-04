@@ -1,0 +1,36 @@
+services:
+  identity-service-db:
+    ports:
+      - "$IDENTITY_SERVICE_DB_PORT:5432"
+  api-gateway:
+    ports:
+      - "$API_GATEWAY_PORT:$API_GATEWAY_PORT"
+  image-service:
+    ports:
+      - "$IMAGE_SERVICE_PORT:$IMAGE_SERVICE_PORT"
+  minio:
+    environment:
+      MINIO_SERVER_URL:
+      MINIO_BROWSER_REDIRECT_URL:
+    ports:
+      - "$MINIO_PORT:9000" # MinIO API
+      - "$MINIO_UI_PORT:9001" # MinIO UI
+  identity-service:
+    ports:
+      - "$IDENTITY_SERVICE_PORT:$IDENTITY_SERVICE_PORT"
+  react-app:
+    ports:
+      - "$REACT_APP_PORT:$REACT_APP_PORT"
+  grafana:
+    environment:
+      - GF_SERVER_ROOT_URL=%(protocol)s://%(domain)s:%(http_port)s/grafana # Grafana будет доступна по этому url
+      - GF_SERVER_SERVE_FROM_SUB_PATH=true # Разрешает работать grafana из подпути (используется вместе с GF_SERVER_ROOT_URL)
+    ports:
+      - '$GRAFANA_PORT:$GRAFANA_PORT'
+  nginx:
+    volumes:
+      - ./nginx-templates/dev.conf.template:/etc/nginx/templates/default.conf.template
+    environment:
+      - DOMAIN=localhost
+volumes:
+  pgadmin-data:

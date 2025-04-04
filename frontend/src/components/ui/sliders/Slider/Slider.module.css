@@ -1,0 +1,58 @@
+.slider {
+    position: relative;
+    height: 50px;
+    margin: 30px 0;
+}
+
+.sliderTrack,
+.sliderRange {
+    position: absolute;
+    height: 6px;
+    border-radius: 3px;
+    top: 50%;
+    transform: translateY(-50%);
+}
+
+.sliderTrack {
+    width: 100%;
+    background-color: var(--border-color);
+    z-index: 1;
+}
+
+.sliderRange {
+    background-color: var(--accent-color);
+    z-index: 2;
+}
+
+.thumb {
+    position: absolute;
+    width: 30px;
+    height: 30px;
+    transform: translate(-50%, -30%);
+    z-index: 3;
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    transition: transform 0.2s ease;
+    background: white;
+    border-radius: 4px;
+}
+
+.thumb.active {
+    transform: translate(-50%, -30%) scale(1.1);
+    z-index: 4;
+}
+
+.thumbIcon {
+    width: 24px;
+    height: 24px;
+    color: var(--accent-color);
+}
+
+.actions {
+    display: flex;
+    justify-content: flex-end;
+    gap: 10px;
+    margin-top: 25px;
+}

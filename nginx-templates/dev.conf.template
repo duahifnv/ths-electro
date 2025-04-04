@@ -1,0 +1,63 @@
+server {
+    listen 80;
+    server_name ${DOMAIN};
+
+    resolver 127.0.0.11 valid=10s;
+    resolver_timeout 5s;
+
+    location / {
+        set $upstream_react http://react-app:${REACT_APP_PORT};
+        proxy_pass $upstream_react;
+
+        proxy_intercept_errors on;
+        error_page 502 = @react_unavailable;
+    }
+
+    location /api/ {
+        set $upstream_api http://api-gateway:${API_GATEWAY_PORT};
+        proxy_pass $upstream_api;
+
+        proxy_intercept_errors on;
+        error_page 502 = @api_unavailable;
+    }
+
+    location /grafana/ {
+        # Указываем upstream для Grafana
+        set $upstream_grafana http://grafana:${GRAFANA_PORT}/;
+        proxy_pass $upstream_grafana;
+
+        # Передаем заголовки для корректной работы Grafana
+        proxy_set_header Host $host;
+        proxy_set_header X-Real-IP $remote_addr;
+        proxy_set_header X-Forwarded-For $proxy_add_x_forwarded_for;
+        proxy_set_header X-Forwarded-Proto $scheme;
+        proxy_set_header X-Forwarded-Port $server_port;
+
+        # Не удаляем префикс /grafana, так как Grafana сам обработает путь
+        proxy_set_header X-Forwarded-Path /grafana;
+
+        # Добавляем таймауты
+        proxy_connect_timeout 60;
+        proxy_send_timeout 60;
+        proxy_read_timeout 60;
+
+        proxy_intercept_errors on;
+        error_page 502 = @grafana_unavailable;
+    }
+
+    # Кастомные обработчики ошибок
+    location @react_unavailable {
+        return 503 'Frontend Service Unavailable';
+        add_header Content-Type text/plain;
+    }
+
+    location @api_unavailable {
+        return 503 'API Service Unavailable';
+        add_header Content-Type text/plain;
+    }
+
+    location @grafana_unavailable {
+        return 503 'Monitoring Unavailable';
+        add_header Content-Type text/plain;
+    }
+}
