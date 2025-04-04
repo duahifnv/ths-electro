@@ -46,19 +46,13 @@ export const TariffPage = () => {
           </select>
         </div>
 
-        {/* <div className={css.inputGroup}>
-          <label>Максимальное энергопотребление за этот месяц (кВт·ч)</label>
-          <input
-            type="number"
-            value={maxConsumption || ''}
-            onChange={(e) => setMaxConsumption(e.target.value ? parseFloat(e.target.value) : null)}
-          />
-        </div> */}
-
         <TextBox borderType={'fullr'}
                  placeholder={`Введите потребление в кВт*ч`}
                  label={`Пиковое потребление за ${monthNames[month]}`}
-                 labelBackground={'var(--bk-color)'}/>
+                 labelBackground={'var(--bk-color)'}
+                 value={maxConsumption}
+                 onChange={setMaxConsumption}
+                 type="number"/>
 
         <h3>Энергопотребление по дням</h3>
         <p>Нажмите на день, чтобы ввести почасовое потребление</p>
