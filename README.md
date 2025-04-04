@@ -36,8 +36,8 @@
 3. Клонируйте репозиторий в желаемую папку
 
 ```shell
-git clone https://github.com/duahifnv/envelope-web.git
-cd envelope-web
+git clone https://github.com/duahifnv/ths-electro.git
+cd ths-electro
 ```
 
 4. Клонируйте необходимые подмодули

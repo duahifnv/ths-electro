@@ -13,7 +13,7 @@ services:
       SPRING_CONFIG_LOCATION: /config/application.yml
     volumes:
       - ./api-gateway/src/main/resources/application.yml:/config/application.yml
-      - ./api-gateway:/envelope-web/api-gateway
+      - ./api-gateway:/ths-electro/api-gateway
       - api-gateway-maven-data:/root/.m2/repository
     expose:
       - $API_GATEWAY_PORT
@@ -33,7 +33,7 @@ services:
       SPRING_CONFIG_LOCATION: /config/application.yml
     volumes:
       - ./image-service/src/main/resources/application.yml:/config/application.yml
-      - ./image-service:/envelope-web/image-service
+      - ./image-service:/ths-electro/image-service
       - image-service-maven-data:/root/.m2/repository
     depends_on:
       - minio
@@ -107,7 +107,7 @@ services:
       SPRING_CONFIG_LOCATION: /config/application.yml
     volumes:
       - ./identity-service/src/main/resources/application.yml:/config/application.yml
-      - ./identity-service:/envelope-web/identity-service
+      - ./identity-service:/ths-electro/identity-service
       - identity-service-maven-data:/root/.m2/repository
     depends_on:
       - identity-service-db
