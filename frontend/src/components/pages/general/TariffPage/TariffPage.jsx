@@ -5,6 +5,7 @@ import { Headline } from "../../../../react-envelope/components/ui/labels/Headli
 import css from './TariffPage.module.css';
 import ExButton from "../../../../react-envelope/components/ui/buttons/ExButton/ExButton";
 import { SupplyCalendar } from "../../../widgets/SupplyCalendar/SupplyCalendar";
+import { TextBox } from "../../../../react-envelope/components/ui/input/text/TextBox/TextBox";
 
 // Основная страница
 export const TariffPage = () => {
@@ -45,14 +46,19 @@ export const TariffPage = () => {
           </select>
         </div>
 
-        <div className={css.inputGroup}>
+        {/* <div className={css.inputGroup}>
           <label>Максимальное энергопотребление за этот месяц (кВт·ч)</label>
           <input
             type="number"
             value={maxConsumption || ''}
             onChange={(e) => setMaxConsumption(e.target.value ? parseFloat(e.target.value) : null)}
           />
-        </div>
+        </div> */}
+
+        <TextBox borderType={'fullr'}
+                 placeholder={`Введите потребление в кВт*ч`}
+                 label={`Пиковое потребление за ${monthNames[month]}`}
+                 labelBackground={'var(--bk-color)'}/>
 
         <h3>Энергопотребление по дням</h3>
         <p>Нажмите на день, чтобы ввести почасовое потребление</p>
