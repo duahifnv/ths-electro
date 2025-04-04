@@ -31,7 +31,7 @@ export const TariffPage = () => {
     return (
         <PageBase>
             <Headline>Исходные данные</Headline>
-            <p>Внесите Ваши данные, чтобы алгоритм мог расчитать рекомендуемые тарифные планы.</p>
+            <p>Внесите Ваши данные за определенный месяц, чтобы алгоритм мог расчитать рекомендуемые тарифные планы.</p>
 
             <VBoxPanel className={css.content} gap={'20px'}>
                 <span className={css.subtitle}>Месяц (рекомендуется выбирать <accent>летний</accent> месяц)</span>
