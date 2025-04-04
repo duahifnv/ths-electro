@@ -34,8 +34,9 @@ export const TariffPage = () => {
             <p>Внесите Ваши данные, чтобы алгоритм мог расчитать рекомендуемые тарифные планы.</p>
 
             <VBoxPanel className={css.content} gap={'20px'}>
+                <span className={css.subtitle}>Месяц (рекомендуется выбирать <accent>летний</accent> месяц)</span>
+
                 <div className={css.inputGroup}>
-                    <label>Месяц (рекомендуется выбирать летний месяц)</label>
                     <select
                         value={month}
                         onChange={(e) => setMonth(parseInt(e.target.value))}
@@ -54,7 +55,7 @@ export const TariffPage = () => {
                     onChange={setMaxConsumption}
                     type="number" />
 
-                <h3>Энергопотребление по дням</h3>
+                <span className={css.subtitle}>Энергопотребление по дням</span>
                 <p>Нажмите на день, чтобы ввести почасовое потребление</p>
 
                 <SupplyCalendar
