@@ -89,3 +89,9 @@
     background-color: #4CAF50;
     color: white;
 }
+
+@media (max-width: 430px) {
+    .calendarGrid {
+        grid-template-columns: repeat(5, 1fr);
+    }
+}
