@@ -13,7 +13,7 @@ import { RadioBox } from "../../../../react-envelope/components/ui/selectors/Rad
 export const TariffPage = () => {
     const [month, setMonth] = useState(new Date().getMonth());
     const [year, setYear] = useState(new Date().getFullYear());
-    const [powerMode, setPowerMode] = useState('marina');
+    const [powerMode, setPowerMode] = useState('bh');
     const [dailyData, setDailyData] = useState({});
 
     // Обработчик изменения данных дня
