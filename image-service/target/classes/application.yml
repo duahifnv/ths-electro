@@ -1,0 +1,49 @@
+spring:
+  application:
+    name: image-service
+server:
+  port: ${IMAGE_SERVICE_PORT}
+  error:
+    include-message: always
+  servlet:
+    context-path: ${IMAGE_SERVICE_CONTEXT}
+minio:
+  user: ${MINIO_ROOT_USER}
+  password: ${MINIO_ROOT_PASSWORD}
+  url: ${MINIO_ROOT_URL}
+  bucket-names:
+    avatar: ${MINIO_AVATAR_BUCKET_NAME}
+jwt:
+  secret: ${JWT_SECRET}
+springdoc:
+  swagger-ui:
+    path: /swagger-ui
+  api-docs:
+    path: /api-docs
+
+management:
+  endpoints:
+    web:
+      exposure:
+        include:
+          - health
+          - info
+          - metrics
+          - prometheus
+  metrics:
+    distribution:
+      percentiles-histogram:
+        http.server.requests: true
+  observations:
+    key-values:
+      application: identity-service
+  tracing:
+    sampling:
+      probability: 1.0 # 100% of traces will be sampled
+
+logging:
+  config: classpath:logback.xml
+  loki:
+    url: http://loki:${LOKI_PORT}/loki/api/v1/push
+  file:
+    log-pattern: "%d{yyyy-MM-dd HH:mm:ss} [%thread] %-5level %logger{36} - %msg%n"

@@ -13,7 +13,7 @@ services:
       SPRING_CONFIG_LOCATION: /config/application.yml
     volumes:
       - ./api-gateway/src/main/resources/application.yml:/config/application.yml
-      - ./api-gateway:/envelope-web/api-gateway
+      - ./api-gateway:/ths-electro/api-gateway
       - api-gateway-maven-data:/root/.m2/repository
     expose:
       - $API_GATEWAY_PORT
@@ -33,7 +33,7 @@ services:
       SPRING_CONFIG_LOCATION: /config/application.yml
     volumes:
       - ./image-service/src/main/resources/application.yml:/config/application.yml
-      - ./image-service:/envelope-web/image-service
+      - ./image-service:/ths-electro/image-service
       - image-service-maven-data:/root/.m2/repository
     depends_on:
       - minio
@@ -107,7 +107,7 @@ services:
       SPRING_CONFIG_LOCATION: /config/application.yml
     volumes:
       - ./identity-service/src/main/resources/application.yml:/config/application.yml
-      - ./identity-service:/envelope-web/identity-service
+      - ./identity-service:/ths-electro/identity-service
       - identity-service-maven-data:/root/.m2/repository
     depends_on:
       - identity-service-db
@@ -115,6 +115,57 @@ services:
       - $IDENTITY_SERVICE_PORT
     networks:
       - dev
+  helper-service-db:
+    container_name: helper-service-db
+    image: postgres:17.2
+    environment:
+      POSTGRES_DB: helper_service
+      POSTGRES_USER: postgres
+      POSTGRES_PASSWORD: secret
+      PGDATA: /var/lib/postgresql/data
+    expose:
+      - "5432"
+    restart: unless-stopped
+    networks:
+      - dev
+  helper-service:
+    container_name: helper-service
+    image: helper-service:dev
+    env_file: # Все переменные из этих файлов добавляются в окружение контейнера
+      - .env
+      - ./helper-service/.env
+    build:
+      context: ./
+      dockerfile: ./docker/spring-boot/Dockerfile
+      args:
+        PROJECT: helper-service
+    environment:
+      SPRING_CONFIG_LOCATION: /config/application.yml
+    volumes:
+      - ./helper-service/src/main/resources/application.yml:/config/application.yml
+      - ./helper-service:/ths-electro/helper-service
+      - helper-service-maven-data:/root/.m2/repository
+    depends_on:
+      - helper-service-db
+    expose:
+      - $HELPER_SERVICE_PORT
+    networks:
+      - dev
+  telegram-bot:
+    container_name: telegram-bot
+    image: telegram-bot:dev
+    build:
+      context: .
+      dockerfile: ./docker/telegram/Dockerfile
+    env_file:
+      - ./telegram/.env
+    volumes:
+      - ./telegram:/app
+    ports:
+      - "5050:5050"
+    networks:
+      - dev
+#    restart: always
   react-app-build:
     container_name: react-app-remote-build
     image: react-app-remote-build:dev
@@ -192,6 +243,7 @@ volumes:
   image-service-maven-data:
   identity-service-maven-data:
   api-gateway-maven-data:
+  helper-service-maven-data:
   # Postgresql
   identity-service-db-data:
 networks:

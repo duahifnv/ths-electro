@@ -1,4 +1,3 @@
-*
 !.gitignore
 !**/.mvn
 !**/.mvn/**
@@ -56,3 +55,6 @@ build/
 /.mvn/
 /frontend/src/react-envelope/
 /frontend/src/react-envelope/
+/helper-service/.gitattributes
+/helper-service/mvnw
+/helper-service/mvnw.cmd
