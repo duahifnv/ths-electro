@@ -1,0 +1,133 @@
+.container {
+    margin: 0;
+    box-sizing: border-box;
+    display: flex;
+    flex-direction: column;
+    display: flex;
+}
+
+.dropZone {
+    border: 2px dashed var(--border-color);
+    border-radius: 8px;
+    padding: 32px;
+    text-align: center;
+    cursor: pointer;
+    transition: all 0.3s ease;
+    margin-bottom: 8px;
+    flex: 1;
+    display: flex;
+    flex-direction: column;
+    overflow: hidden;
+}
+.dropZone:hover {
+    border: 2px dashed var(--disabled-accent-color);
+}
+
+.dropZoneOver {
+    border-color: var(--accent-color);
+    background-color: var(--highlight-light);
+}
+
+.placeholder {
+    color: var(--font-color);
+    font-size: var(--body-font-size);
+    margin: auto;
+}
+
+.fileList {
+    display: flex;
+    flex-direction: column;
+    gap: 8px;
+    overflow-y: auto;
+    flex: 1;
+    padding: 4px;
+}
+
+.fileItem {
+    display: flex;
+    align-items: center;
+    padding: 8px 12px;
+    border-radius: 4px;
+    background-color: var(--button-bk);
+    transition: background-color 0.2s;
+    min-height: 40px;
+    position: relative;
+    cursor: default;
+}
+.delete {
+    position: absolute;
+    display: none;
+    border-radius: 5px;
+    padding: 8px;
+    right: 10px;
+    color: var(--error-color);
+    fill: currentColor;
+}
+.delete:hover {
+    background-color: rgba(244, 67, 54, 0.1);
+}
+.fileItem:hover .delete {
+    display: block;
+}
+
+
+
+.fileItem:hover {
+    background-color: var(--button-hover-bk);
+}
+
+.fileIcon {
+    margin-right: 8px;
+    font-size: 20px;
+    flex-shrink: 0;
+}
+
+.fileName {
+    flex: 1;
+    color: var(--font-color);
+    font-size: var(--body-font-size);
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+}
+
+.fileSize {
+    color: var(--caption-font-color);
+    font-size: var(--caption-font-size);
+    flex-shrink: 0;
+}
+
+.fileInput {
+    display: none;
+}
+
+.fileInputLabel {
+    display: inline-block;
+    margin-top: 16px;
+    padding: 8px 16px;
+    background-color: var(--accent-color);
+    color: var(--accent-font-color);
+    border-radius: 4px;
+    cursor: pointer;
+    transition: background-color 0.2s;
+    font-size: var(--body-font-size);
+    align-self: center;
+}
+
+.fileInputLabel:hover {
+    background-color: var(--accent-color-hover);
+}
+
+.errorMessage {
+    color: var(--error-color);
+    font-size: var(--caption-font-size);
+    margin-top: 4px;
+    text-align: center;
+}
+
+.fileTypesInfo {
+    color: var(--caption-font-color);
+    font-size: var(--caption-font-size);
+    margin-top: 4px;
+    text-align: center;
+}

@@ -1,0 +1,51 @@
+.item {
+    position: relative;
+
+    width: auto;
+    max-width: 350px;
+    background-color: var(--body-bk-color);
+
+    border-radius: 5px;
+
+    padding: 10px;
+
+    box-sizing: border-box;
+
+    border: 1px solid var(--border-color);
+}
+.item:hover {
+    border: 1px solid transparent;
+}
+.item:hover .header {
+    display: flex;
+    background-color: rgba(0, 0, 0, 0.2);
+}
+
+.header {
+    display: none;
+    position: absolute;
+
+    border-radius: 5px;
+
+    right: 0;
+    top: 0;
+
+    padding-right: 2px;
+    
+    height: 100%;
+    width: 100%;
+}
+
+.header svg {
+    width: 36px;
+    height: 36px;
+    padding: 5px;
+    box-sizing: border-box;
+    border-radius: 5px;
+}
+.header svg:hover {
+    background-color: var(--highlight-light);
+}
+.header svg:active {
+    background-color: var(--border-color);
+}
