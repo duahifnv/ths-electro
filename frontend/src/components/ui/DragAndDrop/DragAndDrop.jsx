@@ -3,6 +3,8 @@ import PropTypes from 'prop-types';
 import css from './DragAndDrop.module.css';
 import toast from 'react-hot-toast';
 import { Bin } from '../../../react-envelope/components/dummies/Icons';
+import HBoxPanel from '../../../react-envelope/components/layouts/HBoxPanel/HBoxPanel';
+import VBoxPanel from '../../../react-envelope/components/layouts/VBoxPanel/VBoxPanel';
 
 const DragAndDrop = ({
     acceptedFileTypes,
@@ -104,10 +106,12 @@ const DragAndDrop = ({
                                 onClick={() => removeFile(index)}
                             >
                                 <span className={css.fileIcon}>{getFileIcon(file.type)}</span>
-                                <span className={css.fileName}>{file.name}</span>
-                                <span className={css.fileSize}>
-                                    {(file.size / 1024).toFixed(1)} KB
-                                </span>
+                                <VBoxPanel halign='start'>
+                                    <span className={css.fileName}>{file.name}</span>
+                                    <span className={css.fileSize}>
+                                        {(file.size / 1024).toFixed(1)} KB
+                                    </span>
+                                </VBoxPanel>
                                 <svg onClick={(e) => {
                                     removeFile(index);
                                     e.stopPropagation();

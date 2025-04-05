@@ -55,6 +55,7 @@
     transition: background-color 0.2s;
     min-height: 40px;
     position: relative;
+    cursor: default;
 }
 .delete {
     position: absolute;
@@ -96,7 +97,6 @@
 .fileSize {
     color: var(--caption-font-color);
     font-size: var(--caption-font-size);
-    margin-left: 8px;
     flex-shrink: 0;
 }
 
