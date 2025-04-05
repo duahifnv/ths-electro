@@ -96,7 +96,9 @@ async def send_to_user(message: str) -> bool:
                 f"{BACKEND_URL}/message",
                 params={
                     'tgId': ADMIN_ID,
-                    'key': secret_key,
+                    'key': secret_key
+                },
+                json={
                     'msg': message
                 }
             ) as response:
