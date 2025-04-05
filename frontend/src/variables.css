@@ -1,7 +1,9 @@
 body.light {
     --accent-color: #13a438;
+    /* --header-bk-color: #373737; */
 }
 
 body.dark {
     --accent-color: #13a438;
+    /* --header-bk-color: var(--inverse-font-color); */
 }

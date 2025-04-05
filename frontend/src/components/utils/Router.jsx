@@ -13,6 +13,7 @@ import { HomePage } from "../pages/general/HomePage/HomePage";
 import { TariffPage } from "../pages/general/TariffPage/TariffPage";
 import { ModeratorsManagementPage } from "../pages/admin/ModeratorsManagementPage/ModeratorsManagementPage";
 import { PowerSupplyDataPage } from "../pages/admin/PowerSupplyDataPage/PowerSupplyDataPage";
+import ChatWidget from "../ui/ChatWidget/ChatWidget";
 
 export const Router = () => {
     const { routes, add } = useNavigation();
@@ -73,6 +74,7 @@ export const Router = () => {
 
     return (
         <BrowserRouter>
+            <ChatWidget/>
             <ScrollRestoration />
             <Routes>
                 <Route path="/" element={<HomePage />} />

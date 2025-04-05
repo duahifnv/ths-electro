@@ -6,7 +6,6 @@ import { TNSTitle } from "../../../dummies/TNSTitle/TNSTitle";
 export const HomePage = () => {
     return (
         <PageBase title={<TNSTitle/>}>
-            <ChatWidget/>
             <Headline>Доступные тарифы</Headline>
         </PageBase>
     );
