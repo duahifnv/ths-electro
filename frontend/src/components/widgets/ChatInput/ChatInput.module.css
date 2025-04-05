@@ -11,7 +11,7 @@
     border-radius: 28px;
     font-size: 16px;
     box-sizing: border-box;
-    background-color: var(--panel-bk);
+    background-color: var(--panel-bk) !important;
     color: var(--font-color);
     transition: all 0.3s ease;
     border: 1px solid var(--border-color);
@@ -65,7 +65,7 @@ body.dark .chatInput:focus {
 .sendIcon {
     width: 24px;
     height: 24px;
-    color: #2d7d46;
+    color: var(--accent-color);
     transition: all 0.3s ease;
 }
 

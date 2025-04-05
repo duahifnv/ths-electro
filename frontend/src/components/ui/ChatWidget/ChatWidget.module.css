@@ -5,7 +5,7 @@
     width: 60px;
     height: 60px;
     border-radius: 50%;
-    background-color: #48b869;
+    background-color: var(--accent-color);;
     border: none;
     cursor: pointer;
     display: grid;
@@ -31,7 +31,7 @@
     right: 20px;
     width: 350px;
     height: 400px;
-    background-color: var(--panel-bk);
+    background-color: var(--body-bk-color);
     border: 1px solid var(--border-color);
     border-radius: 10px;
     box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
@@ -39,6 +39,9 @@
     display: flex;
     flex-direction: column;
     z-index: 999;
+}
+.chatWindow ::-webkit-scrollbar-track {
+    background: var(--body-bk-color);
 }
 
 .blurredChatWindow {
@@ -97,7 +100,7 @@
 
 .userMessage {
     align-self: flex-end;
-    background-color: #48b869;
+    background-color: var(--accent-color);
     color: white;
     border-bottom-right-radius: 5px;
     margin-right: 10px;
@@ -109,15 +112,7 @@
     background-color: #f1f1f1;
     color: #333;
     border-bottom-left-radius: 5px;
-}
-
-body.dark .userMessage {
-    background-color: #48b869;
-}
-
-body.dark .serverMessage {
-    background-color: #4e5058;
-    color: #f1f1f1;
+    border: 1px solid var(--border-color);
 }
 
 /* Размытый контент для неавторизованных */
