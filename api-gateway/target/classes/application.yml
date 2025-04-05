@@ -1,0 +1,49 @@
+spring:
+  application:
+    name: api-gateway
+server:
+  port: ${API_GATEWAY_PORT}
+  error:
+    include-message: always
+  servlet:
+    context-path: ${API_GATEWAY_CONTEXT}
+hosts:
+  identity-service: http://identity-service:${IDENTITY_SERVICE_PORT}
+  image-service: http://image-service:${IMAGE_SERVICE_PORT}
+springdoc:
+  swagger-ui:
+    path: /swagger-ui
+    urls:
+      - name: Сервис аутентификации и авторизации
+        url: /aggregate/identity-service/v1/api-docs
+      - name: Сервис изображений
+        url: /aggregate/image-service/v1/api-docs
+  api-docs:
+    path: /api-docs
+
+management:
+  endpoints:
+    web:
+      exposure:
+        include:
+          - health
+          - info
+          - metrics
+          - prometheus
+  metrics:
+    distribution:
+      percentiles-histogram:
+        http.server.requests: true
+  observations:
+    key-values:
+      application: identity-service
+  tracing:
+    sampling:
+      probability: 1.0 # 100% of traces will be sampled
+
+logging:
+  config: classpath:logback.xml
+  loki:
+    url: http://loki:${LOKI_PORT}/loki/api/v1/push
+  file:
+    log-pattern: "%d{yyyy-MM-dd HH:mm:ss} [%thread] %-5level %logger{36} - %msg%n"
