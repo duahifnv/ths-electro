@@ -13,14 +13,56 @@ from telegram.ext import (
 )
 from collections import deque
 import asyncio
+import aiohttp
+import json
 
 ADMIN_ID = 588116881 
 active_dialogs = {} 
 waiting_queue = deque()  
 work_started = False
 notification_task = None
+secret_key = None  # Глобальная переменная для хранения секретного ключа
 
 COMMANDS = ["Начать работу", "Завершить работу", "Следующий диалог", "Завершить диалог"]
+BACKEND_URL = "http://helper-service:8082/api/helper/chat"
+
+async def verify_key(key: str) -> bool:
+    """Проверяет ключ на бекенде"""
+    try:
+        async with aiohttp.ClientSession() as session:
+            async with session.post(
+                f"{BACKEND_URL}/key",
+                json={"key": key},
+                timeout=5
+            ) as response:
+                if response.status == 200:
+                    data = await response.json()
+                    return data.get("valid", False)
+                return False
+    except Exception as e:
+        print(f"Error verifying key: {e}")
+        return False
+
+async def get_queue_size() -> int:
+    """Получает размер очереди с бекенда"""
+    global secret_key
+    if not secret_key:
+        return 0
+        
+    try:
+        async with aiohttp.ClientSession() as session:
+            async with session.get(
+                f"{BACKEND_URL}/queue",
+                headers={"Authorization": f"Bearer {secret_key}"},
+                timeout=5
+            ) as response:
+                if response.status == 200:
+                    data = await response.json()
+                    return data.get("size", 0)
+                return 0
+    except Exception as e:
+        print(f"Error getting queue size: {e}")
+        return 0
 
 async def notify_admin(context: ContextTypes.DEFAULT_TYPE):
     global notification_task
@@ -56,29 +98,54 @@ async def get_admin_keyboard():
         )
 
 async def start(update: Update, context: ContextTypes.DEFAULT_TYPE):
+    global secret_key
+    
     if update.effective_user.id == ADMIN_ID:
-        await update.message.reply_text(
-            "Админ-панель готова к работе:",
-            reply_markup=await get_admin_keyboard()
-        )
+        if secret_key is None:
+            await update.message.reply_text(
+                "🔒 Пожалуйста, введите секретный ключ для доступа к админ-панели:",
+                reply_markup=ReplyKeyboardRemove()
+            )
+        else:
+            await update.message.reply_text(
+                "Админ-панель готова к работе:",
+                reply_markup=await get_admin_keyboard()
+            )
     else:
         await update.message.reply_text(
             "Привет! Отправьте ваше сообщение, и оператор с вами свяжется.",
             reply_markup=ReplyKeyboardRemove()
         )
 
+
 async def handle_message(update: Update, context: ContextTypes.DEFAULT_TYPE):
-    global work_started, notification_task
+    global work_started, notification_task, secret_key
     
     if update.effective_user.id == ADMIN_ID:
         text = update.message.text
         
+        # Обработка ввода секретного ключа
+        if secret_key is None:
+            key = text.strip()
+            is_valid = await verify_key(key)
+            if is_valid:
+                secret_key = key
+                await update.message.reply_text(
+                    "✅ Ключ подтверждён. Доступ к админ-панели разрешён.",
+                    reply_markup=await get_admin_keyboard()
+                )
+            else:
+                await update.message.reply_text(
+                    "❌ Неверный ключ. Попробуйте ещё раз или обратитесь к администратору."
+                )
+            return
+                
         if text == "Начать работу":
             work_started = True
-            count = len(waiting_queue)
+            count = await get_queue_size()  # Получаем размер очереди с бекенда
             notification_task = asyncio.create_task(notify_admin(context))
             await update.message.reply_text(
-                f"ℹ Ожидают ответа: {count} пользователей\n"
+                f"ℹ️ Ожидают ответа: {count} пользователей\n"
                 "Работа начата. Используйте 'Следующий диалог' для начала общения.",
                 reply_markup=await get_admin_keyboard()
             )
@@ -100,41 +167,46 @@ async def handle_message(update: Update, context: ContextTypes.DEFAULT_TYPE):
             
         elif text == "Следующий диалог":
             if not work_started:
-                await update.message.reply_text("⚠ Сначала начните работу!", reply_markup=await get_admin_keyboard())
+                await update.message.reply_text("⚠️ Сначала начните работу!", reply_markup=await get_admin_keyboard())
                 return
                 
             if ADMIN_ID in active_dialogs:
                 await update.message.reply_text(
-                    "⚠ У вас уже есть активный диалог. Завершите его сначала.",
+                    "⚠️ У вас уже есть активный диалог. Завершите его сначала.",
                     reply_markup=await get_admin_keyboard()
                 )
             else:
-                if waiting_queue:
-                    user_id, chat_id, first_message, first_message_id = waiting_queue.popleft()
-                    active_dialogs[ADMIN_ID] = (user_id, chat_id)
-                    
-                    await context.bot.send_message(
-                        chat_id=chat_id,
-                        text="✅ Оператор подключился к диалогу. Можете общаться."
-                    )
-                    
-                    await update.message.reply_text(
-                        f"🔄 Новый диалог с пользователем ID: {user_id}\n"
-                        f"Первое сообщение:\n\n{first_message}\n\n"
-                        "Отправляйте сообщения - они будут пересылаться пользователю. "
-                        "Используйте 'Завершить диалог' для окончания.",
-                        reply_markup=await get_admin_keyboard()
-                    )
+                queue_size = await get_queue_size()
+                if queue_size > 0:
+                    # Здесь должна быть логика получения следующего диалога из бекенда
+                    # Пока используем старую логику с локальной очередью
+                    if waiting_queue:
+                        user_id, chat_id, first_message, first_message_id = waiting_queue.popleft()
+                        active_dialogs[ADMIN_ID] = (user_id, chat_id)
+                        
+                        await context.bot.send_message(
+                            chat_id=chat_id,
+                            text="✅ Оператор подключился к диалогу. Можете общаться."
+                        )
+                        
+                        await update.message.reply_text(
+                            f"🔄 Новый диалог с пользователем ID: {user_id}\n"
+                            f"Первое сообщение:\n\n{first_message}\n\n"
+                            "Отправляйте сообщения - они будут пересылаться пользователю. "
+                            "Используйте 'Завершить диалог' для окончания.",
+                            reply_markup=await get_admin_keyboard()
+                        )
                 else:
                     await update.message.reply_text(
-                        "ℹ Нет ожидающих диалогов.",
+                        "ℹ️ Нет ожидающих диалогов.",
                         reply_markup=await get_admin_keyboard()
                     )
                 
         elif text == "Завершить диалог":
             if ADMIN_ID not in active_dialogs:
                 await update.message.reply_text(
-                    "⚠ Нет активного диалога для завершения.",
+
+                    "⚠️ Нет активного диалога для завершения.",
                     reply_markup=await get_admin_keyboard()
                 )
             else:
@@ -204,7 +276,7 @@ async def handle_message(update: Update, context: ContextTypes.DEFAULT_TYPE):
                             pass
                 
                 await update.message.reply_text(
-                    "✔ Ваше сообщение получено. Ожидайте подключения оператора.",
+                    "✔️ Ваше сообщение получено. Ожидайте подключения оператора.",
                     reply_markup=ReplyKeyboardRemove()
                 )
         else:
