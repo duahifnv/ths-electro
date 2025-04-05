@@ -1,0 +1,158 @@
+.chatButton {
+    position: fixed;
+    bottom: 20px;
+    right: 20px;
+    width: 60px;
+    height: 60px;
+    border-radius: 50%;
+    background-color: var(--accent-color);;
+    border: none;
+    cursor: pointer;
+    display: grid;
+    place-items: center;
+    box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+    z-index: 1000;
+    transition: all 0.3s ease;
+}
+
+.chatButton:hover {
+    background-color: #48b869;
+}
+
+.chatIcon {
+    width: 28px;
+    height: 28px;
+    color: white;
+}
+
+.chatWindow {
+    position: fixed;
+    bottom: 90px;
+    right: 20px;
+    width: 350px;
+    height: 400px;
+    background-color: var(--body-bk-color);
+    border: 1px solid var(--border-color);
+    border-radius: 10px;
+    box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+    padding: 15px;
+    display: flex;
+    flex-direction: column;
+    z-index: 999;
+}
+.chatWindow ::-webkit-scrollbar-track {
+    background: var(--body-bk-color);
+}
+
+.blurredChatWindow {
+    filter: blur(2px);
+}
+
+.unauthorizedContent {
+    position: absolute;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    align-items: center;
+    text-align: center;
+    background-color: rgba(255, 255, 255, 0.8);
+    border-radius: 10px;
+    z-index: 1000;
+    color: var(--font-color);
+}
+
+.loginButton {
+    margin-top: 10px;
+    padding: 10px 20px;
+    background-color: var(--dstu-dark-blue);
+    color: white;
+    border: none;
+    border-radius: 5px;
+    cursor: pointer;
+    transition: background-color 0.3s ease;
+}
+
+.loginButton:hover {
+    background-color: var(--dstu-light-blue);
+}
+
+.chatMessages {
+    flex: 1;
+    overflow-y: auto;
+    margin-bottom: 10px;
+    display: flex;
+    flex-direction: column;
+    gap: 10px;
+}
+
+.message {
+    max-width: 80%;
+    padding: 10px 15px;
+    border-radius: 20px;
+    font-size: 14px;
+    line-height: 1.4;
+    word-break: break-word;
+}
+
+.userMessage {
+    align-self: flex-end;
+    background-color: var(--accent-color);
+    color: white;
+    border-bottom-right-radius: 5px;
+    margin-right: 10px;
+    margin-left: 15px;
+}
+
+.serverMessage {
+    align-self: flex-start;
+    background-color: #f1f1f1;
+    color: #333;
+    border-bottom-left-radius: 5px;
+    border: 1px solid var(--border-color);
+}
+
+/* Размытый контент для неавторизованных */
+/* Размытие ТОЛЬКО контента чата */
+.blurredContent {
+    filter: blur(4px);
+    pointer-events: none;
+  }
+  
+  /* Оверлей - БЕЗ размытия, поверх всего */
+  .authOverlay {
+    position: absolute;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    align-items: center;
+    z-index: 10; /* Важно: должен быть выше blurredContent */
+  }
+
+.authMessage {
+    font-size: 16px;
+    color: var(--auth-message-color);
+    margin-bottom: 20px;
+    text-align: center;
+}
+
+.authButton {
+    min-width: 120px;
+}
+
+/* Сообщения */
+.chatMessages {
+    flex: 1;
+    overflow-y: auto;
+    margin-bottom: 10px;
+    display: flex;
+    flex-direction: column;
+    gap: 10px;
+}

@@ -3,6 +3,7 @@ import ReactDOM from 'react-dom/client';
 import './index.css';
 import './react-envelope/variables.css'
 import './react-envelope/styles.css'
+import './variables.css';
 import App from './App';
 import reportWebVitals from './reportWebVitals';
 import { AuthProvider } from './react-envelope/contexts/AuthContext';
@@ -13,19 +14,17 @@ import { SyntaxHighlighterProvider } from './react-envelope/contexts/SyntaxHighl
 
 const root = ReactDOM.createRoot(document.getElementById('root'));
 root.render(
-  <React.StrictMode>
     <ThemeProvider>
-      <SyntaxHighlighterProvider>
-        <AuthProvider>
-          <AccountsProvider>
-            <NavigationProvider>
-              <App/>
-            </NavigationProvider>
-          </AccountsProvider>
-        </AuthProvider>
-      </SyntaxHighlighterProvider>
+        <SyntaxHighlighterProvider>
+            <AuthProvider>
+                <AccountsProvider>
+                    <NavigationProvider>
+                        <App />
+                    </NavigationProvider>
+                </AccountsProvider>
+            </AuthProvider>
+        </SyntaxHighlighterProvider>
     </ThemeProvider>
-  </React.StrictMode>
 );
 
 reportWebVitals();

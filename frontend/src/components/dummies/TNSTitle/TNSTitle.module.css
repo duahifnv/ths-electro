@@ -1,0 +1,13 @@
+.title {
+    width: 100%;
+    height: var(--header-height);
+
+    border-right: 1px solid var(--border-color);
+
+    box-sizing: border-box;
+}
+
+.title img {
+    object-fit: contain;
+    height: inherit;
+}
