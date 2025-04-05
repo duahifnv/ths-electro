@@ -18,10 +18,13 @@ export const TariffPage = () => {
     const [dailyData, setDailyData] = useState({});
 
     // Обработчик изменения данных дня
-    const handleDayDataChange = (day, hourlyData) => {
+    const handleDayDataChange = (day, holiday, hours) => {
         setDailyData(prev => ({
             ...prev,
-            [day]: hourlyData
+            [day]: {
+                holiday: holiday,
+                data: hours
+            }
         }));
     };
 
