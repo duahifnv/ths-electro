@@ -1,0 +1,132 @@
+.card {
+    position: relative;
+    border: 1px solid var(--border-color);
+    border-radius: 8px;
+    background-color: var(--body-bk-color);
+    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+    max-width: 300px;
+    overflow: hidden;
+}
+.card:hover .cardHeader {
+    display: flex;
+}
+
+.card.editing {
+    border: 2px solid #2196F3;
+    box-shadow: 0 0 10px rgba(33, 150, 243, 0.3);
+}
+
+.cardHeader {
+    position: absolute;
+    right: 0;
+    top: 0;
+    display: none;
+    justify-content: flex-end;
+    gap: 4px;
+    padding: 8px;
+}
+
+.cardContent {
+    padding: 16px;
+}
+
+.fieldGroup {
+    margin-top: 12px;
+}
+
+.field {
+    display: flex;
+    flex-direction: row;
+    gap: 10px;
+    align-items: center;
+}
+
+.label {
+    font-weight: bold;
+    margin-right: 8px;
+    width: 80px;
+    flex-shrink: 0;
+}
+
+.value {
+    flex-grow: 1;
+    word-break: break-word;
+}
+
+.input {
+    width: 100%;
+    padding: 4px 8px;
+    border: 1px solid #ccc;
+    border-radius: 4px;
+    font-size: 14px;
+}
+
+.actions {
+    display: flex;
+    gap: 8px;
+    margin-top: 16px;
+    justify-content: flex-end;
+}
+
+.editButton,
+.deleteButton {
+    background: none;
+    border: none;
+    cursor: pointer;
+    width: 36px;
+    height: 36px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    border-radius: 4px;
+    transition: background-color 0.2s;
+}
+
+.editButton {
+    color: var(--info-color);
+}
+
+.editButton:hover {
+    background-color: rgba(33, 150, 243, 0.1);
+}
+
+.deleteButton {
+    color: var(--error-color);
+}
+
+.deleteButton:hover {
+    background-color: rgba(244, 67, 54, 0.1);
+}
+
+.icon {
+    width: 80%;
+    height: 80%;
+    fill: currentColor;
+}
+
+.saveButton {
+    background-color: #4CAF50;
+    color: white;
+    border: none;
+    padding: 6px 12px;
+    border-radius: 4px;
+    cursor: pointer;
+    font-size: 14px;
+}
+
+.saveButton:hover {
+    background-color: #45a049;
+}
+
+.cancelButton {
+    background-color: #f1f1f1;
+    border: 1px solid #ccc;
+    padding: 6px 12px;
+    border-radius: 4px;
+    cursor: pointer;
+    font-size: 14px;
+}
+
+.cancelButton:hover {
+    background-color: #ddd;
+}

@@ -1,0 +1,100 @@
+.container {
+    padding: 20px;
+}
+
+.addButton {
+    background-color: #2196F3;
+    color: white;
+    border: none;
+    padding: 10px 15px;
+    border-radius: 4px;
+    cursor: pointer;
+    margin-bottom: 20px;
+}
+
+.addButton:hover {
+    background-color: #0b7dda;
+}
+
+.cardsContainer {
+    display: flex;
+    flex-direction: column;
+    align-items: stretch;
+
+    gap: 20px;
+}
+
+.modalOverlay {
+    position: fixed;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    background-color: rgba(0, 0, 0, 0.5);
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    z-index: 1000;
+}
+
+.modal {
+    background-color: white;
+    padding: 20px;
+    border-radius: 8px;
+    width: 400px;
+    max-width: 90%;
+}
+
+.modalField {
+    margin-bottom: 15px;
+}
+
+.modalField label {
+    display: block;
+    margin-bottom: 5px;
+    font-weight: bold;
+}
+
+.modalField input {
+    width: 100%;
+    padding: 8px;
+    border: 1px solid #ccc;
+    border-radius: 4px;
+}
+
+.modalActions {
+    display: flex;
+    justify-content: flex-end;
+    gap: 10px;
+    margin-top: 20px;
+}
+
+.modalSaveButton {
+    background-color: #4CAF50;
+    color: white;
+    border: none;
+    padding: 8px 16px;
+    border-radius: 4px;
+    cursor: pointer;
+}
+
+.modalSaveButton:disabled {
+    background-color: #cccccc;
+    cursor: not-allowed;
+}
+
+.modalSaveButton:hover:not(:disabled) {
+    background-color: #45a049;
+}
+
+.modalCancelButton {
+    background-color: #f1f1f1;
+    border: 1px solid #ccc;
+    padding: 8px 16px;
+    border-radius: 4px;
+    cursor: pointer;
+}
+
+.modalCancelButton:hover {
+    background-color: #ddd;
+}
