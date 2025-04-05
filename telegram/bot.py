@@ -177,6 +177,7 @@ async def handle_message(update: Update, context: ContextTypes.DEFAULT_TYPE):
                 )
             return
 
+
         # Обработка команд администратора
         if text == "Начать работу":
             logger.info("Администратор начал работу.")
@@ -255,6 +256,7 @@ async def handle_message(update: Update, context: ContextTypes.DEFAULT_TYPE):
                 )
                 await update.message.reply_text(
                     "❌ Диалог завершён.",
+
                     reply_markup=await get_admin_keyboard()
                 )
         elif ADMIN_ID in active_dialogs and text not in COMMANDS:
