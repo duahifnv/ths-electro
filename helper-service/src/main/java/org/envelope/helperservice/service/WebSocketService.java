@@ -2,6 +2,7 @@ package org.envelope.helperservice.service;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
 import lombok.Getter;
+import lombok.RequiredArgsConstructor;
 import org.envelope.helperservice.dto.MessageDto;
 import org.envelope.helperservice.dto.SocketDialog;
 import org.envelope.helperservice.dto.UserResponse;
@@ -21,26 +22,29 @@ import java.util.Optional;
 import java.util.concurrent.ConcurrentHashMap;
 
 @Service
+@RequiredArgsConstructor
 public class WebSocketService {
     @Getter
     private final Map<Long, SocketDialog> sessions = new ConcurrentHashMap<>();
     private final ObjectMapper objectMapper = new ObjectMapper();
     private static final String BEARER_PREFIX = "Bearer:";
     private final RestTemplate restTemplate;
+    private final MessageService messageService;
 
-    public WebSocketService(RestTemplate restTemplate) {
-        this.restTemplate = restTemplate;
-    }
-
-    public void sendMessageToUser(Long userId, String message) throws IOException {
+    public void sendMessageToUser(Long userId, String tgId, String message) throws IOException {
         SocketDialog wrapper = sessions.get(userId);
         if (wrapper != null && wrapper.getSession().isOpen()) {
             WebSocketSession session = wrapper.getSession();
             session.sendMessage(new TextMessage(message));
             System.out.println("Message sent to userId: " + wrapper.getUserId() + " message: " + message);
+            messageService.addMessage(message, "user", userId, tgId);
         } else {
             System.out.println("Session not found or closed for userId: " + userId);
         }
+    }
+
+    public void sendMessageFromUser(Long userId, String tgId, String message) {
+        messageService.addMessage(message, "helper", userId, tgId);
     }
 
     public Long getUserIdFromSession(WebSocketSession session) throws Exception {

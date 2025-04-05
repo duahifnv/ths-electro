@@ -4,6 +4,7 @@ import lombok.Getter;
 import lombok.RequiredArgsConstructor;
 import org.envelope.helperservice.dto.SocketDialog;
 import org.envelope.helperservice.entity.WaitingUserRequest;
+import org.envelope.helperservice.service.MessageService;
 import org.envelope.helperservice.service.UserRequestService;
 import org.envelope.helperservice.service.WebSocketService;
 import org.springframework.stereotype.Component;
@@ -50,9 +51,15 @@ public class WebSocketHandler extends TextWebSocketHandler {
             System.out.println("Connection closed for unauthorized user");
             return;
         }
+        if (status == CloseStatus.GOING_AWAY) {
+            System.out.println("Connection close from helper");
+            session.sendMessage(new TextMessage("Диалог окончен"));
+        }
         try {
             Long userId = webSocketService.getUserIdFromSession(session);
             SocketDialog dialog = webSocketService.deleteDialog(userId);
+            dialog.setHelperId(null);
+
             userRequestService.deleteByUserId(userId);
             if (dialog != null) {
                 System.out.println("Connection closed for userId: " + dialog.getUserId());
@@ -69,10 +76,12 @@ public class WebSocketHandler extends TextWebSocketHandler {
     protected void handleTextMessage(WebSocketSession session, TextMessage message) throws Exception {
         try {
             String parsedMessage = webSocketService.parseJsonMessage(message);
-            String response = "Server received: " + parsedMessage;
-            session.sendMessage(new TextMessage(response));
+            Long userId = webSocketService.getUserIdFromSession(session);
+            String helperId = webSocketService.getSessions().get(userId).getHelperId();
+            webSocketService.sendMessageFromUser(userId, helperId, parsedMessage);
+            System.out.println("Server received: " + parsedMessage);
+            session.sendMessage(new TextMessage("Сообщение доставлено и ждет ответа помощника"));
         } catch (Exception e) {
-            // Обработка ошибок парсинга JSON
             System.err.println("Error parsing JSON: " + e.getMessage());
             session.sendMessage(new TextMessage("Invalid JSON format"));
         }

@@ -18,5 +18,5 @@ create table dialog_messages(
     user_id bigint not null,
     message_to text check ( message_to in ('helper', 'user') ) not null,
     message text not null,
-    timestamp timestamp not null
+    timestamp timestamp default current_timestamp not null
 );

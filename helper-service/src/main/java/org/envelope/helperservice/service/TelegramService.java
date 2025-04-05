@@ -11,6 +11,10 @@ import org.springframework.beans.factory.annotation.Value;
 import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Service;
 import org.springframework.web.server.ResponseStatusException;
+import org.springframework.web.socket.CloseStatus;
+import org.springframework.web.socket.WebSocketSession;
+
+import java.io.IOException;
 
 @Service
 @RequiredArgsConstructor
@@ -40,13 +44,22 @@ public class TelegramService {
             SocketDialog socketDialog = webSocketService.getSessions().get(request.getUserId());
             socketDialog.setHelperId(tgId);
 
-            requestRepository.delete(request);
-
-            return MessageDto.builder()
+            MessageDto messageDto = MessageDto.builder()
                     .message(request.getMessage())
                     .build();
+
+            requestRepository.delete(request);
+            return messageDto;
         } catch (Exception e) {
             throw new ServerException(e);
+        }
+    }
+    public void disconnectFromUser(Long userId) throws IOException {
+        SocketDialog socketDialog = webSocketService.getSessions().get(userId);
+        socketDialog.setHelperId(null);
+        WebSocketSession session = socketDialog.getSession();
+        if (session.isOpen()) {
+            session.close(CloseStatus.GOING_AWAY);
         }
     }
 }
