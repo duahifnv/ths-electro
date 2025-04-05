@@ -42,9 +42,15 @@ export const CreateEnergyRecordModal = ({
                 ))}
             </select>
             <SupplyCalendar year={editContext?.year} month={editContext?.month} dailyData={editContext?.dailyData}
-                onChange={(e) => setEditContext(prev => ({
+                onChange={(day, holiday, hours) => setEditContext(prev => ({
                     ...prev,
-                    dailyData: e
+                    dailyData: {
+                        ...prev.dailyData,
+                        [day]: {
+                            holiday: holiday,
+                            data: hours
+                        }
+                    }
                 }))} />
         </Modal>
     );

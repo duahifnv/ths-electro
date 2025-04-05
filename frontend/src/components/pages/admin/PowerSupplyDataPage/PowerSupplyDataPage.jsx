@@ -16,8 +16,8 @@ export const PowerSupplyDataPage = () => {
         year: '2026',
         month: '4',
         dailyData: {
-            '10': {
-                holiday: false,
+            '1': {
+                holiday: true,
                 data: {
                     '5': '1250'
                 }
@@ -25,9 +25,10 @@ export const PowerSupplyDataPage = () => {
         }
     }]);
     const [modalActive, setModalActive] = useState(false);
-    const [tempDeleteSelection, setTempDeletionSelection] = useState(0);
+    const [selection, setSelection] = useState(0);
 
     const [editContext, setEditContext] = useState();
+    const [isEdit, setIsEdit] = useState(false);
 
     const resetContext = () => {
         setEditContext({
@@ -44,30 +45,41 @@ export const PowerSupplyDataPage = () => {
     const [confirmationModalActive, setConfirmationModalActive] = useState(false);
 
     const handleAdd = () => {
+        setIsEdit(false);
         setModalActive(true);
+        resetContext();
     };
 
     const handleEdit = (i) => {
+        setEditContext(records[i]);
+        setSelection(i);
+        setIsEdit(true);
         setModalActive(true);
     };
 
     const handleDelete = (i) => {
-        setTempDeletionSelection(i);
+        setSelection(i);
         setConfirmationModalActive(true);
     };
 
     const handleConfirmedDelete = () => {
         let newData = [...records];
-        newData.splice(tempDeleteSelection, 1);
+        newData.splice(selection, 1);
         setRecords(newData);
         setConfirmationModalActive(false);
     };
 
     const handleCreate = () => {
-        setRecords([
-            ...records,
-            editContext
-        ]);
+        if (isEdit) {
+            let new_records = [...records];
+            new_records[selection] = editContext;
+            setRecords(new_records);
+        } else {
+            setRecords([
+                ...records,
+                editContext
+            ]);
+        }
 
         resetContext();
 
