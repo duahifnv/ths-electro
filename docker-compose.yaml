@@ -115,6 +115,42 @@ services:
       - $IDENTITY_SERVICE_PORT
     networks:
       - dev
+  helper-service-db:
+    container_name: helper-service-db
+    image: postgres:17.2
+    environment:
+      POSTGRES_DB: helper_service
+      POSTGRES_USER: postgres
+      POSTGRES_PASSWORD: secret
+      PGDATA: /var/lib/postgresql/data
+    expose:
+      - "5432"
+    restart: unless-stopped
+    networks:
+      - dev
+  helper-service:
+    container_name: helper-service
+    image: helper-service:dev
+    env_file: # Все переменные из этих файлов добавляются в окружение контейнера
+      - .env
+      - ./helper-service/.env
+    build:
+      context: ./
+      dockerfile: ./docker/spring-boot/Dockerfile
+      args:
+        PROJECT: helper-service
+    environment:
+      SPRING_CONFIG_LOCATION: /config/application.yml
+    volumes:
+      - ./helper-service/src/main/resources/application.yml:/config/application.yml
+      - ./helper-service:/ths-electro/helper-service
+      - helper-service-maven-data:/root/.m2/repository
+    depends_on:
+      - helper-service-db
+    expose:
+      - $HELPER_SERVICE_PORT
+    networks:
+      - dev
   react-app-build:
     container_name: react-app-remote-build
     image: react-app-remote-build:dev
@@ -192,6 +228,7 @@ volumes:
   image-service-maven-data:
   identity-service-maven-data:
   api-gateway-maven-data:
+  helper-service-maven-data:
   # Postgresql
   identity-service-db-data:
 networks:
