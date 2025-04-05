@@ -44,7 +44,7 @@ export const TariffPage = () => {
     const handleCalculate = () => {
 
     };
-console.log(files);
+
     return (
         <PageBase title={<TNSTitle />}>
             <Headline>Исходные данные</Headline>
