@@ -11,7 +11,7 @@ import { RadioBox } from "../../../../react-envelope/components/ui/selectors/Rad
 import { TNSTitle } from "../../../dummies/TNSTitle/TNSTitle";
 import CheckBox from "../../../../react-envelope/components/ui/input/CheckBox/CheckBox";
 import { Switch } from "../../../../react-envelope/components/ui/selectors/Switch/Switch";
-import DragAndDrop from "../../../ui/DragAndDrop/DragAndDrop";
+import { DragAndDrop } from "../../../ui/DragAndDrop/DragAndDrop";
 
 // Основная страница
 export const TariffPage = () => {
@@ -23,6 +23,8 @@ export const TariffPage = () => {
 
     const [maxPower, setMaxPower] = useState('');
     const [sumPower, setSumPower] = useState('');
+
+    const [files, setFiles] = useState([]);
 
     const [year, setYear] = useState(new Date().getFullYear());
     const [dailyData, setDailyData] = useState({});
@@ -42,7 +44,7 @@ export const TariffPage = () => {
     const handleCalculate = () => {
 
     };
-
+console.log(files);
     return (
         <PageBase title={<TNSTitle />}>
             <Headline>Исходные данные</Headline>
@@ -128,7 +130,7 @@ export const TariffPage = () => {
                 {mode == 2 && <>
                     {/* Файл */}
 
-                    <DragAndDrop/>
+                    <DragAndDrop onFilesChange={setFiles}/>
                 </>}
 
                 <ExButton className={'accent-button'} onClick={handleCalculate}>Расчитать</ExButton>

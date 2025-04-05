@@ -6,7 +6,7 @@ import { Bin } from '../../../react-envelope/components/dummies/Icons';
 import HBoxPanel from '../../../react-envelope/components/layouts/HBoxPanel/HBoxPanel';
 import VBoxPanel from '../../../react-envelope/components/layouts/VBoxPanel/VBoxPanel';
 
-const DragAndDrop = ({
+export const DragAndDrop = ({
     acceptedFileTypes,
     maxFiles,
     onFilesChange
@@ -95,7 +95,7 @@ const DragAndDrop = ({
             >
                 {files.length === 0 ? (
                     <div className={css.placeholder}>
-                        {isOver ? 'Перетащите сюда файлы' : 'Перетащите сюда файлы или нажмите'}
+                        {'Перетащите сюда файлы или нажмите'}
                     </div>
                 ) : (
                     <div className={css.fileList}>
@@ -143,19 +143,3 @@ const DragAndDrop = ({
         </div>
     );
 };
-
-DragAndDrop.propTypes = {
-    acceptedFileTypes: PropTypes.arrayOf(PropTypes.string),
-    maxFiles: PropTypes.number,
-    onFilesChange: PropTypes.func,
-    darkMode: PropTypes.bool,
-};
-
-DragAndDrop.defaultProps = {
-    acceptedFileTypes: null,
-    maxFiles: null,
-    onFilesChange: null,
-    darkMode: false,
-};
-
-export default DragAndDrop;
