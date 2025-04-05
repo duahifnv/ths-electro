@@ -37,7 +37,7 @@ export const Router = () => {
             name: 'Модерация',
             to: '/mods',
             requireAuth: true,
-            roles: 'admin',
+            permissions: 'admin',
             props: {
                 icon: <Crown />
             }
@@ -45,7 +45,7 @@ export const Router = () => {
             name: 'Сетевая нагрузка',
             to: '/supply',
             requireAuth: true,
-            roles: 'admin',
+            permissions: 'admin',
             props: {
                 icon: <Electricity />
             }
