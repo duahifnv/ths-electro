@@ -3,7 +3,7 @@ import styles from './ChatWidget.module.css';
 import { useAuth } from '../../../react-envelope/hooks/useAuth'
 import {Pizza} from '../../../react-envelope/components/dummies/Icons.jsx'
 
-const ChatWidget = ({ clientId }) => {
+const ChatWidget = ({}) => {
     const { auth } = useAuth(); // Используем хук для получения состояния авторизации
     const [isChatOpen, setIsChatOpen] = useState(false); // Состояние видимости окна чата
 

@@ -5,7 +5,7 @@ import { Headline } from "../../../../react-envelope/components/ui/labels/Headli
 export const HomePage = () => {
     return (
         <PageBase>
-            <ChatWidget clientId={1} />
+            <ChatWidget/>
             <Headline>Доступные тарифы</Headline>
         </PageBase>
     );
