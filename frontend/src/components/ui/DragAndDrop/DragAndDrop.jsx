@@ -1,155 +1,157 @@
-import React, { useState, useCallback } from 'react';
+import React, { useState, useCallback, useRef } from 'react';
 import PropTypes from 'prop-types';
 import css from './DragAndDrop.module.css';
+import toast from 'react-hot-toast';
+import { Bin } from '../../../react-envelope/components/dummies/Icons';
 
 const DragAndDrop = ({
-  acceptedFileTypes,
-  maxFiles,
-  onFilesChange,
-  darkMode = false
+    acceptedFileTypes,
+    maxFiles,
+    onFilesChange
 }) => {
-  const [files, setFiles] = useState([]);
-  const [isOver, setIsOver] = useState(false);
-  const [error, setError] = useState(null);
+    const [files, setFiles] = useState([]);
+    const [isOver, setIsOver] = useState(false);
+    const fileRef = useRef(0);
 
-  const handleDragOver = useCallback((e) => {
-    e.preventDefault();
-    setIsOver(true);
-  }, []);
+    const handleDragOver = useCallback((e) => {
+        e.preventDefault();
+        setIsOver(true);
+    }, []);
 
-  const handleDragLeave = useCallback(() => {
-    setIsOver(false);
-  }, []);
+    const handleDragLeave = useCallback(() => {
+        setIsOver(false);
+    }, []);
 
-  const validateFiles = useCallback((fileList) => {
-    const newFiles = Array.from(fileList);
+    const validateFiles = useCallback((fileList) => {
+        const newFiles = Array.from(fileList);
 
-    if (maxFiles && files.length + newFiles.length > maxFiles) {
-      setError(`Maximum files: ${maxFiles}`);
-      return false;
-    }
+        if (maxFiles && files.length + newFiles.length > maxFiles) {
+            toast.error(`Maximum files: ${maxFiles}`);
+            return false;
+        }
 
-    if (acceptedFileTypes && acceptedFileTypes.length > 0) {
-      const invalidFiles = newFiles.filter(
-        file => !acceptedFileTypes.some(type => file.type.includes(type))
-      );
+        if (acceptedFileTypes && acceptedFileTypes.length > 0) {
+            const invalidFiles = newFiles.filter(
+                file => !acceptedFileTypes.some(type => file.type.includes(type))
+            );
 
-      if (invalidFiles.length > 0) {
-        setError(`Invalid file type. Only ${acceptedFileTypes.join(', ')} allowed`);
-        return false;
-      }
-    }
+            if (invalidFiles.length > 0) {
+                toast.error(`Invalid file type. Only ${acceptedFileTypes.join(', ')} allowed`);
+                return false;
+            }
+        }
 
-    setError(null);
-    return true;
-  }, [acceptedFileTypes, files.length, maxFiles]);
+        return true;
+    }, [acceptedFileTypes, files.length, maxFiles]);
 
-  const handleDrop = useCallback((e) => {
-    e.preventDefault();
-    setIsOver(false);
+    const handleDrop = useCallback((e) => {
+        e.preventDefault();
+        setIsOver(false);
 
-    if (validateFiles(e.dataTransfer.files)) {
-      const newFiles = Array.from(e.dataTransfer.files);
-      const updatedFiles = [...files, ...newFiles];
-      setFiles(updatedFiles);
-      onFilesChange && onFilesChange(updatedFiles);
-    }
-  }, [files, onFilesChange, validateFiles]);
+        if (validateFiles(e.dataTransfer.files)) {
+            const newFiles = Array.from(e.dataTransfer.files);
+            const updatedFiles = [...files, ...newFiles];
+            setFiles(updatedFiles);
+            onFilesChange && onFilesChange(updatedFiles);
+        }
+    }, [files, onFilesChange, validateFiles]);
 
-  const handleFileInput = useCallback((e) => {
-    if (validateFiles(e.target.files)) {
-      const newFiles = Array.from(e.target.files);
-      const updatedFiles = [...files, ...newFiles];
-      setFiles(updatedFiles);
-      onFilesChange && onFilesChange(updatedFiles);
-    }
-    e.target.value = '';
-  }, [files, onFilesChange, validateFiles]);
+    const handleFileInput = useCallback((e) => {
+        if (validateFiles(e.target.files)) {
+            const newFiles = Array.from(e.target.files);
+            const updatedFiles = [...files, ...newFiles];
+            setFiles(updatedFiles);
+            onFilesChange && onFilesChange(updatedFiles);
+        }
+        e.target.value = '';
+    }, [files, onFilesChange, validateFiles]);
 
-  const removeFile = useCallback((index) => {
-    const newFiles = [...files];
-    newFiles.splice(index, 1);
-    setFiles(newFiles);
-    onFilesChange && onFilesChange(newFiles);
-    setError(null);
-  }, [files, onFilesChange]);
+    const removeFile = useCallback((index) => {
+        const newFiles = [...files];
+        newFiles.splice(index, 1);
+        setFiles(newFiles);
+        onFilesChange && onFilesChange(newFiles);
+    }, [files, onFilesChange]);
 
-  const getFileIcon = (type) => {
-    if (type.includes('spreadsheet') || type.includes('excel')) return '📊';
-    return '📄';
-  };
+    const getFileIcon = (type) => {
+        if (type.includes('spreadsheet') || type.includes('excel')) return '📊';
+        return '📄';
+    };
 
-  const containerClass = `${css.container} ${darkMode ? css.dark : ''}`;
-  const dropZoneClass = `${css.dropZone} ${isOver ? css.dropZoneOver : ''} ${darkMode ? css.darkDropZone : ''}`;
-  const fileItemClass = `${css.fileItem} ${darkMode ? css.darkFileItem : ''}`;
-  const errorClass = `${css.errorMessage} ${darkMode ? css.darkError : ''}`;
+    const handleDropZoneClick = useCallback(() => {
+        fileRef.current.click(); // Программно кликаем по input
+    }, []);
 
-  return (
-    <div className={containerClass}>
-      <div
-        className={dropZoneClass}
-        onDragOver={handleDragOver}
-        onDragLeave={handleDragLeave}
-        onDrop={handleDrop}
-      >
-        {files.length === 0 ? (
-          <div className={css.placeholder}>
-            {isOver ? 'Drop files here' : 'Drag files or click to select'}
-          </div>
-        ) : (
-          <div className={css.fileList}>
-            {files.map((file, index) => (
-              <div
-                key={`${file.name}-${index}`}
-                className={fileItemClass}
-                onClick={() => removeFile(index)}
-              >
-                <span className={css.fileIcon}>{getFileIcon(file.type)}</span>
-                <span className={css.fileName}>{file.name}</span>
-                <span className={css.fileSize}>
-                  {(file.size / 1024).toFixed(1)} KB
-                </span>
-              </div>
-            ))}
-          </div>
-        )}
+    return (
+        <div className={css.container}>
+            <div
+                className={css.dropZone}
+                onDragOver={handleDragOver}
+                onDragLeave={handleDragLeave}
+                onDrop={handleDrop}
+                onClick={handleDropZoneClick}
+            >
+                {files.length === 0 ? (
+                    <div className={css.placeholder}>
+                        {isOver ? 'Drop files here' : 'Drag files or click to select'}
+                    </div>
+                ) : (
+                    <div className={css.fileList}>
+                        {files.map((file, index) => (
+                            <div
+                                key={`${file.name}-${index}`}
+                                className={css.fileItem}
+                                onClick={() => removeFile(index)}
+                            >
+                                <span className={css.fileIcon}>{getFileIcon(file.type)}</span>
+                                <span className={css.fileName}>{file.name}</span>
+                                <span className={css.fileSize}>
+                                    {(file.size / 1024).toFixed(1)} KB
+                                </span>
+                                <Bin onClick={(e) => {
+                                    removeFile(index);
+                                    e.stopPropagation();
+                                }} className={`${css.delete} pointer icon-m`}/>
+                            </div>
+                        ))}
+                    </div>
+                )}
 
-        <input
-          type="file"
-          id="fileInput"
-          className={css.fileInput}
-          onChange={handleFileInput}
-          multiple
-          accept={acceptedFileTypes?.join(',')}
-        />
-        <label htmlFor="fileInput" className={css.fileInputLabel}>
-          Select Files
-        </label>
-      </div>
+                <input
+                    type="file"
+                    id="fileInput"
+                    className={css.fileInput}
+                    onChange={handleFileInput}
+                    multiple
+                    ref={fileRef}
+                    accept={acceptedFileTypes?.join(',')}
+                />
+                <label htmlFor="fileInput" className={css.fileInputLabel}>
+                    Select Files
+                </label>
+            </div>
 
-      {error && <div className={errorClass}>{error}</div>}
-
-      {acceptedFileTypes && (
-        <div className={css.fileTypesInfo}>
-          Allowed types: {acceptedFileTypes.join(', ')}
+            {acceptedFileTypes && (
+                <div className={css.fileTypesInfo}>
+                    Allowed types: {acceptedFileTypes.join(', ')}
+                </div>
+            )}
         </div>
-      )}
-    </div>
-  );
+    );
 };
 
 DragAndDrop.propTypes = {
-  acceptedFileTypes: PropTypes.arrayOf(PropTypes.string),
-  maxFiles: PropTypes.number,
-  onFilesChange: PropTypes.func,
-  darkMode: PropTypes.bool,
+    acceptedFileTypes: PropTypes.arrayOf(PropTypes.string),
+    maxFiles: PropTypes.number,
+    onFilesChange: PropTypes.func,
+    darkMode: PropTypes.bool,
 };
 
 DragAndDrop.defaultProps = {
-  acceptedFileTypes: null,
-  maxFiles: null,
-  onFilesChange: null,
-  darkMode: false,
+    acceptedFileTypes: null,
+    maxFiles: null,
+    onFilesChange: null,
+    darkMode: false,
 };
 
 export default DragAndDrop;

@@ -11,6 +11,7 @@ import { RadioBox } from "../../../../react-envelope/components/ui/selectors/Rad
 import { TNSTitle } from "../../../dummies/TNSTitle/TNSTitle";
 import CheckBox from "../../../../react-envelope/components/ui/input/CheckBox/CheckBox";
 import { Switch } from "../../../../react-envelope/components/ui/selectors/Switch/Switch";
+import DragAndDrop from "../../../ui/DragAndDrop/DragAndDrop";
 
 // Основная страница
 export const TariffPage = () => {
@@ -76,10 +77,9 @@ export const TariffPage = () => {
 
                 <RadioBox className={css.radiopanel}
                     options={[
-                        { value: '0', label: 'Менее 150 кВт' },
-                        { value: '1', label: '150 — 680 кВт' },
-                        { value: '2', label: '670 кВт — 10 МВт' },
-                        { value: '3', label: 'Более 10 МВт' },
+                        { value: '0', label: 'Менее 670 кВт' },
+                        { value: '1', label: '670 кВт — 10 МВт' },
+                        { value: '2', label: 'Больше 10 МВт' }
                     ]}
                     selectedValue={interval}
                     onChange={setInterval}
@@ -127,6 +127,8 @@ export const TariffPage = () => {
 
                 {mode == 2 && <>
                     {/* Файл */}
+
+                    <DragAndDrop/>
                 </>}
 
                 <ExButton className={'accent-button'} onClick={handleCalculate}>Расчитать</ExButton>
