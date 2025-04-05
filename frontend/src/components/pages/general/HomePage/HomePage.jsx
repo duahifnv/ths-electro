@@ -1,10 +1,10 @@
 import { PageBase } from "../../../../react-envelope/components/pages/base/PageBase/PageBase";
-import DragAndDrop from "../../../ui/DragAndDrop/DragAndDrop";
+import ChatWidget from "../../../ui/ChatWidget/ChatWidget";
 
 export const HomePage = () => {
     return (
         <PageBase>
-            <DragAndDrop/>
+            <ChatWidget></ChatWidget>
         </PageBase>
     );
 };

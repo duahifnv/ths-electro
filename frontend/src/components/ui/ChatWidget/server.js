@@ -1,5 +1,15 @@
 const WebSocket = require('ws');
 const http = require('http');
+const url = require('url');
+
+// Функция для проверки токена (замените на свою логику)
+function verifyToken(token) {
+    // Например, проверяем, что токен соответствует определенному формату
+    if (!token || token !== 'valid-token') {
+        throw new Error('Неверный токен');
+    }
+    return { userId: 1 }; // Возвращаем данные пользователя
+}
 
 // Создаем HTTP сервер
 const server = http.createServer((req, res) => {
@@ -31,24 +41,39 @@ const server = http.createServer((req, res) => {
 // Создаем WebSocket сервер
 const wss = new WebSocket.Server({ server });
 
-wss.on('connection', (ws) => {
-    console.log('Новый клиент подключен');
+wss.on('connection', (ws, req) => {
+    // Извлекаем токен из URL
+    const parsedUrl = url.parse(req.url, true);
+    const token = parsedUrl.query.token;
 
-    // Отправляем приветственное сообщение клиенту
-    ws.send('Добро пожаловать в чат!');
+    if (!token) {
+        console.error('Токен отсутствует');
+        ws.close(); // Закрываем соединение
+        return;
+    }
 
-    // Обработка входящих сообщений
-    ws.on('message', (message) => {
-        console.log(`Получено сообщение: ${message}`);
+    try {
+        // Проверяем токен
+        const user = verifyToken(token);
+        console.log('Пользователь подключен:', user);
 
-        // Отправляем автоматический ответ клиенту
-        ws.send(`Сервер получил: ${message}`);
-    });
+        // Отправляем приветственное сообщение клиенту
+        ws.send('Добро пожаловать в чат!');
 
-    // Обработка закрытия соединения
-    ws.on('close', () => {
-        console.log('Клиент отключился');
-    });
+        // Обработка входящих сообщений
+        ws.on('message', (message) => {
+            console.log(`Получено сообщение: ${message}`);
+            ws.send(`Сервер получил: ${message}, ${token}`);
+        });
+
+        // Обработка закрытия соединения
+        ws.on('close', () => {
+            console.log('Клиент отключился');
+        });
+    } catch (error) {
+        console.error('Ошибка при проверке токена:', error.message);
+        ws.close(); // Закрываем соединение
+    }
 });
 
 // Запускаем сервер на порту 3001
