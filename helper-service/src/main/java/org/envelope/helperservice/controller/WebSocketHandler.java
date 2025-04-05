@@ -4,7 +4,6 @@ import lombok.Getter;
 import lombok.RequiredArgsConstructor;
 import org.envelope.helperservice.dto.SocketDialog;
 import org.envelope.helperservice.entity.WaitingUserRequest;
-import org.envelope.helperservice.repository.UserRequestRepository;
 import org.envelope.helperservice.service.UserRequestService;
 import org.envelope.helperservice.service.WebSocketService;
 import org.springframework.stereotype.Component;
@@ -51,13 +50,17 @@ public class WebSocketHandler extends TextWebSocketHandler {
             System.out.println("Connection closed for unauthorized user");
             return;
         }
-        Long userId = webSocketService.getUserIdFromSession(session);
-        SocketDialog dialog = webSocketService.deleteDialog(userId);
-        userRequestService.deleteByUserId(userId);
-        if (dialog != null) {
-            System.out.println("Connection closed for userId: " + dialog.getUserId());
-        } else {
-            System.out.println("Connection closed for unknown userId: " + userId);
+        try {
+            Long userId = webSocketService.getUserIdFromSession(session);
+            SocketDialog dialog = webSocketService.deleteDialog(userId);
+            userRequestService.deleteByUserId(userId);
+            if (dialog != null) {
+                System.out.println("Connection closed for userId: " + dialog.getUserId());
+            } else {
+                System.out.println("Connection closed for unknown userId");
+            }
+        } catch (Exception e) {
+            System.out.println("Connection close due to server exception");
         }
     }
 

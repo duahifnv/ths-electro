@@ -1,10 +1,16 @@
 package org.envelope.helperservice.service;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
+import jakarta.validation.constraints.NotNull;
 import lombok.Getter;
 import org.envelope.helperservice.dto.MessageDto;
 import org.envelope.helperservice.dto.SocketDialog;
+import org.envelope.helperservice.dto.UserResponse;
+import org.springframework.http.*;
 import org.springframework.stereotype.Service;
+import org.springframework.web.client.HttpClientErrorException;
+import org.springframework.web.client.RestTemplate;
+import org.springframework.web.server.ResponseStatusException;
 import org.springframework.web.socket.TextMessage;
 import org.springframework.web.socket.WebSocketSession;
 
@@ -12,6 +18,7 @@ import java.io.IOException;
 import java.net.URI;
 import java.util.HashMap;
 import java.util.Map;
+import java.util.Optional;
 import java.util.concurrent.ConcurrentHashMap;
 
 @Service
@@ -20,6 +27,11 @@ public class WebSocketService {
     private final Map<Long, SocketDialog> sessions = new ConcurrentHashMap<>();
     private final ObjectMapper objectMapper = new ObjectMapper();
     private static final String BEARER_PREFIX = "Bearer:";
+    private final RestTemplate restTemplate;
+
+    public WebSocketService(RestTemplate restTemplate) {
+        this.restTemplate = restTemplate;
+    }
 
     public void sendMessageToUser(Long userId, String message) throws IOException {
         SocketDialog wrapper = sessions.get(userId);
@@ -31,12 +43,13 @@ public class WebSocketService {
             System.out.println("Session not found or closed for userId: " + userId);
         }
     }
-
+    // todo: Соединить с identity-service
     public Long getUserIdFromSession(WebSocketSession session) throws Exception {
         Map<String, String> queryParams = extractQueryParams(session);
         String jwt = extractJwtToken(queryParams);
         System.out.println("Токен пользователя: " + jwt);
-        return 1L;
+        UserResponse userResponse = exchangeUserResponse(jwt);
+        return userResponse.id();
     }
 
     public void addDialog(Long userId, SocketDialog dialog) {
@@ -45,6 +58,42 @@ public class WebSocketService {
 
     public SocketDialog deleteDialog(Long userId) {
         return sessions.remove(userId);
+    }
+
+    public boolean existsByHelperId(String helperId) {
+        return sessions.values().stream()
+                .anyMatch(socketDialog -> helperId.equals(socketDialog.getHelperId()));
+    }
+
+    public Optional<Long> findUserIdByHelperId(String helperId) {
+        if (sessions.isEmpty()) {
+            throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "Отсутствуют ожидающие пользователи");
+        }
+        return sessions.values().stream()
+                .filter(dialog -> helperId.equals(dialog.getHelperId()))
+                .map(SocketDialog::getUserId)
+                .findFirst();
+    }
+
+    private UserResponse exchangeUserResponse(String token) throws Exception {
+        try {
+            String url = "http://localhost:8080/api/identity/users/me";
+            // Настройка заголовков
+            HttpHeaders headers = new HttpHeaders();
+            headers.setBearerAuth(token);
+            // Создание HTTP-запроса
+            HttpEntity<Void> requestEntity = new HttpEntity<>(headers);
+            // Выполнение запроса
+            ResponseEntity<UserResponse> response = restTemplate.exchange(
+                    url,
+                    HttpMethod.GET,
+                    requestEntity,
+                    UserResponse.class
+            );
+            return response.getBody();
+        } catch (HttpClientErrorException e) {
+            throw new Exception();
+        }
     }
 
     private String extractJwtToken(Map<String, String> queryParams) throws Exception {

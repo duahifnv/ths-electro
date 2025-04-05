@@ -2,15 +2,11 @@ package org.envelope.helperservice.controller;
 
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.media.Schema;
-import jakarta.validation.constraints.NotNull;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
-import org.envelope.helperservice.dto.SocketDialog;
 import org.envelope.helperservice.dto.MessageDto;
-import org.envelope.helperservice.entity.WaitingUserRequest;
 import org.envelope.helperservice.exception.IllegalClientException;
 import org.envelope.helperservice.exception.ServerException;
-import org.envelope.helperservice.repository.UserRequestRepository;
 import org.envelope.helperservice.service.TelegramService;
 import org.envelope.helperservice.service.WebSocketService;
 import org.springframework.http.HttpStatus;
@@ -19,8 +15,6 @@ import org.springframework.web.bind.annotation.*;
 import org.springframework.web.server.ResponseStatusException;
 
 import java.io.IOException;
-import java.util.Map;
-import java.util.Optional;
 
 @RestController
 @RequestMapping("/chat")
@@ -58,6 +52,9 @@ public class TelegramController {
                                                    example = "g6s75rjhWc6cWxsYf7KSPdl0rO6Rc0RQ")
                                                String secretKey) {
         validateHelper(tgId, secretKey);
+        if (webSocketService.existsByHelperId(tgId)) {
+            throw new ResponseStatusException(HttpStatus.NOT_FOUND, "Отсутствуют ожидающие пользователи");
+        }
         return telegramService.pickWaitingUser(tgId);
     }
 
@@ -71,7 +68,7 @@ public class TelegramController {
                                       String secretKey,
                                   @RequestBody MessageDto message) {
         validateHelper(tgId, secretKey);
-        Long userId = findUserIdByHelperId(webSocketService.getSessions(), tgId)
+        Long userId = webSocketService.findUserIdByHelperId(tgId)
                 .orElseThrow(() ->
                         new ResponseStatusException(HttpStatus.BAD_REQUEST, "Помощник не подсоединен к клиенту")
                 );
@@ -80,16 +77,6 @@ public class TelegramController {
         } catch (IOException e) {
             throw new ServerException(e);
         }
-    }
-
-    private Optional<Long> findUserIdByHelperId(@NotNull Map<Long, SocketDialog> sessions, String helperId) {
-        if (sessions.isEmpty()) {
-            throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "Отсутствуют ожидающие пользователи");
-        }
-        return sessions.values().stream()
-                .filter(dialog -> helperId.equals(dialog.getHelperId()))
-                .map(SocketDialog::getUserId)
-                .findFirst();
     }
 
     private void validateHelper(String tgId, String secretKey) {

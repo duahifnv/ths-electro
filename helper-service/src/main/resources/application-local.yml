@@ -22,10 +22,10 @@ server:
   servlet:
     context-path: /api/helper
 
-#client:
-#  identity-service:
-#    url: http://localhost:8080
-#    context-path: /api/identity
+client:
+  identity-service:
+    url: http://localhost:8080
+    context-path: /api/identity
 
 springdoc:
   swagger-ui:
