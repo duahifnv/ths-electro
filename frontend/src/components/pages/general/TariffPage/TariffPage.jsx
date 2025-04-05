@@ -15,10 +15,13 @@ import { Switch } from "../../../../react-envelope/components/ui/selectors/Switc
 // Основная страница
 export const TariffPage = () => {
     const [month, setMonth] = useState(new Date().getMonth());
-    const [powerMode, setPowerMode] = useState(0);
-    const [interval, setInterval] = useState(0);
+    const [powerMode, setPowerMode] = useState('0');
+    const [interval, setInterval] = useState('0');
 
     const [mode, setMode] = useState(0);
+
+    const [maxPower, setMaxPower] = useState('');
+    const [sumPower, setSumPower] = useState('');
 
     const [year, setYear] = useState(new Date().getFullYear());
     const [dailyData, setDailyData] = useState({});
@@ -91,6 +94,21 @@ export const TariffPage = () => {
 
                 {mode == 0 && <>
                     {/* пиковая, суммарная */}
+
+                    <TextBox value={maxPower}
+                            onChange={setMaxPower}
+                            label={'Пиковая мощность'}
+                            placeholder={'Введите максимальную мощность'}
+                            borderType={'fullr'}
+                            labelProps={{style: {backgroundColor: 'var(--bk-color)'}}}
+                            type="number"/>
+                    <TextBox value={sumPower}
+                            onChange={setSumPower}
+                            label={'Суммарная мощность'}
+                            placeholder={'Введите суммарную мощность'}
+                            borderType={'fullr'}
+                            labelProps={{style: {backgroundColor: 'var(--bk-color)'}}}
+                            type="number"/>
                 </>}
 
                 {mode == 1 && <>
@@ -107,13 +125,14 @@ export const TariffPage = () => {
                         onChange={handleDayDataChange}
                         className={css.calendar}
                     />
-
-                    <ExButton className={'accent-button'} onClick={handleCalculate}>Расчитать</ExButton>
                 </>}
 
                 {mode == 2 && <>
-                    
+                    {/* Файл */}
                 </>}
+
+                <ExButton className={'accent-button'} onClick={handleCalculate}>Расчитать</ExButton>
+
             </VBoxPanel>
         </PageBase>
     );
