@@ -8,6 +8,7 @@ import { SupplyCalendar } from "../../../widgets/SupplyCalendar/SupplyCalendar";
 import { TextBox } from "../../../../react-envelope/components/ui/input/text/TextBox/TextBox";
 import { MONTH_NAMES } from "../../../../constants";
 import { RadioBox } from "../../../../react-envelope/components/ui/selectors/RadioBox/RadioBox";
+import { TNSTitle } from "../../../dummies/TNSTitle/TNSTitle";
 
 // Основная страница
 export const TariffPage = () => {
@@ -29,7 +30,7 @@ export const TariffPage = () => {
     };
 
     return (
-        <PageBase>
+        <PageBase title={<TNSTitle/>}>
             <Headline>Исходные данные</Headline>
             <p>Внесите Ваши данные за определенный месяц, чтобы алгоритм мог расчитать рекомендуемые тарифные планы.</p>
 

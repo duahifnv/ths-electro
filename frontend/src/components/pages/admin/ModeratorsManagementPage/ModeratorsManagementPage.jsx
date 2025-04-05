@@ -5,6 +5,7 @@ import css from "./ModeratorsManagementPage.module.css";
 import { Headline } from "../../../../react-envelope/components/ui/labels/Headline/Headline";
 import ExButton from "../../../../react-envelope/components/ui/buttons/ExButton/ExButton";
 import { TextBox } from "../../../../react-envelope/components/ui/input/text/TextBox/TextBox";
+import { TNSTitle } from "../../../dummies/TNSTitle/TNSTitle";
 
 export const ModeratorsManagementPage = () => {
     const [moderators, setModerators] = useState([]);
@@ -84,7 +85,7 @@ export const ModeratorsManagementPage = () => {
     };
 
     return (
-        <PageBase>
+        <PageBase title={<TNSTitle/>}>
             <Headline>Управление модераторами</Headline>
 
             <ExButton

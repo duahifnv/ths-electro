@@ -10,6 +10,7 @@ import { SupplyCalendar } from "../../../widgets/SupplyCalendar/SupplyCalendar";
 import { MONTH_NAMES } from "../../../../constants";
 import css from './PowerSupplyDataPage.module.css';
 import { CreateEnergyRecordModal } from "../../../widgets/modals/CreateEnergyRecordModal/modals/CreateEnergyRecordModal";
+import { TNSTitle } from "../../../dummies/TNSTitle/TNSTitle";
 
 export const PowerSupplyDataPage = () => {
     const [records, setRecords] = useState([]);
@@ -76,7 +77,7 @@ export const PowerSupplyDataPage = () => {
     };
 
     return (
-        <PageBase>
+        <PageBase title={<TNSTitle/>}>
             <Headline>База данных тарифов</Headline>
 
             <ExButton onClick={handleAdd} className={`accent-button start-self`}>Добавить запись</ExButton>
