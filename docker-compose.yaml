@@ -151,6 +151,21 @@ services:
       - $HELPER_SERVICE_PORT
     networks:
       - dev
+  telegram-bot:
+    container_name: telegram-bot
+    image: telegram-bot:dev
+    build:
+      context: .
+      dockerfile: ./docker/telegram/Dockerfile
+    env_file:
+      - ./telegram/.env
+    volumes:
+      - ./telegram:/app
+    ports:
+      - "5050:5050"
+    networks:
+      - dev
+#    restart: always
   react-app-build:
     container_name: react-app-remote-build
     image: react-app-remote-build:dev
