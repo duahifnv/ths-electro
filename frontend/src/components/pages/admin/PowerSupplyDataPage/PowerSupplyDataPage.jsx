@@ -12,18 +12,7 @@ import css from './PowerSupplyDataPage.module.css';
 import { CreateEnergyRecordModal } from "../../../widgets/modals/CreateEnergyRecordModal/modals/CreateEnergyRecordModal";
 
 export const PowerSupplyDataPage = () => {
-    const [records, setRecords] = useState([{
-        year: '2026',
-        month: '4',
-        dailyData: {
-            '1': {
-                holiday: true,
-                data: {
-                    '5': '1250'
-                }
-            }
-        }
-    }]);
+    const [records, setRecords] = useState([]);
     const [modalActive, setModalActive] = useState(false);
     const [selection, setSelection] = useState(0);
 
@@ -101,7 +90,8 @@ export const PowerSupplyDataPage = () => {
                     return Number(a.month) - Number(b.month);
                 }).map((d, i) => <PowerSupplyItem key={i} year={d.year} month={d.month}
                     onDelete={() => handleDelete(i)}
-                    onEdit={() => handleEdit(i)} />)}
+                    onEdit={() => handleEdit(i)}
+                    dailyData={d.dailyData} />)}
             </VBoxPanel>
 
             <CreateEnergyRecordModal isEnabled={modalActive}
