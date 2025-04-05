@@ -32,7 +32,7 @@ export const CreateEnergyRecordModal = ({
                 value={editContext.month}
                 onChange={(e) => setEditContext(prev => ({
                     ...prev,
-                    month: e.target.value
+                    month: parseInt(e.target.value)
                 }))}
             >
                 {MONTH_NAMES.map((name, index) => (
