@@ -15,10 +15,14 @@ import { Switch } from "../../../../react-envelope/components/ui/selectors/Switc
 // Основная страница
 export const TariffPage = () => {
     const [month, setMonth] = useState(new Date().getMonth());
-    const [year, setYear] = useState(new Date().getFullYear());
-    const [powerMode, setPowerMode] = useState('bh');
-    const [dailyData, setDailyData] = useState({});
+    const [powerMode, setPowerMode] = useState(0);
+    const [interval, setInterval] = useState(0);
+
     const [mode, setMode] = useState(0);
+
+    const [year, setYear] = useState(new Date().getFullYear());
+    const [dailyData, setDailyData] = useState({});
+
 
     // Обработчик изменения данных дня
     const handleDayDataChange = (day, holiday, hours) => {
@@ -38,41 +42,60 @@ export const TariffPage = () => {
     return (
         <PageBase title={<TNSTitle />}>
             <Headline>Исходные данные</Headline>
+            <VBoxPanel className={css.content} gap={'20px'}>
 
-            <Switch className={`${css.switch} flex row center`} value={mode} onSelect={setMode}>
-                <span>Упрощенное за расчетный период</span>
-                <span>Ручное почасовое</span>
-                <span>Файл почасового рассчета</span>
-            </Switch>
+                <span className={css.subtitle}>Месяц (рекомендуется выбирать <accent>летний</accent> месяц)</span>
 
-            {mode == 1 && <>
-                <p>Внесите Ваши данные за определенный месяц, чтобы алгоритм мог расчитать рекомендуемые тарифные планы.</p>
+                <div className={css.inputGroup}>
+                    <select
+                        value={month}
+                        onChange={(e) => setMonth(parseInt(e.target.value))}
+                    >
+                        {MONTH_NAMES.map((name, index) => (
+                            <option key={name} value={index}>{name}</option>
+                        ))}
+                    </select>
+                </div>
 
-                <VBoxPanel className={css.content} gap={'20px'}>
-                    <span className={css.subtitle}>Месяц (рекомендуется выбирать <accent>летний</accent> месяц)</span>
+                <RadioBox className={css.radiopanel}
+                    options={[
+                        { value: '0', label: 'BH' },
+                        { value: '1', label: 'CH-1' },
+                        { value: '2', label: 'CH-2' },
+                        { value: '3', label: 'HH' },
+                    ]}
+                    selectedValue={powerMode}
+                    onChange={setPowerMode}
+                    name="power-mode"
+                    label={'Уровень напряжения'}
+                    labelProps={{ style: { backgroundColor: 'var(--bk-color)', color: 'var(--font-color)' } }} />
 
-                    <div className={css.inputGroup}>
-                        <select
-                            value={month}
-                            onChange={(e) => setMonth(parseInt(e.target.value))}
-                        >
-                            {MONTH_NAMES.map((name, index) => (
-                                <option key={name} value={index}>{name}</option>
-                            ))}
-                        </select>
-                    </div>
+                <RadioBox className={css.radiopanel}
+                    options={[
+                        { value: '0', label: 'Менее 150 кВт' },
+                        { value: '1', label: '150 — 680 кВт' },
+                        { value: '2', label: '670 кВт — 10 МВт' },
+                        { value: '3', label: 'Более 10 МВт' },
+                    ]}
+                    selectedValue={interval}
+                    onChange={setInterval}
+                    name="power-interval"
+                    label={'Максимальная мощность'}
+                    labelProps={{ style: { backgroundColor: 'var(--bk-color)', color: 'var(--font-color)' } }} />
 
-                    <RadioBox className={css.radiopanel}
-                        options={[
-                            { value: 'bh', label: 'BH' },
-                            { value: 'ch1', label: 'CH-1' },
-                            { value: 'ch2', label: 'CH-2' },
-                            { value: 'hh', label: 'HH' },
-                        ]}
-                        selectedValue={powerMode}
-                        onChange={setPowerMode}
-                        label={'Уровень напряжения'}
-                        labelProps={{ style: { backgroundColor: 'var(--bk-color)', color: 'var(--font-color)' } }} />
+                <Switch className={`${css.switch} flex row`} value={mode} onSelect={setMode}>
+                    <span>Упрощенное за расчетный период</span>
+                    <span>Ручное почасовое</span>
+                    <span>Файл почасового рассчета</span>
+                </Switch>
+
+                {mode == 0 && <>
+                    {/* пиковая, суммарная */}
+                </>}
+
+                {mode == 1 && <>
+                    <p>Внесите Ваши данные за определенный месяц, чтобы алгоритм мог расчитать рекомендуемые тарифные планы.</p>
+
 
                     <span className={css.subtitle}>Энергопотребление по дням</span>
                     <p>Нажмите на день, чтобы ввести почасовое потребление</p>
@@ -86,8 +109,12 @@ export const TariffPage = () => {
                     />
 
                     <ExButton className={'accent-button'} onClick={handleCalculate}>Расчитать</ExButton>
-                </VBoxPanel>
-            </>}
+                </>}
+
+                {mode == 2 && <>
+                    
+                </>}
+            </VBoxPanel>
         </PageBase>
     );
 };
