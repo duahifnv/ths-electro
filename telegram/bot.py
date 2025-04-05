@@ -106,7 +106,37 @@ async def send_to_user(message: str) -> bool:
     except Exception as e:
         logger.error(f"Ошибка отправки сообщения: {e}")
         return False
+    
+async def get_messages_by_time(seconds: int) -> list[str] | None:
+    """Получает сообщения за указанное количество секунд"""
+    global secret_key
+    if not secret_key:
+        return None
 
+    try:
+        async with aiohttp.ClientSession() as session:
+            async with session.get(
+                f"{BACKEND_URL}",  
+                params={
+                    'tgId': ADMIN_ID,
+                    'key': secret_key
+                },
+                json={
+                    'seconds': seconds
+                },
+                timeout=5
+            ) as response:
+                if response.status == 200:
+                    data = await response.json()
+                    if isinstance(data, list) and all(isinstance(item, str) for item in data):
+                        return data
+                    logger.warning("Некорректный формат данных в ответе")
+                return None
+    except Exception as e:
+        logger.error(f"Ошибка получения сообщений по времени: {e}")
+        return None
+
+2
 async def close_dialog() -> bool:
     """Закрывает текущий диалог"""
     global secret_key
