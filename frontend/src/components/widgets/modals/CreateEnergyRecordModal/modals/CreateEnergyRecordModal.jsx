@@ -8,19 +8,21 @@ export const CreateEnergyRecordModal = ({
     isEnabled,
     onCloseRequested,
     editContext,
-    setEditContext
+    setEditContext,
+    onCreate
 }) => {
     return (
         <Modal isEnabled={isEnabled}
             onCloseRequested={onCloseRequested}
             primaryButtonText={'Сохранить'}
+            onPrimaryClick={onCreate}
             closeButtonText={'Отмена'}
             title={'Тариф'}
             height="500px"
             bodyClassName={'flex col g10'}>
             <TextBox label={'Год'}
                 placeholder={'Введите год'}
-                value={editContext.year}
+                value={editContext?.year}
                 onChange={(e) => setEditContext(prev => ({
                     ...prev,
                     year: e
@@ -29,7 +31,7 @@ export const CreateEnergyRecordModal = ({
                 borderType={'fullr'} />
             <select
                 className={css.monthSelect}
-                value={editContext.month}
+                value={editContext?.month}
                 onChange={(e) => setEditContext(prev => ({
                     ...prev,
                     month: parseInt(e.target.value)
@@ -39,7 +41,7 @@ export const CreateEnergyRecordModal = ({
                     <option key={name} value={index}>{name}</option>
                 ))}
             </select>
-            <SupplyCalendar year={editContext.year} month={editContext.month} dailyData={editContext.dailyData}
+            <SupplyCalendar year={editContext?.year} month={editContext?.month} dailyData={editContext?.dailyData}
                 onChange={(e) => setEditContext(prev => ({
                     ...prev,
                     dailyData: e

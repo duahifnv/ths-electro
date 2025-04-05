@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import { PageBase } from "../../../../react-envelope/components/pages/base/PageBase/PageBase";
 import ExButton from "../../../../react-envelope/components/ui/buttons/ExButton/ExButton";
 import { Headline } from "../../../../react-envelope/components/ui/labels/Headline/Headline";
@@ -12,18 +12,7 @@ import css from './PowerSupplyDataPage.module.css';
 import { CreateEnergyRecordModal } from "../../../widgets/modals/CreateEnergyRecordModal/modals/CreateEnergyRecordModal";
 
 export const PowerSupplyDataPage = () => {
-    const [records, setRecords] = useState([]);
-    const [modalActive, setModalActive] = useState(false);
-    const [tempDeleteSelection, setTempDeletionSelection] = useState(0);
-
-    const [editContext, setEditContext] = useState({
-        year: new Date().getFullYear(),
-        month: new Date().getMonth(),
-        dailyData: {}
-    });
-
-    const [confirmationModalActive, setConfirmationModalActive] = useState(false);
-    const [data, setData] = useState([{
+    const [records, setRecords] = useState([{
         year: '2026',
         month: '4',
         dailyData: {
@@ -35,6 +24,24 @@ export const PowerSupplyDataPage = () => {
             }
         }
     }]);
+    const [modalActive, setModalActive] = useState(false);
+    const [tempDeleteSelection, setTempDeletionSelection] = useState(0);
+
+    const [editContext, setEditContext] = useState();
+
+    const resetContext = () => {
+        setEditContext({
+            year: new Date().getFullYear(),
+            month: new Date().getMonth(),
+            dailyData: {}
+        });
+    }
+
+    useEffect(() => {
+        resetContext();
+    }, []);
+
+    const [confirmationModalActive, setConfirmationModalActive] = useState(false);
 
     const handleAdd = () => {
         setModalActive(true);
@@ -50,10 +57,21 @@ export const PowerSupplyDataPage = () => {
     };
 
     const handleConfirmedDelete = () => {
-        let newData = [...data];
+        let newData = [...records];
         newData.splice(tempDeleteSelection, 1);
-        setData(newData);
+        setRecords(newData);
         setConfirmationModalActive(false);
+    };
+
+    const handleCreate = () => {
+        setRecords([
+            ...records,
+            editContext
+        ]);
+
+        resetContext();
+
+        setModalActive(false);
     };
 
     return (
@@ -64,15 +82,21 @@ export const PowerSupplyDataPage = () => {
 
 
             <VBoxPanel gap={'10px'}>
-                {data.map((d, i) => <PowerSupplyItem key={i} year={d.year} month={d.month}
+                {records.slice().sort((a, b) => {
+                    if (a.year !== b.year) {
+                        return Number(a.year) - Number(b.year);
+                    }
+                    return Number(a.month) - Number(b.month);
+                }).map((d, i) => <PowerSupplyItem key={i} year={d.year} month={d.month}
                     onDelete={() => handleDelete(i)}
                     onEdit={() => handleEdit(i)} />)}
             </VBoxPanel>
 
             <CreateEnergyRecordModal isEnabled={modalActive}
-                                     onCloseRequested={() => setModalActive(false)}
-                                     editContext={editContext}
-                                     setEditContext={setEditContext}/>
+                onCloseRequested={() => setModalActive(false)}
+                editContext={editContext}
+                setEditContext={setEditContext}
+                onCreate={handleCreate} />
 
             <Modal isEnabled={confirmationModalActive}
                 onCloseRequested={() => setConfirmationModalActive(false)}
