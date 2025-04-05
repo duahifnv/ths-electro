@@ -1,0 +1,37 @@
+spring:
+  application:
+    name: helper-service
+  datasource:
+    url: jdbc:postgresql://localhost:5434/helper_service
+    username: postgres
+    password: secret
+    driver-class-name: org.postgresql.Driver
+  jpa:
+    hibernate:
+      ddl-auto: none
+  flyway:
+    locations: classpath:db/migration/base, classpath:db/migration/dev
+
+telegram:
+  secret-key: g6s75rjhWc6cWxsYf7KSPdl0rO6Rc0RQ
+
+server:
+  port: 8082
+  error:
+    include-message: always
+  servlet:
+    context-path: /api/helper
+
+#client:
+#  identity-service:
+#    url: http://localhost:8080
+#    context-path: /api/identity
+
+springdoc:
+  swagger-ui:
+    path: /swagger-ui
+  api-docs:
+    path: /api-docs
+
+#logging:
+#  config: classpath:logback-local.xml

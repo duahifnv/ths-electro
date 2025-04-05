@@ -32,5 +32,11 @@ services:
       - ./nginx-templates/dev.conf.template:/etc/nginx/templates/default.conf.template
     environment:
       - DOMAIN=localhost
+  helper-service-db:
+    ports:
+      - "$HELPER_SERVICE_DB_PORT:5432"
+  helper-service:
+    ports:
+      - "$HELPER_SERVICE_PORT:$HELPER_SERVICE_PORT"
 volumes:
   pgadmin-data:

@@ -9,7 +9,7 @@
   </parent>
 
   <groupId>org.envelope</groupId>
-  <artifactId>envelope-web</artifactId>
+  <artifactId>ths-electro</artifactId>
   <version>1.0</version>
   <name>EnvelopeTeam webapp</name>
 
@@ -19,6 +19,7 @@
     <module>image-service</module>
     <module>identity-service</module>
     <module>api-gateway</module>
+    <module>helper-service</module>
   </modules>
 
   <properties>
