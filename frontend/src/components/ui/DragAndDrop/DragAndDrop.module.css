@@ -60,12 +60,16 @@
     position: absolute;
     display: none;
     border-radius: 5px;
-    padding: 5px;
+    padding: 8px;
     right: 10px;
+    color: var(--error-color);
+    fill: currentColor;
+}
+.delete:hover {
+    background-color: rgba(244, 67, 54, 0.1);
 }
 .fileItem:hover .delete {
     display: block;
-    background-color: rgba(255, 0, 0, 0.3);
 }
 
 
