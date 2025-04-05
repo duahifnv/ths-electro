@@ -1,3 +1,5 @@
+from dotenv import load_dotenv
+import os
 from telegram import (
     Update,
     ReplyKeyboardMarkup,
@@ -11,10 +13,13 @@ from telegram.ext import (
     MessageHandler,
     filters
 )
-from collections import deque
 import asyncio
 import aiohttp
 import logging
+
+# Загрузка переменных окружения
+load_dotenv()
+TELEGRAM_TOKEN = os.getenv("TELEGRAM_API_KEY")
 
 # Настройка логирования
 logging.basicConfig(
@@ -23,323 +28,261 @@ logging.basicConfig(
 )
 logger = logging.getLogger(__name__)
 
+# Конфигурация
 ADMIN_ID = 996188029
-active_dialogs = {}
-waiting_queue = deque()
+active_dialogs = set()  
 work_started = False
 notification_task = None
-secret_key = None  # Глобальная переменная для хранения секретного ключа
+secret_key = None
 COMMANDS = ["Начать работу", "Завершить работу", "Следующий диалог", "Завершить диалог"]
 BACKEND_URL = "http://helper-service:8082/api/helper/chat"
 
 async def verify_key(key: str) -> bool:
     """Проверяет ключ на бекенде"""
     try:
-        logger.info("Отправка запроса на проверку ключа...")
-        logger.info(f"Параметры запроса: key={key}")
-
         async with aiohttp.ClientSession() as session:
             async with session.post(
                 f"{BACKEND_URL}/key",
-                params={
-                    'key': key,
-                }
+                params={'key': key}
             ) as response:
-                if response.status == 200:
-                    logger.info(f"Ключ валиден")
-                    return True
-                if response.status == 401:
-                    logger.info(f"Ключ невалиден")
-                    return False
-                else:
-                    error_message = await response.text()
-                    logger.error(f"Ошибка при проверке ключа. Статус: {response.status}, Сообщение: {error_message}")
-                    return False
+                return response.status == 200
     except Exception as e:
-        logger.error(f"Ошибка подключения к серверу при проверке ключа: {e}")
+        logger.error(f"Ошибка проверки ключа: {e}")
         return False
-
 
 async def get_queue_size() -> int:
     """Получает размер очереди с бекенда"""
     global secret_key
     if not secret_key:
-        logger.warning("Secret key не настроен. Запрос размера очереди отменён.")
         return 0
 
     try:
-        logger.info("Отправка запроса на получение размера очереди...")
-        logger.debug(f"Параметры запроса: Authorization=Bearer {secret_key}")
-
         async with aiohttp.ClientSession() as session:
             async with session.get(
                 f"{BACKEND_URL}/queue",
-                headers={"Authorization": f"Bearer {secret_key}"},
+                params={'tgId': ADMIN_ID, 'key': secret_key},
                 timeout=5
             ) as response:
                 if response.status == 200:
-                    data = await response.json()
-                    queue_size = data.get("size", 0)
-                    logger.info(f"Размер очереди получен: {queue_size}")
-                    return queue_size
-                else:
-                    error_message = await response.text()
-                    logger.error(f"Ошибка при получении размера очереди. Статус: {response.status}, Сообщение: {error_message}")
-                    return 0
+                    return int(await response.text())
+                return 0
     except Exception as e:
-        logger.error(f"Ошибка подключения к серверу при получении размера очереди: {e}")
+        logger.error(f"Ошибка получения очереди: {e}")
         return 0
 
+async def get_next_dialog() -> str | None:
+    """Получаем следующее сообщение из очереди"""
+    global secret_key
+    try:
+        async with aiohttp.ClientSession() as session:
+            async with session.post(
+                f"{BACKEND_URL}/link",
+                params={'tgId': ADMIN_ID, 'key': secret_key},
+                timeout=5
+            ) as response:
+                if response.status == 200:
+                    return await response.text()
+                return None
+    except Exception as e:
+        logger.error(f"Ошибка получения диалога: {e}")
+        return None
+
+async def send_to_user(message: str) -> bool:
+    """Отправляет сообщение пользователю через бекенд"""
+    global secret_key
+    try:
+        async with aiohttp.ClientSession() as session:
+            async with session.post(
+                f"{BACKEND_URL}/message",
+                params={
+                    'tgId': ADMIN_ID,
+                    'key': secret_key,
+                    'msg': message
+                }
+            ) as response:
+                return response.status == 200
+    except Exception as e:
+        logger.error(f"Ошибка отправки сообщения: {e}")
+        return False
+
+async def close_dialog() -> bool:
+    """Закрывает текущий диалог"""
+    global secret_key
+    try:
+        async with aiohttp.ClientSession() as session:
+            async with session.post(
+                f"{BACKEND_URL}/close",
+                params={'tgId': ADMIN_ID, 'key': secret_key},
+                timeout=5
+            ) as response:
+                if response.status == 200:
+                    return True
+                elif response.status == 400:
+                    logger.warning("Попытка закрыть несуществующий диалог")
+                    return False
+                return False
+    except Exception as e:
+        logger.error(f"Ошибка закрытия диалога: {e}")
+        return False
 
 async def notify_admin(context: ContextTypes.DEFAULT_TYPE):
-    global notification_task
+    """Периодически уведомляет админа о новых сообщениях"""
+    global work_started
     while work_started:
-        if waiting_queue and ADMIN_ID not in active_dialogs:
-            count = len(waiting_queue)
-            logger.info(f"Уведомление администратора о новых диалогах. Всего в очереди: {count}")
-
-            await context.bot.send_message(
-                chat_id=ADMIN_ID,
-                text=f"🔔 Новый диалог в очереди! Всего ожидает: {count}",
-                reply_markup=await get_admin_keyboard()
-            )
+        if ADMIN_ID not in active_dialogs:
+            queue_size = await get_queue_size()
+            if queue_size > 0:
+                await context.bot.send_message(
+                    chat_id=ADMIN_ID,
+                    text=f"🔔 Ожидают ответа: {queue_size}",
+                    reply_markup=await get_admin_keyboard()
+                )
         await asyncio.sleep(60)
 
-
 async def get_admin_keyboard():
-    if work_started:
-        if ADMIN_ID in active_dialogs:
-            return ReplyKeyboardMarkup(
-                [[KeyboardButton("Завершить диалог")]],
-                resize_keyboard=True
-            )
-        else:
-            return ReplyKeyboardMarkup(
-                [
-                    [KeyboardButton("Следующий диалог")],
-                    [KeyboardButton("Завершить работу")]
-                ],
-                resize_keyboard=True
-            )
+    """Генерирует клавиатуру для админа"""
+    if not work_started:
+        return ReplyKeyboardMarkup([[KeyboardButton("Начать работу")]], resize_keyboard=True)
+    
+    if ADMIN_ID in active_dialogs:
+        return ReplyKeyboardMarkup([[KeyboardButton("Завершить диалог")]], resize_keyboard=True)
     else:
         return ReplyKeyboardMarkup(
-            [[KeyboardButton("Начать работу")]],
+            [
+                [KeyboardButton("Следующий диалог")],
+                [KeyboardButton("Завершить работу")]
+            ],
             resize_keyboard=True
         )
 
-
 async def start(update: Update, context: ContextTypes.DEFAULT_TYPE):
+    """Обработчик команды /start"""
     global secret_key
     if update.effective_user.id == ADMIN_ID:
         if secret_key is None:
-            logger.info("Администратор запрашивает ввод секретного ключа.")
             await update.message.reply_text(
-                "🔒 Пожалуйста, введите секретный ключ для доступа к админ-панели:",
+                "🔒 Введите секретный ключ:",
                 reply_markup=ReplyKeyboardRemove()
             )
         else:
-            logger.info("Администратор уже авторизован. Отображение админ-панели.")
             await update.message.reply_text(
-                "Админ-панель готова к работе:",
+                "Админ-панель готова:",
                 reply_markup=await get_admin_keyboard()
             )
     else:
-        logger.info(f"Обычный пользователь (ID: {update.effective_user.id}) начал общение.")
         await update.message.reply_text(
-            "Привет! Отправьте ваше сообщение, и оператор с вами свяжется.",
+            "Привет! Оставьте сообщение, и оператор вам ответит.",
             reply_markup=ReplyKeyboardRemove()
         )
 
-
 async def handle_message(update: Update, context: ContextTypes.DEFAULT_TYPE):
+    """Обработчик всех текстовых сообщений"""
     global work_started, notification_task, secret_key
     user_id = update.effective_user.id
-    chat_id = update.effective_chat.id
     text = update.message.text
 
     if user_id == ADMIN_ID:
-        # Обработка ввода секретного ключа
         if secret_key is None:
-            logger.info("Администратор ввёл секретный ключ.")
-            key = text.strip()
-            is_valid = await verify_key(key)
-            if is_valid:
-                secret_key = key
-                logger.info("Секретный ключ подтверждён.")
+            if await verify_key(text.strip()):
+                secret_key = text.strip()
                 await update.message.reply_text(
-                    "✅ Ключ подтверждён. Доступ к админ-панели разрешён.",
+                    "✅ Доступ разрешён",
                     reply_markup=await get_admin_keyboard()
                 )
             else:
-                logger.error("Введён неверный секретный ключ.")
-                await update.message.reply_text(
-                    "❌ Неверный ключ. Попробуйте ещё раз или обратитесь к администратору."
-                )
+                await update.message.reply_text("❌ Неверный ключ")
             return
 
-
-        # Обработка команд администратора
         if text == "Начать работу":
-            logger.info("Администратор начал работу.")
             work_started = True
-            count = await get_queue_size()  # Получаем размер очереди с бекенда
+            count = await get_queue_size()
             notification_task = asyncio.create_task(notify_admin(context))
             await update.message.reply_text(
-                f"ℹ️ Ожидают ответа: {count} пользователей\n"
-                "Работа начата. Используйте 'Следующий диалог' для начала общения.",
+                f"ℹ️ Ожидают: {count}\nРабота начата",
                 reply_markup=await get_admin_keyboard()
             )
+
         elif text == "Завершить работу":
-            logger.info("Администратор завершил работу.")
             work_started = False
             if ADMIN_ID in active_dialogs:
-                user_id, chat_id = active_dialogs.pop(ADMIN_ID)
-                await context.bot.send_message(
-                    chat_id=chat_id,
-                    text="❌ Оператор завершил работу. Диалог прерван."
-                )
+                await close_dialog()
+                active_dialogs.remove(ADMIN_ID)
             if notification_task:
                 notification_task.cancel()
             await update.message.reply_text(
-                "❌ Работа завершена. Новые диалоги не принимаются.",
+                "❌ Работа завершена",
                 reply_markup=await get_admin_keyboard()
             )
+
         elif text == "Следующий диалог":
-            logger.info("Администратор запросил следующий диалог.")
             if not work_started:
-                logger.warning("Работа не начата. Запрос 'Следующий диалог' отклонён.")
-                await update.message.reply_text("⚠️ Сначала начните работу!", reply_markup=await get_admin_keyboard())
+                await update.message.reply_text("⚠️ Сначала начните работу!")
                 return
+                
             if ADMIN_ID in active_dialogs:
-                logger.warning("У администратора уже есть активный диалог.")
+                await update.message.reply_text("⚠️ Завершите текущий диалог!")
+                return
+                
+            user_msg = await get_next_dialog()
+            if user_msg:
+                active_dialogs.add(ADMIN_ID)
                 await update.message.reply_text(
-                    "⚠️ У вас уже есть активный диалог. Завершите его сначала.",
+                    f"🔄 Новый диалог:\n{user_msg}",
                     reply_markup=await get_admin_keyboard()
                 )
             else:
-                queue_size = await get_queue_size()
-                if queue_size > 0:
-                    if waiting_queue:
-                        logger.info("Начат новый диалог с пользователем.")
-                        user_id, chat_id, first_message, first_message_id = waiting_queue.popleft()
-                        active_dialogs[ADMIN_ID] = (user_id, chat_id)
-                        await context.bot.send_message(
-                            chat_id=chat_id,
-                            text="✅ Оператор подключился к диалогу. Можете общаться."
-                        )
-                        await update.message.reply_text(
-                            f"🔄 Новый диалог с пользователем ID: {user_id}\n"
-                            f"Первое сообщение:\n{first_message}\n"
-                            "Отправляйте сообщения - они будут пересылаться пользователю. "
-                            "Используйте 'Завершить диалог' для окончания.",
-                            reply_markup=await get_admin_keyboard()
-                        )
-                else:
-                    logger.info("Нет ожидающих диалогов.")
+                await update.message.reply_text(
+                    "ℹ️ Нет ожидающих сообщений",
+                    reply_markup=await get_admin_keyboard()
+                )
+
+        elif text == "Завершить диалог":
+            if ADMIN_ID in active_dialogs:
+                success = await close_dialog()
+                if success:
+                    active_dialogs.remove(ADMIN_ID)
                     await update.message.reply_text(
-                        "ℹ️ Нет ожидающих диалогов.",
+                        "✅ Диалог завершён",
                         reply_markup=await get_admin_keyboard()
                     )
-        elif text == "Завершить диалог":
-            logger.info("Администратор завершил текущий диалог.")
-            if ADMIN_ID not in active_dialogs:
-                logger.warning("Нет активного диалога для завершения.")
-                await update.message.reply_text(
-                    "⚠️ Нет активного диалога для завершения.",
-                    reply_markup=await get_admin_keyboard()
-                )
+                else:
+                    await update.message.reply_text(
+                        "⚠️ Не удалось завершить диалог",
+                        reply_markup=await get_admin_keyboard()
+                    )
             else:
-                user_id, chat_id = active_dialogs.pop(ADMIN_ID)
-                await context.bot.send_message(
-                    chat_id=chat_id,
-                    text="❌ Оператор завершил диалог. Спасибо за обращение!"
-                )
                 await update.message.reply_text(
-                    "❌ Диалог завершён.",
+                    "⚠️ Нет активного диалога",
+                    reply_markup=await get_admin_keyboard()
+                )
 
-                    reply_markup=await get_admin_keyboard()
-                )
         elif ADMIN_ID in active_dialogs and text not in COMMANDS:
-            logger.info("Администратор отправил сообщение пользователю.")
-            user_id, chat_id = active_dialogs[ADMIN_ID]
-            try:
-                await context.bot.send_message(
-                    chat_id=chat_id,
-                    text=f"Оператор: {update.message.text}"
-                )
-            except Exception as e:
-                logger.error(f"Ошибка отправки сообщения пользователю: {e}")
-                await update.message.reply_text(
-                    f"❌ Ошибка отправки: {e}",
-                    reply_markup=await get_admin_keyboard()
-                )
+            if await send_to_user(text):
+                logger.info("Сообщение оператора отправлено")
+            else:
+                await update.message.reply_text("⚠️ Ошибка отправки")
+
+    # Обработка сообщений от пользователей
     else:
-        logger.info(f"Пользователь (ID: {user_id}) отправил сообщение.")
         if work_started:
             if ADMIN_ID in active_dialogs:
-                active_user_id, _ = active_dialogs[ADMIN_ID]
-                if user_id == active_user_id:
-                    logger.info(f"Пересылка сообщения от пользователя (ID: {user_id}) администратору.")
-                    await context.bot.send_message(
-                        chat_id=ADMIN_ID,
-                        text=f"Пользователь ID {user_id}:\n{update.message.text}"
-                    )
-                else:
-                    logger.info(f"Пользователь (ID: {user_id}) добавлен в очередь.")
-                    await update.message.reply_text(
-                        "⏳ Оператор занят другим диалогом. Ваше сообщение будет обработано позже.",
-                        reply_markup=ReplyKeyboardRemove()
-                    )
-                    if not any(q[0] == user_id for q in waiting_queue):
-                        waiting_queue.append((
-                            user_id,
-                            chat_id,
-                            update.message.text,
-                            update.message.message_id
-                        ))
-            else:
-                logger.info(f"Пользователь (ID: {user_id}) добавлен в очередь.")
-                if not any(q[0] == user_id for q in waiting_queue):
-                    waiting_queue.append((
-                        user_id,
-                        chat_id,
-                        update.message.text,
-                        update.message.message_id
-                    ))
-                    if work_started:
-                        try:
-                            await context.bot.send_message(
-                                chat_id=ADMIN_ID,
-                                text=f"🔔 Новый диалог от пользователя ID: {user_id}! Всего в очереди: {len(waiting_queue)}",
-                                reply_markup=await get_admin_keyboard()
-                            )
-                        except Exception as e:
-                            logger.error(f"Ошибка уведомления администратора: {e}")
-                await update.message.reply_text(
-                    "✔️ Ваше сообщение получено. Ожидайте подключения оператора.",
-                    reply_markup=ReplyKeyboardRemove()
+                await context.bot.send_message(
+                    chat_id=ADMIN_ID,
+                    text=f"Пользователь:\n{text}"
                 )
+            else:
+                await update.message.reply_text("⌛ Ожидайте ответа оператора")
         else:
-            logger.info(f"Пользователь (ID: {user_id}) попытался отправить сообщение, но работа не начата.")
-            await update.message.reply_text(
-                "❌ В настоящее время оператор не принимает сообщения. Попробуйте позже.",
-                reply_markup=ReplyKeyboardRemove()
-            )
-
+            await update.message.reply_text("❌ Оператор недоступен")
 
 def main():
-    application = Application.builder() \
-        .token("8170772601:AAGitKaxTm_LVKE4BtaqmsU4iR9RFtzZCYM") \
-        .build()
-
-    application.add_handlers([
-        CommandHandler("start", start),
-        MessageHandler(filters.TEXT & ~filters.COMMAND, handle_message)
-    ])
-
-    logger.info("Бот запущен.")
+    application = Application.builder().token(TELEGRAM_TOKEN).build()
+    
+    application.add_handler(CommandHandler("start", start))
+    application.add_handler(MessageHandler(filters.TEXT & ~filters.COMMAND, handle_message))
+    
+    logger.info("Бот запущен")
     application.run_polling()
-
 
 if __name__ == "__main__":
     main()
