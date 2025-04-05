@@ -9,21 +9,16 @@ from telegram.ext import (
     CommandHandler,
     ContextTypes,
     MessageHandler,
-    filters,
-    ConversationHandler
+    filters
 )
 from collections import deque
 import asyncio
-import aiohttp
-
-GET_SERVER_KEY = 1
 
 ADMIN_ID = 588116881 
 active_dialogs = {} 
 waiting_queue = deque()  
 work_started = False
 notification_task = None
-server_key = None  
 
 COMMANDS = ["Начать работу", "Завершить работу", "Следующий диалог", "Завершить диалог"]
 
@@ -61,86 +56,16 @@ async def get_admin_keyboard():
         )
 
 async def start(update: Update, context: ContextTypes.DEFAULT_TYPE):
-    global server_key
-    
     if update.effective_user.id == ADMIN_ID:
-        if server_key is None:
-            await update.message.reply_text(
-                "🔒 Пожалуйста, введите секретный ключ для доступа к сервису:",
-                reply_markup=ReplyKeyboardRemove()
-            )
-            return GET_SERVER_KEY
-        else:
-            await update.message.reply_text(
-                "Админ-панель готова к работе:",
-                reply_markup=await get_admin_keyboard()
-            )
-            return ConversationHandler.END
+        await update.message.reply_text(
+            "Админ-панель готова к работе:",
+            reply_markup=await get_admin_keyboard()
+        )
     else:
         await update.message.reply_text(
             "Привет! Отправьте ваше сообщение, и оператор с вами свяжется.",
             reply_markup=ReplyKeyboardRemove()
         )
-        return ConversationHandler.END
-
-async def get_server_key(update: Update, context: ContextTypes.DEFAULT_TYPE):
-    global server_key
-    server_key = update.message.text.strip()
-    
-    async with aiohttp.ClientSession() as session:
-        try:
-            async with session.post(
-                'http://localhost:5050/chat/queue',
-                params={
-                    'tgId': str(ADMIN_ID),
-                    'serverKey': server_key
-                }
-            ) as response:
-                if response.status == 200:
-                    data = await response.json()
-                    await update.message.reply_text(
-                        "✅ Ключ принят! Админ-панель готова к работе:",
-                        reply_markup=await get_admin_keyboard()
-                    )
-                    return ConversationHandler.END
-                else:
-                    server_key = None
-                    await update.message.reply_text(
-                        "❌ Неверный ключ. Пожалуйста, введите правильный секретный ключ:"
-                    )
-                    return GET_SERVER_KEY
-        except Exception as e:
-            server_key = None
-            await update.message.reply_text(
-                f"❌ Ошибка подключения к серверу: {e}. Пожалуйста, попробуйте снова:"
-            )
-            return GET_SERVER_KEY
-
-async def cancel(update: Update, context: ContextTypes.DEFAULT_TYPE):
-    await update.message.reply_text(
-        "Действие отменено.",
-        reply_markup=await get_admin_keyboard()
-    )
-    return ConversationHandler.END
-
-async def get_queue_size():
-    if not server_key:
-        return None
-    
-    async with aiohttp.ClientSession() as session:
-        try:
-            async with session.post(
-                'http://your-backend-url/chat/queue',
-                params={
-                    'tgId': str(ADMIN_ID),
-                    'secretKey': server_key
-                }
-            ) as response:
-                if response.status == 200:
-                    data = await response.json()
-                    return data.get('queue_size', 0)
-        except:
-            return None
 
 async def handle_message(update: Update, context: ContextTypes.DEFAULT_TYPE):
     global work_started, notification_task
@@ -150,9 +75,7 @@ async def handle_message(update: Update, context: ContextTypes.DEFAULT_TYPE):
         
         if text == "Начать работу":
             work_started = True
-            queue_size = await get_queue_size()
-            count = queue_size if queue_size is not None else len(waiting_queue)
-            
+            count = len(waiting_queue)
             notification_task = asyncio.create_task(notify_admin(context))
             await update.message.reply_text(
                 f"ℹ Ожидают ответа: {count} пользователей\n"
@@ -248,7 +171,7 @@ async def handle_message(update: Update, context: ContextTypes.DEFAULT_TYPE):
                 if user_id == active_user_id:
                     await context.bot.send_message(
                         chat_id=ADMIN_ID,
-                        text=f"Пользователь {user_id}:\n\n{update.message.text}"
+                        text=f"Пользователь ID {user_id}:\n\n{update.message.text}"
                     )
                 else:
                     await update.message.reply_text(
@@ -295,16 +218,8 @@ def main():
         .token("8170772601:AAGitKaxTm_LVKE4BtaqmsU4iR9RFtzZCYM") \
         .build()
     
-    conv_handler = ConversationHandler(
-        entry_points=[CommandHandler("start", start)],
-        states={
-            GET_SERVER_KEY: [MessageHandler(filters.TEXT & ~filters.COMMAND, get_server_key)],
-        },
-        fallbacks=[CommandHandler("cancel", cancel)],
-    )
-    
     application.add_handlers([
-        conv_handler,
+        CommandHandler("start", start),
         MessageHandler(filters.TEXT & ~filters.COMMAND, handle_message)
     ])
     
