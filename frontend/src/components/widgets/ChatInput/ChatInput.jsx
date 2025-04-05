@@ -1,5 +1,5 @@
-import { Send } from "../../dummies/Icons.jsx";
 import styles from './ChatInput.module.css';
+import { Send } from "../../dummies/Icons.jsx";
 
 const ChatInput = ({ value, onChange, onSend }) => {
   return (

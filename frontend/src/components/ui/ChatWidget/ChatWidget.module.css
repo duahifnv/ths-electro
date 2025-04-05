@@ -2,23 +2,24 @@
     position: fixed;
     bottom: 20px;
     right: 20px;
-    width: 60px;
-    height: 60px;
+    width: 70px;
+    height: 70px;
     border-radius: 50%;
     background-color: #007bff;
     border: none;
     cursor: pointer;
-    display: flex;
-    justify-content: center;
-    align-items: center;
+    display: grid;
+    place-items: center;
     box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
     z-index: 1000;
+    padding: 0;
 }
 
 .chatIcon {
-    width: 32px;
-    height: 32px;
+    width: 36px;
+    height: 36px;
     color: white;
+    margin: 0;
 }
 
 .chatWindow {
@@ -104,35 +105,37 @@
 
 .inputWrapper {
     position: relative;
-    width: 100%;
-    display: flex;
-    align-items: center;
+    height: 56px;
 }
 
 .chatInput {
     width: 100%;
-    padding: 12px 50px 12px 15px;
+    height: 100%;
+    padding: 0 52px 0 20px;
     border: 1px solid #ccc;
-    border-radius: 25px;
-    font-size: 14px;
+    border-radius: 28px;
+    font-size: 16px;
     box-sizing: border-box;
-    outline: none;
 }
 
 .sendButton {
     position: absolute;
-    right: 10px;
+    right: 8px;
+    top: 50%;
+    transform: translateY(-50%);
     background: none;
     border: none;
     cursor: pointer;
-    padding: 5px;
-    display: flex;
-    align-items: center;
-    justify-content: center;
+    width: 44px;
+    height: 44px;
+    display: grid;
+    place-items: center;
+    padding: 0;
 }
 
 .sendIcon {
-    width: 24px;
-    height: 24px;
+    width: 28px;
+    height: 28px;
     color: #007bff;
+    margin: 0;
 }
