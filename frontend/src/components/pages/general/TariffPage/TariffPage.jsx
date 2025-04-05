@@ -81,7 +81,7 @@ export const TariffPage = () => {
                     options={[
                         { value: '0', label: 'Менее 670 кВт' },
                         { value: '1', label: '670 кВт — 10 МВт' },
-                        { value: '2', label: 'Больше 10 МВт' }
+                        { value: '2', label: 'Более 10 МВт' }
                     ]}
                     selectedValue={interval}
                     onChange={setInterval}
