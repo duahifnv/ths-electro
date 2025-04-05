@@ -9,6 +9,8 @@ import { TextBox } from "../../../../react-envelope/components/ui/input/text/Tex
 import { MONTH_NAMES } from "../../../../constants";
 import { RadioBox } from "../../../../react-envelope/components/ui/selectors/RadioBox/RadioBox";
 import { TNSTitle } from "../../../dummies/TNSTitle/TNSTitle";
+import CheckBox from "../../../../react-envelope/components/ui/input/CheckBox/CheckBox";
+import { Switch } from "../../../../react-envelope/components/ui/selectors/Switch/Switch";
 
 // Основная страница
 export const TariffPage = () => {
@@ -16,6 +18,7 @@ export const TariffPage = () => {
     const [year, setYear] = useState(new Date().getFullYear());
     const [powerMode, setPowerMode] = useState('bh');
     const [dailyData, setDailyData] = useState({});
+    const [mode, setMode] = useState(0);
 
     // Обработчик изменения данных дня
     const handleDayDataChange = (day, holiday, hours) => {
@@ -33,49 +36,58 @@ export const TariffPage = () => {
     };
 
     return (
-        <PageBase title={<TNSTitle/>}>
+        <PageBase title={<TNSTitle />}>
             <Headline>Исходные данные</Headline>
-            <p>Внесите Ваши данные за определенный месяц, чтобы алгоритм мог расчитать рекомендуемые тарифные планы.</p>
 
-            <VBoxPanel className={css.content} gap={'20px'}>
-                <span className={css.subtitle}>Месяц (рекомендуется выбирать <accent>летний</accent> месяц)</span>
+            <Switch className={`${css.switch} flex row center`} value={mode} onSelect={setMode}>
+                <span>Упрощенное за расчетный период</span>
+                <span>Ручное почасовое</span>
+                <span>Файл почасового рассчета</span>
+            </Switch>
 
-                <div className={css.inputGroup}>
-                    <select
-                        value={month}
-                        onChange={(e) => setMonth(parseInt(e.target.value))}
-                    >
-                        {MONTH_NAMES.map((name, index) => (
-                            <option key={name} value={index}>{name}</option>
-                        ))}
-                    </select>
-                </div>
+            {mode == 1 && <>
+                <p>Внесите Ваши данные за определенный месяц, чтобы алгоритм мог расчитать рекомендуемые тарифные планы.</p>
 
-                <RadioBox className={css.radiopanel}
-                          options={[
+                <VBoxPanel className={css.content} gap={'20px'}>
+                    <span className={css.subtitle}>Месяц (рекомендуется выбирать <accent>летний</accent> месяц)</span>
+
+                    <div className={css.inputGroup}>
+                        <select
+                            value={month}
+                            onChange={(e) => setMonth(parseInt(e.target.value))}
+                        >
+                            {MONTH_NAMES.map((name, index) => (
+                                <option key={name} value={index}>{name}</option>
+                            ))}
+                        </select>
+                    </div>
+
+                    <RadioBox className={css.radiopanel}
+                        options={[
                             { value: 'bh', label: 'BH' },
                             { value: 'ch1', label: 'CH-1' },
                             { value: 'ch2', label: 'CH-2' },
                             { value: 'hh', label: 'HH' },
-                          ]}
-                          selectedValue={powerMode}
-                          onChange={setPowerMode}
-                          label={'Уровень напряжения'}
-                          labelProps={{style: {backgroundColor: 'var(--bk-color)', color: 'var(--font-color)'}}}/>
+                        ]}
+                        selectedValue={powerMode}
+                        onChange={setPowerMode}
+                        label={'Уровень напряжения'}
+                        labelProps={{ style: { backgroundColor: 'var(--bk-color)', color: 'var(--font-color)' } }} />
 
-                <span className={css.subtitle}>Энергопотребление по дням</span>
-                <p>Нажмите на день, чтобы ввести почасовое потребление</p>
+                    <span className={css.subtitle}>Энергопотребление по дням</span>
+                    <p>Нажмите на день, чтобы ввести почасовое потребление</p>
 
-                <SupplyCalendar
-                    month={month}
-                    year={year}
-                    dailyData={dailyData}
-                    onChange={handleDayDataChange}
-                    className={css.calendar}
-                />
+                    <SupplyCalendar
+                        month={month}
+                        year={year}
+                        dailyData={dailyData}
+                        onChange={handleDayDataChange}
+                        className={css.calendar}
+                    />
 
-                <ExButton className={'accent-button'} onClick={handleCalculate}>Расчитать</ExButton>
-            </VBoxPanel>
+                    <ExButton className={'accent-button'} onClick={handleCalculate}>Расчитать</ExButton>
+                </VBoxPanel>
+            </>}
         </PageBase>
     );
 };
