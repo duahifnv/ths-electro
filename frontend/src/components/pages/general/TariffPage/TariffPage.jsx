@@ -46,6 +46,7 @@ export const TariffPage = () => {
         <PageBase title={<TNSTitle />}>
             <Headline>Исходные данные</Headline>
             <VBoxPanel className={css.content} gap={'20px'}>
+                <p>Внесите Ваши данные за определенный месяц, чтобы алгоритм мог расчитать рекомендуемые тарифные планы.</p>
 
                 <span className={css.subtitle}>Месяц (рекомендуется выбирать <accent>летний</accent> месяц)</span>
 
@@ -96,25 +97,22 @@ export const TariffPage = () => {
                     {/* пиковая, суммарная */}
 
                     <TextBox value={maxPower}
-                            onChange={setMaxPower}
-                            label={'Пиковая мощность'}
-                            placeholder={'Введите максимальную мощность'}
-                            borderType={'fullr'}
-                            labelProps={{style: {backgroundColor: 'var(--bk-color)'}}}
-                            type="number"/>
+                        onChange={setMaxPower}
+                        label={'Пиковая мощность'}
+                        placeholder={'Введите максимальную мощность'}
+                        borderType={'fullr'}
+                        labelProps={{ style: { backgroundColor: 'var(--bk-color)' } }}
+                        type="number" />
                     <TextBox value={sumPower}
-                            onChange={setSumPower}
-                            label={'Суммарная мощность'}
-                            placeholder={'Введите суммарную мощность'}
-                            borderType={'fullr'}
-                            labelProps={{style: {backgroundColor: 'var(--bk-color)'}}}
-                            type="number"/>
+                        onChange={setSumPower}
+                        label={'Суммарная мощность'}
+                        placeholder={'Введите суммарную мощность'}
+                        borderType={'fullr'}
+                        labelProps={{ style: { backgroundColor: 'var(--bk-color)' } }}
+                        type="number" />
                 </>}
 
                 {mode == 1 && <>
-                    <p>Внесите Ваши данные за определенный месяц, чтобы алгоритм мог расчитать рекомендуемые тарифные планы.</p>
-
-
                     <span className={css.subtitle}>Энергопотребление по дням</span>
                     <p>Нажмите на день, чтобы ввести почасовое потребление</p>
 
