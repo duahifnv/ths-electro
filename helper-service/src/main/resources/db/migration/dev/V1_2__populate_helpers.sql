@@ -1,3 +1,3 @@
 insert into helpers (tg_id, firstname, lastname)
-values ('993439102', 'Kirill', 'Frolov'),
-       ('991241452', 'Nikita', 'Fomin');
+values ('588116881', 'Kirill', 'Frolov'),
+       ('404527685', 'Nikita', 'Fomin');
