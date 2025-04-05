@@ -1,14 +1,17 @@
 import { useState } from 'react';
 import styles from './ChatWidget.module.css';
 import { useAuth } from '../../../react-envelope/hooks/useAuth';
-import { ChatDots } from '../../dummies/Icons';
+import { ChatDots } from '../../dummies/Icons.jsx';
 import ChatInput from '../../widgets/ChatInput/ChatInput';
+import ExButton from '../../../react-envelope/components/ui/buttons/ExButton/ExButton';
+import { useNavigate } from 'react-router-dom';
 
 const ChatWidget = () => {
     const { auth } = useAuth();
     const [isChatOpen, setIsChatOpen] = useState(false);
     const [messages, setMessages] = useState([]);
     const [inputValue, setInputValue] = useState('');
+    const navigate = useNavigate();
 
     const toggleChat = () => {
         setIsChatOpen((prev) => !prev);
@@ -27,6 +30,10 @@ const ChatWidget = () => {
         }, 1000);
     };
 
+    const handleLogin = () => {
+        navigate('/user/auth');
+    };
+
     return (
         <>
             <button onClick={toggleChat} className={styles.chatButton}>
@@ -34,11 +41,17 @@ const ChatWidget = () => {
             </button>
 
             {isChatOpen && (
-                <div className={`${styles.chatWindow} ${auth ? '' : styles.blurredChatWindow}`}>
+                <div className={`${styles.chatWindow} ${!auth ? styles.blurredBackground : ''}`}>
                     {!auth && (
-                        <div className={styles.unauthorizedContent}>
-                            <p>Войдите чтобы воспользоваться чатом</p>
-                            <button className={styles.loginButton}>Войти</button>
+                        <div className={styles.authOverlay}>
+                            <p className={styles.authMessage}>Войдите, чтобы воспользоваться чатом</p>
+                            <ExButton 
+                                type="success"
+                                onClick={handleLogin}
+                                className={styles.authButton}
+                            >
+                                Войти
+                            </ExButton>
                         </div>
                     )}
                     {auth && (

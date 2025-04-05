@@ -5,42 +5,24 @@
     width: 60px;
     height: 60px;
     border-radius: 50%;
-    background-color: #2d7d46;
+    background-color: #48b869;
     border: none;
     cursor: pointer;
     display: grid;
     place-items: center;
     box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
     z-index: 1000;
-    padding: 0;
     transition: all 0.3s ease;
 }
 
 .chatButton:hover {
-    background-color: #3a9a5a;
-    transform: scale(1.05);
+    background-color: #48b869;
 }
 
 .chatIcon {
     width: 28px;
     height: 28px;
     color: white;
-    margin: 0;
-}
-
-body.dark .chatButton {
-    background-color: #3a9a5a;
-}
-
-body.dark .chatButton:hover {
-    background-color: #48b869;
-}
-
-.chatIcon {
-    width: 36px;
-    height: 36px;
-    color: white;
-    margin: 0;
 }
 
 .chatWindow {
@@ -50,13 +32,13 @@ body.dark .chatButton:hover {
     width: 350px;
     height: 400px;
     background-color: var(--panel-bk);
+    border: 1px solid var(--border-color);
     border-radius: 10px;
     box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
     padding: 15px;
     display: flex;
     flex-direction: column;
     z-index: 999;
-    border: 1px solid var(--border-color);
 }
 
 .blurredChatWindow {
@@ -115,9 +97,11 @@ body.dark .chatButton:hover {
 
 .userMessage {
     align-self: flex-end;
-    background-color: #2d7d46;
+    background-color: #48b869;
     color: white;
     border-bottom-right-radius: 5px;
+    margin-right: 10px;
+    margin-left: 15px;
 }
 
 .serverMessage {
@@ -128,7 +112,7 @@ body.dark .chatButton:hover {
 }
 
 body.dark .userMessage {
-    background-color: #3a9a5a;
+    background-color: #48b869;
 }
 
 body.dark .serverMessage {
@@ -136,7 +120,44 @@ body.dark .serverMessage {
     color: #f1f1f1;
 }
 
-.chatInputContainer {
+/* Размытый контент для неавторизованных */
+/* Размытие ТОЛЬКО контента чата */
+.blurredContent {
+    filter: blur(4px);
+    pointer-events: none;
+  }
+  
+  /* Оверлей - БЕЗ размытия, поверх всего */
+  .authOverlay {
+    position: absolute;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
     display: flex;
-    padding-top: 10px;
+    flex-direction: column;
+    justify-content: center;
+    align-items: center;
+    z-index: 10; /* Важно: должен быть выше blurredContent */
+  }
+
+.authMessage {
+    font-size: 16px;
+    color: var(--auth-message-color);
+    margin-bottom: 20px;
+    text-align: center;
+}
+
+.authButton {
+    min-width: 120px;
+}
+
+/* Сообщения */
+.chatMessages {
+    flex: 1;
+    overflow-y: auto;
+    margin-bottom: 10px;
+    display: flex;
+    flex-direction: column;
+    gap: 10px;
 }
