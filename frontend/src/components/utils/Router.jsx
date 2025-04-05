@@ -25,7 +25,7 @@ export const Router = () => {
                 icon: <Home />
             }
         }, {
-            name: 'Рассчет тарифного плана',
+            name: 'Калькулятор',
             to: '/calc',
             props: {
                 icon: <Dollar />

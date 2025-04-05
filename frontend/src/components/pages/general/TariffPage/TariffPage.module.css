@@ -1,0 +1,51 @@
+.content {
+    margin-top: 20px;
+    max-width: 800px;
+    width: 100%;
+    align-self: center;
+}
+
+.inputGroup {
+    display: flex;
+    flex-direction: column;
+    gap: 5px;
+    margin-bottom: 15px;
+}
+
+.inputGroup select {
+    border-radius: 5px;
+    padding: 10px 12px;
+    border: 1px solid var(--disabled-accent-color);
+    background-color: var(--bk-color);
+    color: var(--font-color);
+    font-size: 14px;
+    cursor: pointer;
+    outline: none;
+    transition: border-color 0.12s ease-out;
+    appearance: none;
+    /* Убираем стандартный стиль браузера */
+    background-image: url("data:image/svg+xml;charset=UTF-8,%3csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='%23808080'%3e%3cpath d='M7 10l5 5 5-5z'/%3e%3c/svg%3e");
+    background-repeat: no-repeat;
+    background-position: right 10px center;
+    background-size: 16px;
+}
+
+.inputGroup select:focus {
+    border-color: var(--accent-color);
+    box-shadow: 0 0 0 2px rgba(var(--accent-color-rgb), 0.2);
+}
+
+/* Стили для option элементов (работает не во всех браузерах) */
+.inputGroup select option {
+    padding: 8px 12px;
+    background-color: transparent;
+    color: var(--font-color);
+}
+
+.calendar {
+    align-self: center;
+}
+
+.subtitle {
+    font-size: var(--h2-font-size);
+}
