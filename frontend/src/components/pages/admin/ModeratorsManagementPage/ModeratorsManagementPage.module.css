@@ -2,20 +2,6 @@
     padding: 20px;
 }
 
-.addButton {
-    background-color: #2196F3;
-    color: white;
-    border: none;
-    padding: 10px 15px;
-    border-radius: 4px;
-    cursor: pointer;
-    margin-bottom: 20px;
-}
-
-.addButton:hover {
-    background-color: #0b7dda;
-}
-
 .cardsContainer {
     display: flex;
     flex-direction: column;
@@ -38,11 +24,15 @@
 }
 
 .modal {
-    background-color: white;
+    background-color: var(--body-bk-color);
     padding: 20px;
     border-radius: 8px;
     width: 400px;
     max-width: 90%;
+}
+.modal > .title {
+    font-size: var(--h1-font-size);
+    /* margin-bottom: 10px; */
 }
 
 .modalField {
@@ -66,7 +56,6 @@
     display: flex;
     justify-content: flex-end;
     gap: 10px;
-    margin-top: 20px;
 }
 
 .modalSaveButton {

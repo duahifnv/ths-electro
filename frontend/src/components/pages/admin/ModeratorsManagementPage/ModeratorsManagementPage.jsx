@@ -3,6 +3,8 @@ import { ModeratorAccessCard } from "../../../dummies/ModeratorAccessCard/Modera
 import { useState } from "react";
 import css from "./ModeratorsManagementPage.module.css";
 import { Headline } from "../../../../react-envelope/components/ui/labels/Headline/Headline";
+import ExButton from "../../../../react-envelope/components/ui/buttons/ExButton/ExButton";
+import { TextBox } from "../../../../react-envelope/components/ui/input/text/TextBox/TextBox";
 
 export const ModeratorsManagementPage = () => {
     const [moderators, setModerators] = useState([]);
@@ -72,112 +74,96 @@ export const ModeratorsManagementPage = () => {
     const handleEditClick = (id) => {
         const moderator = moderators.find(mod => mod.id === id);
         if (moderator) {
-          setEditingModerator(moderator);
-          setNewId(moderator.id);
-          setNewLastName(moderator.lastName);
-          setNewFirstName(moderator.firstName);
-          setNewMiddleName(moderator.middleName);
-          setIsModalOpen(true);
+            setEditingModerator(moderator);
+            setNewId(moderator.id);
+            setNewLastName(moderator.lastName);
+            setNewFirstName(moderator.firstName);
+            setNewMiddleName(moderator.middleName);
+            setIsModalOpen(true);
         }
-      };
+    };
 
     return (
         <PageBase>
             <Headline>Управление модераторами</Headline>
-            <div className={css.container}>
 
-                <button
-                    onClick={() => {
-                        setEditingModerator(null);
-                        setNewId("");
-                        setNewLastName("");
-                        setNewFirstName("");
-                        setNewMiddleName("");
-                        setIsModalOpen(true);
-                    }}
-                    className={css.addButton}
-                >
-                    Добавить модератора
-                </button>
+            <ExButton
+                onClick={() => {
+                    setEditingModerator(null);
+                    setNewId("");
+                    setNewLastName("");
+                    setNewFirstName("");
+                    setNewMiddleName("");
+                    setIsModalOpen(true);
+                }}
+                className={`accent-button start-self`}
+            >
+                Добавить модератора
+            </ExButton>
 
-                <div className={css.cardsContainer}>
-                    {moderators.map((moderator) => (
-                        <ModeratorAccessCard
-                            key={moderator.id}
-                            id={moderator.id}
-                            lastName={moderator.lastName}
-                            firstName={moderator.firstName}
-                            middleName={moderator.middleName}
-                            onSave={handleSaveCard}
-                            onDelete={handleDeleteCard}
-                            onEdit={handleEditClick}
-                        />
-                    ))}
-                </div>
+            <div className={css.cardsContainer}>
+                {moderators.map((moderator) => (
+                    <ModeratorAccessCard
+                        key={moderator.id}
+                        id={moderator.id}
+                        lastName={moderator.lastName}
+                        firstName={moderator.firstName}
+                        middleName={moderator.middleName}
+                        onSave={handleSaveCard}
+                        onDelete={handleDeleteCard}
+                        onEdit={handleEditClick}
+                    />
+                ))}
+            </div>
 
-                {isModalOpen && (
-                    <div className={css.modalOverlay}>
-                        <div className={css.modal}>
-                            <h2>
-                                {editingModerator ? "Редактировать модератора" : "Добавить модератора"}
-                            </h2>
+            {isModalOpen && (
+                <div className={css.modalOverlay}>
+                    <div className={`${css.modal} flex col g20`}>
+                        <span className={`${css.title} bold`}>{editingModerator ? "Редактировать модератора" : "Добавить модератора"} </span>
 
-                            <div className={css.modalField}>
-                                <label>ID:</label>
-                                <input
-                                    type="text"
-                                    value={newId}
-                                    onChange={(e) => setNewId(e.target.value)}
-                                    disabled={!!editingModerator}
-                                />
-                            </div>
+                        <TextBox value={newId}
+                            onChange={setNewId}
+                            borderType={'fullr'}
+                            label={'ID'}
+                            placeholder={'Введите ID модератора'}
+                            type="number" />
 
-                            <div className={css.modalField}>
-                                <label>Фамилия:</label>
-                                <input
-                                    type="text"
-                                    value={newLastName}
-                                    onChange={(e) => setNewLastName(e.target.value)}
-                                />
-                            </div>
+                        <TextBox value={newLastName}
+                            onChange={setNewLastName}
+                            borderType={'fullr'}
+                            label={'Фамилия'}
+                            placeholder={'Введите фамилию'} />
 
-                            <div className={css.modalField}>
-                                <label>Имя:</label>
-                                <input
-                                    type="text"
-                                    value={newFirstName}
-                                    onChange={(e) => setNewFirstName(e.target.value)}
-                                />
-                            </div>
+                        <TextBox value={newFirstName}
+                            onChange={setNewFirstName}
+                            borderType={'fullr'}
+                            label={'Имя'}
+                            placeholder={'Введите имя'} />
 
-                            <div className={css.modalField}>
-                                <label>Отчество:</label>
-                                <input
-                                    type="text"
-                                    value={newMiddleName}
-                                    onChange={(e) => setNewMiddleName(e.target.value)}
-                                />
-                            </div>
+                        <TextBox value={newMiddleName}
+                            onChange={setNewMiddleName}
+                            borderType={'fullr'}
+                            label={'Отчество'}
+                            placeholder={'Введите отчество'} />
 
-                            <div className={css.modalActions}>
-                                <button
-                                    onClick={handleAddModerator}
-                                    disabled={!newId || !newLastName || !newFirstName}
-                                    className={css.modalSaveButton}
-                                >
-                                    {editingModerator ? "Сохранить" : "Добавить"}
-                                </button>
-                                <button
-                                    onClick={() => setIsModalOpen(false)}
-                                    className={css.modalCancelButton}
-                                >
-                                    Отмена
-                                </button>
-                            </div>
+                        <div className={css.modalActions}>
+                            <ExButton
+                                onClick={handleAddModerator}
+                                disabled={!newId || !newLastName || !newFirstName}
+                                className={'accent-button'}
+                            >
+                                {editingModerator ? "Сохранить" : "Добавить"}
+                            </ExButton>
+                            <ExButton
+                                onClick={() => setIsModalOpen(false)}
+                                type={'error'}
+                            >
+                                Отмена
+                            </ExButton>
                         </div>
                     </div>
-                )}
-            </div>
+                </div>
+            )}
         </PageBase>
     );
 };
