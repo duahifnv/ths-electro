@@ -11,4 +11,5 @@ import java.util.Optional;
 @Repository
 public interface HelperRepository extends JpaRepository<Helper, Long> {
     Optional<Helper> findByTgId(@Size(max = 100) @NotNull String tgId);
+    boolean existsByTgId(@Size(max = 100) @NotNull String tgId);
 }
