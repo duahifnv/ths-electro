@@ -58,3 +58,5 @@ build/
 /helper-service/.gitattributes
 /helper-service/mvnw
 /helper-service/mvnw.cmd
+/helper-service/target/
+/identity-service/target/

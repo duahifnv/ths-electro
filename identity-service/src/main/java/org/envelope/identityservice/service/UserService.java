@@ -2,7 +2,6 @@ package org.envelope.identityservice.service;
 
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
-import org.envelope.identityservice.dto.role.RoleDto;
 import org.envelope.identityservice.dto.role.RoleNamesDto;
 import org.envelope.identityservice.dto.user.PasswordUpdateRequest;
 import org.envelope.identityservice.dto.user.RegistrationRequest;
@@ -11,9 +10,7 @@ import org.envelope.identityservice.entity.Role;
 import org.envelope.identityservice.entity.User;
 import org.envelope.identityservice.exception.UserAlreadyExistsException;
 import org.envelope.identityservice.exception.UserNotFoundException;
-import org.envelope.identityservice.mapper.RoleMapper;
 import org.envelope.identityservice.mapper.UserMapper;
-import org.envelope.identityservice.repository.RoleRepository;
 import org.envelope.identityservice.repository.UserRepository;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
@@ -25,8 +22,6 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.server.ResponseStatusException;
 
-import java.util.HashSet;
-import java.util.List;
 import java.util.Set;
 
 @Service

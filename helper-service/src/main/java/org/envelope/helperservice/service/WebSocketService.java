@@ -1,7 +1,6 @@
 package org.envelope.helperservice.service;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
-import jakarta.validation.constraints.NotNull;
 import lombok.Getter;
 import org.envelope.helperservice.dto.MessageDto;
 import org.envelope.helperservice.dto.SocketDialog;
@@ -43,7 +42,7 @@ public class WebSocketService {
             System.out.println("Session not found or closed for userId: " + userId);
         }
     }
-    // todo: Соединить с identity-service
+
     public Long getUserIdFromSession(WebSocketSession session) throws Exception {
         Map<String, String> queryParams = extractQueryParams(session);
         String jwt = extractJwtToken(queryParams);

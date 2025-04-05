@@ -1,6 +1,5 @@
 package org.envelope.helperservice.service;
 
-import jakarta.validation.constraints.NotNull;
 import lombok.RequiredArgsConstructor;
 import org.envelope.helperservice.entity.WaitingUserRequest;
 import org.envelope.helperservice.exception.ResourceNotFoundException;

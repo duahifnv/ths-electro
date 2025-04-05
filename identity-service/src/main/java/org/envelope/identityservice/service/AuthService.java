@@ -1,8 +1,8 @@
 package org.envelope.identityservice.service;
 
 import lombok.extern.slf4j.Slf4j;
-import org.envelope.identityservice.dto.user.CredentialsRequest;
 import org.envelope.identityservice.dto.JwtResponse;
+import org.envelope.identityservice.dto.user.CredentialsRequest;
 import org.envelope.identityservice.dto.user.RegistrationRequest;
 import org.envelope.identityservice.entity.User;
 import org.envelope.identityservice.exception.CustomBadCredentialsException;

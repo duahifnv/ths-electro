@@ -1,6 +1,5 @@
 package org.envelope.helperservice.repository;
 
-import jakarta.validation.constraints.NotNull;
 import org.envelope.helperservice.entity.WaitingUserRequest;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.stereotype.Repository;
