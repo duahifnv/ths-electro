@@ -1,6 +1,20 @@
+.kryglyashok {
+    position: fixed;
+    background-color: var(--bk-color);
+    width: 76px;
+    height: 76px;
+
+    bottom: 42px;
+    right: 12px;
+
+    border-radius: 100%;
+
+    z-index: 40;
+}
+
 .chatButton {
     position: fixed;
-    bottom: 20px;
+    bottom: 50px;
     right: 20px;
     width: 60px;
     height: 60px;
@@ -11,7 +25,7 @@
     display: grid;
     place-items: center;
     box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
-    z-index: 1000;
+    z-index: 40;
     transition: all 0.3s ease;
 }
 
@@ -27,18 +41,19 @@
 
 .chatWindow {
     position: fixed;
-    bottom: 90px;
-    right: 20px;
-    width: 350px;
+    bottom: 100px;
+    right: 40px;
+    max-width: 350px;
+    width: 75%;
     height: 400px;
     background-color: var(--body-bk-color);
-    border: 1px solid var(--border-color);
+    /* border: 1px solid var(--border-color); */
     border-radius: 10px;
-    box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+    box-shadow: 0 0 10px rgba(0, 0, 0, 0.25);
     padding: 15px;
     display: flex;
     flex-direction: column;
-    z-index: 999;
+    z-index: 20;
 }
 .chatWindow ::-webkit-scrollbar-track {
     background: var(--body-bk-color);

@@ -11,20 +11,25 @@
     border-radius: 28px;
     font-size: 16px;
     box-sizing: border-box;
-    background-color: var(--panel-bk) !important;
+    background-color: var(--highlight-light) !important;
     color: var(--font-color);
     transition: all 0.3s ease;
-    border: 1px solid var(--border-color);
+    border: 0;
 }
 
-body.dark .chatInput {
+.chatInput:focus-visible {
+    border: none;
+    outline: none;
+}
+
+/* body.dark .chatInput {
     border: 1px solid #ffffff;
 }
 
 body.dark .chatInput:focus {
     border: 1px solid orange;
     box-shadow: 0 0 0 2px rgba(255, 166, 0, 0.3);
-}
+} */
 
 .chatSlider {
     position: absolute;
@@ -42,9 +47,9 @@ body.dark .chatInput:focus {
     transition: all 0.3s ease;
 }
 
-.chatSlider:hover {
+/* .chatSlider:hover {
     background-color: var(--dstu-light-blue);
-}
+} */
 
 .sendButton {
     position: absolute;
