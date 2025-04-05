@@ -25,6 +25,11 @@ export const me = async () => {
     return response;
 };
 
+export const roles = async () => {
+    const response = await api.get('/identity/users/me/roles');
+    return response;
+};
+
 export const update = async (user: User) => {
     const response = await api.put(`/identity/users/me`, {
         email: user.email,

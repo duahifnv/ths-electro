@@ -89,11 +89,14 @@ const ChatWidget = () => {
     }, [isChatOpen, auth]);
 
     const handleLogin = () => {
+        setIsChatOpen(false);
         navigate('/user/auth');
     };
 
     return (
-        <>
+        <div>
+            <div className={styles.kryglyashok}></div>
+
             <button onClick={toggleChat} className={styles.chatButton}>
                 <ChatDots className={styles.chatIcon} />
             </button>
@@ -137,7 +140,7 @@ const ChatWidget = () => {
                     )}
                 </div>
             )}
-        </>
+        </div>
     );
 };
 
