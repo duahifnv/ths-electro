@@ -9,7 +9,7 @@
 
     border-radius: 100%;
 
-    z-index: 40;
+    z-index: 1040;
 }
 
 .chatButton {
@@ -25,7 +25,7 @@
     display: grid;
     place-items: center;
     box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
-    z-index: 40;
+    z-index: 1040;
     transition: all 0.3s ease;
 }
 
@@ -53,7 +53,7 @@
     padding: 15px;
     display: flex;
     flex-direction: column;
-    z-index: 20;
+    z-index: 1020;
 }
 .chatWindow ::-webkit-scrollbar-track {
     background: var(--body-bk-color);

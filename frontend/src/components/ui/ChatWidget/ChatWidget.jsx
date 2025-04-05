@@ -89,6 +89,7 @@ const ChatWidget = () => {
     }, [isChatOpen, auth]);
 
     const handleLogin = () => {
+        setIsChatOpen(false);
         navigate('/user/auth');
     };
 
