@@ -3,7 +3,14 @@ import css from './SupplyCalendar.module.css';
 import ExButton from '../../../react-envelope/components/ui/buttons/ExButton/ExButton';
 import { TextBox } from '../../../react-envelope/components/ui/input/text/TextBox/TextBox';
 
-export const SupplyCalendar = ({ month, year, dailyData, onChange, className }) => {
+export const SupplyCalendar = ({
+    month,
+    year,
+    dailyData,
+    onChange,
+    className,
+    holidays = false
+}) => {
     const [selectedDay, setSelectedDay] = useState(null);
     const [hourlyInputs, setHourlyInputs] = useState({});
     const [isHoliday, setIsHoliday] = useState(false);
@@ -73,7 +80,7 @@ export const SupplyCalendar = ({ month, year, dailyData, onChange, className }) 
                 <div className={css.modal}>
                     <div className={css.modalContent}>
                         <span className={css.dayTitle}>День {selectedDay}</span>
-                        <div className={css.holidayCheckbox}>
+                        {holidays && <div className={css.holidayCheckbox}>
                             <label>
                                 <input
                                     type="checkbox"
@@ -82,7 +89,7 @@ export const SupplyCalendar = ({ month, year, dailyData, onChange, className }) 
                                 />
                                 Выходной день
                             </label>
-                        </div>
+                        </div>}
                         <div className={css.hourInputs}>
                             {Array.from({ length: 24 }, (_, i) => i).map(hour => (
                                 <TextBox key={hour}

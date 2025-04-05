@@ -18,6 +18,7 @@ export const TariffPage = () => {
     const [month, setMonth] = useState(new Date().getMonth());
     const [powerMode, setPowerMode] = useState('0');
     const [interval, setInterval] = useState('0');
+    const [contractType, setContractType] = useState('0');
 
     const [mode, setMode] = useState(0);
 
@@ -89,6 +90,17 @@ export const TariffPage = () => {
                     label={'Максимальная мощность'}
                     labelProps={{ style: { backgroundColor: 'var(--bk-color)', color: 'var(--font-color)' } }} />
 
+                <RadioBox className={css.radiopanel}
+                    options={[
+                        { value: '0', label: 'Купля-продажа электроэнергии' },
+                        { value: '1', label: 'Договор электроснабжения' }
+                    ]}
+                    selectedValue={contractType}
+                    onChange={setContractType}
+                    name="contract-type"
+                    label={'Вид договора'}
+                    labelProps={{ style: { backgroundColor: 'var(--bk-color)', color: 'var(--font-color)' } }} />
+
                 <Switch className={`${css.switch} flex row`} value={mode} onSelect={setMode}>
                     <span>Упрощенное за расчетный период</span>
                     <span>Ручное почасовое</span>
@@ -130,7 +142,7 @@ export const TariffPage = () => {
                 {mode == 2 && <>
                     {/* Файл */}
 
-                    <DragAndDrop onFilesChange={setFiles}/>
+                    <DragAndDrop onFilesChange={setFiles} />
                 </>}
 
                 <ExButton className={'accent-button'} onClick={handleCalculate}>Расчитать</ExButton>

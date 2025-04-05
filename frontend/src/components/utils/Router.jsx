@@ -5,15 +5,16 @@ import { DevExpPage } from "../../react-envelope/components/pages/development/De
 import { UserSettingsPage } from "../pages/user/UserSettingsPage/UserSettingsPage";
 import { useEffect } from "react";
 import { useNavigation } from "../../react-envelope/hooks/useNavigation";
-import { Code, Crown, Dollar, Electricity, Home, Package, Pizza } from "../../react-envelope/components/dummies/Icons";
+import { Code, Crown, Database, Dollar, Electricity, Home, Package, Pizza } from "../../react-envelope/components/dummies/Icons";
 import { DocsPage } from "../../react-envelope/components/pages/development/DocsPage/DocsPage";
 import { ScrollRestoration } from "../../react-envelope/utils/ScrollRestoration";
 import { AuthPage } from "../pages/user/AuthPage/AuthPage";
 import { HomePage } from "../pages/general/HomePage/HomePage";
 import { TariffPage } from "../pages/general/TariffPage/TariffPage";
 import { ModeratorsManagementPage } from "../pages/admin/ModeratorsManagementPage/ModeratorsManagementPage";
-import { PowerSupplyDataPage } from "../pages/admin/PowerSupplyDataPage/PowerSupplyDataPage";
+import { PowerSupplyDataPage } from "../pages/admin/database/PowerSupplyDataPage/PowerSupplyDataPage";
 import ChatWidget from "../ui/ChatWidget/ChatWidget";
+import { HolidaysDatabasePage } from "../pages/admin/database/HolidaysDatabasePage";
 
 export const Router = () => {
     const { routes, add } = useNavigation();
@@ -42,12 +43,20 @@ export const Router = () => {
                 icon: <Crown />
             }
         }, {
-            name: 'Сетевая нагрузка',
-            to: '/supply',
+            name: 'База данных тарифов',
+            to: '/database/tarifs',
             requireAuth: true,
             permissions: 'admin',
             props: {
-                icon: <Electricity />
+                icon: <Database />
+            }
+        }, {
+            name: 'База данных выходных',
+            to: '/database/holidays',
+            requireAuth: true,
+            permissions: 'admin',
+            props: {
+                icon: <Database />
             }
         }, {
             name: 'ENVELOPE 2.0',
@@ -84,7 +93,10 @@ export const Router = () => {
 
                 <Route element={<PrivateRoute/>}>
                     <Route path="/mods" element={<ModeratorsManagementPage/>}/>
-                    <Route path="/supply" element={<PowerSupplyDataPage/>}/>
+                    <Route path="/database">
+                        <Route path="tarifs" element={<PowerSupplyDataPage/>}/>
+                        <Route path="holidays" element={<HolidaysDatabasePage/>}/>
+                    </Route>
                 </Route>
 
                 <Route path="/_lab" element={<PrivateRoute roles={'dev'} />}>
