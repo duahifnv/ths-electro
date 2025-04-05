@@ -28,6 +28,10 @@ export const TariffPage = () => {
         'Июль', 'Август', 'Сентябрь', 'Октябрь', 'Ноябрь', 'Декабрь'
     ];
 
+    const handleCalculate = () => {
+
+    };
+
     return (
         <PageBase>
             <Headline>Исходные данные</Headline>
@@ -65,6 +69,8 @@ export const TariffPage = () => {
                     onChange={handleDayDataChange}
                     className={css.calendar}
                 />
+
+                <ExButton className={'accent-button'} onClick={handleCalculate}>Расчитать</ExButton>
             </VBoxPanel>
         </PageBase>
     );
