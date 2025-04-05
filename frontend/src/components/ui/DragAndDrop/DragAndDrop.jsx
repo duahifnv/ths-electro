@@ -28,7 +28,7 @@ const DragAndDrop = ({
         const newFiles = Array.from(fileList);
 
         if (maxFiles && files.length + newFiles.length > maxFiles) {
-            toast.error(`Maximum files: ${maxFiles}`);
+            toast.error(`Достигнут максимум файлов: ${maxFiles}`);
             return false;
         }
 
@@ -38,7 +38,7 @@ const DragAndDrop = ({
             );
 
             if (invalidFiles.length > 0) {
-                toast.error(`Invalid file type. Only ${acceptedFileTypes.join(', ')} allowed`);
+                toast.error(`Неверный тип файла. Только типы ${acceptedFileTypes.join(', ')} разрешены.`);
                 return false;
             }
         }
@@ -95,7 +95,7 @@ const DragAndDrop = ({
             >
                 {files.length === 0 ? (
                     <div className={css.placeholder}>
-                        {isOver ? 'Drop files here' : 'Drag files or click to select'}
+                        {isOver ? 'Перетащите сюда файлы' : 'Перетащите сюда файлы или нажмите'}
                     </div>
                 ) : (
                     <div className={css.fileList}>
@@ -132,9 +132,7 @@ const DragAndDrop = ({
                     ref={fileRef}
                     accept={acceptedFileTypes?.join(',')}
                 />
-                <label htmlFor="fileInput" className={css.fileInputLabel}>
-                    Select Files
-                </label>
+                <label htmlFor="fileInput" className={css.fileInputLabel}>Выбрать файлы</label>
             </div>
 
             {acceptedFileTypes && (

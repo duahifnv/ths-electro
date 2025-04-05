@@ -1,21 +1,18 @@
 .container {
-    width: 400px;
-    height: 300px;
     margin: 0;
-    padding: 16px;
     box-sizing: border-box;
     display: flex;
     flex-direction: column;
+    display: flex;
 }
 
 .dropZone {
     border: 2px dashed var(--border-color);
     border-radius: 8px;
-    padding: 16px;
+    padding: 32px;
     text-align: center;
     cursor: pointer;
     transition: all 0.3s ease;
-    /* background-color: var(--panel-bk); */
     margin-bottom: 8px;
     flex: 1;
     display: flex;
