@@ -7,12 +7,13 @@ import ExButton from "../../../../react-envelope/components/ui/buttons/ExButton/
 import { SupplyCalendar } from "../../../widgets/SupplyCalendar/SupplyCalendar";
 import { TextBox } from "../../../../react-envelope/components/ui/input/text/TextBox/TextBox";
 import { MONTH_NAMES } from "../../../../constants";
+import { RadioBox } from "../../../../react-envelope/components/ui/selectors/RadioBox/RadioBox";
 
 // Основная страница
 export const TariffPage = () => {
     const [month, setMonth] = useState(new Date().getMonth());
     const [year, setYear] = useState(new Date().getFullYear());
-    const [maxConsumption, setMaxConsumption] = useState(null);
+    const [powerMode, setPowerMode] = useState('marina');
     const [dailyData, setDailyData] = useState({});
 
     // Обработчик изменения данных дня
@@ -46,13 +47,17 @@ export const TariffPage = () => {
                     </select>
                 </div>
 
-                <TextBox borderType={'fullr'}
-                    placeholder={`Введите потребление в кВт*ч`}
-                    label={`Пиковое потребление за ${MONTH_NAMES[month]}`}
-                    labelBackground={'var(--bk-color)'}
-                    value={maxConsumption}
-                    onChange={setMaxConsumption}
-                    type="number" />
+                <RadioBox className={css.radiopanel}
+                          options={[
+                            { value: 'bh', label: 'BH' },
+                            { value: 'ch1', label: 'CH-1' },
+                            { value: 'ch2', label: 'CH-2' },
+                            { value: 'hh', label: 'HH' },
+                          ]}
+                          selectedValue={powerMode}
+                          onChange={setPowerMode}
+                          label={'Уровень напряжения'}
+                          labelProps={{style: {backgroundColor: 'var(--bk-color)', color: 'var(--font-color)'}}}/>
 
                 <span className={css.subtitle}>Энергопотребление по дням</span>
                 <p>Нажмите на день, чтобы ввести почасовое потребление</p>

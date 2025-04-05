@@ -49,3 +49,10 @@
 .subtitle {
     font-size: var(--h2-font-size);
 }
+
+.radiopanel {
+    /* background-color: var(--body-bk-color); */
+    border-radius: 5px;
+    justify-content: center;
+    gap: 20px;
+}
