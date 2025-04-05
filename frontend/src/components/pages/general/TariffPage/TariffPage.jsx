@@ -6,6 +6,7 @@ import css from './TariffPage.module.css';
 import ExButton from "../../../../react-envelope/components/ui/buttons/ExButton/ExButton";
 import { SupplyCalendar } from "../../../widgets/SupplyCalendar/SupplyCalendar";
 import { TextBox } from "../../../../react-envelope/components/ui/input/text/TextBox/TextBox";
+import { MONTH_NAMES } from "../../../../constants";
 
 // Основная страница
 export const TariffPage = () => {
@@ -21,12 +22,6 @@ export const TariffPage = () => {
             [day]: hourlyData
         }));
     };
-
-    // Получаем название месяца
-    const monthNames = [
-        'Январь', 'Февраль', 'Март', 'Апрель', 'Май', 'Июнь',
-        'Июль', 'Август', 'Сентябрь', 'Октябрь', 'Ноябрь', 'Декабрь'
-    ];
 
     const handleCalculate = () => {
 
@@ -45,7 +40,7 @@ export const TariffPage = () => {
                         value={month}
                         onChange={(e) => setMonth(parseInt(e.target.value))}
                     >
-                        {monthNames.map((name, index) => (
+                        {MONTH_NAMES.map((name, index) => (
                             <option key={name} value={index}>{name}</option>
                         ))}
                     </select>
@@ -53,7 +48,7 @@ export const TariffPage = () => {
 
                 <TextBox borderType={'fullr'}
                     placeholder={`Введите потребление в кВт*ч`}
-                    label={`Пиковое потребление за ${monthNames[month]}`}
+                    label={`Пиковое потребление за ${MONTH_NAMES[month]}`}
                     labelBackground={'var(--bk-color)'}
                     value={maxConsumption}
                     onChange={setMaxConsumption}
