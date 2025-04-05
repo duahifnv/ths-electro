@@ -1,25 +1,38 @@
 import { useState } from 'react';
 import styles from './ChatWidget.module.css';
-import { useAuth } from '../../../react-envelope/hooks/useAuth'
-import {Pizza} from '../../../react-envelope/components/dummies/Icons.jsx'
+import { useAuth } from '../../../react-envelope/hooks/useAuth';
+import { ChatDots } from '../../dummies/Icons';
+import ChatInput from '../../widgets/ChatInput/ChatInput';
 
-const ChatWidget = ({}) => {
-    const { auth } = useAuth(); // Используем хук для получения состояния авторизации
-    const [isChatOpen, setIsChatOpen] = useState(false); // Состояние видимости окна чата
+const ChatWidget = () => {
+    const { auth } = useAuth();
+    const [isChatOpen, setIsChatOpen] = useState(false);
+    const [messages, setMessages] = useState([]);
+    const [inputValue, setInputValue] = useState('');
 
-    // Функция для переключения видимости чата
     const toggleChat = () => {
         setIsChatOpen((prev) => !prev);
     };
 
+    const handleSendMessage = () => {
+        if (!inputValue.trim()) return;
+
+        const newMessage = { text: inputValue, isUser: true };
+        setMessages((prevMessages) => [...prevMessages, newMessage]);
+        setInputValue('');
+
+        setTimeout(() => {
+            const serverResponse = { text: 'Это автоматический ответ!', isUser: false };
+            setMessages((prevMessages) => [...prevMessages, serverResponse]);
+        }, 1000);
+    };
+
     return (
         <>
-            {/* Кнопка чата */}
             <button onClick={toggleChat} className={styles.chatButton}>
-                <img src={Pizza} alt="Chat Icon" className={styles.chatIcon} />
+                <ChatDots className={styles.chatIcon} />
             </button>
 
-            {/* Окно чата */}
             {isChatOpen && (
                 <div className={`${styles.chatWindow} ${auth ? '' : styles.blurredChatWindow}`}>
                     {!auth && (
@@ -30,12 +43,25 @@ const ChatWidget = ({}) => {
                     )}
                     {auth && (
                         <>
-                            <h3>Чат</h3>
                             <div className={styles.chatMessages}>
-                                {/* Здесь можно добавить логику для отображения сообщений */}
-                                <p>Напишите сообщение...</p>
+                                {messages.map((message, index) => (
+                                    <div
+                                        key={index}
+                                        className={`${styles.message} ${
+                                            message.isUser ? styles.userMessage : styles.serverMessage
+                                        }`}
+                                    >
+                                        {message.text}
+                                    </div>
+                                ))}
                             </div>
-                            <input type="text" placeholder="Введите сообщение..." className={styles.chatInput} />
+                            <div className={styles.chatInputContainer}>
+                                <ChatInput 
+                                    value={inputValue} 
+                                    onChange={setInputValue} 
+                                    onSend={handleSendMessage} 
+                                />
+                            </div>
                         </>
                     )}
                 </div>

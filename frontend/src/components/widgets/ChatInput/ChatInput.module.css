@@ -1,0 +1,49 @@
+.inputWrapper {
+    position: relative;
+    width: 100%;
+    display: flex;
+    align-items: center;
+}
+
+.chatInput {
+    width: 100%;
+    padding: 12px 50px 12px 15px;
+    border: 1px solid #ccc;
+    border-radius: 25px;
+    font-size: 14px;
+    box-sizing: border-box;
+    outline: none;
+    transition: border-color 0.3s ease;
+}
+
+.chatInput:focus {
+    border-color: #007bff;
+}
+
+.sendButton {
+    position: absolute;
+    right: 10px;
+    background: none;
+    border: none;
+    cursor: pointer;
+    padding: 5px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    transition: transform 0.2s ease;
+}
+
+.sendButton:hover {
+    transform: scale(1.1);
+}
+
+.sendIcon {
+    width: 24px;
+    height: 24px;
+    color: #007bff;
+    transition: color 0.3s ease;
+}
+
+.sendButton:hover .sendIcon {
+    color: #0056b3;
+}

@@ -1,31 +1,30 @@
-/* ChatWidget.module.css */
-
 .chatButton {
-    position: fixed; /* Фиксированное позиционирование */
-    bottom: 20px; /* Отступ снизу */
-    right: 20px; /* Отступ справа */
+    position: fixed;
+    bottom: 20px;
+    right: 20px;
     width: 60px;
     height: 60px;
-    border-radius: 50%; /* Круглая форма */
-    background-color: #007bff; /* Цвет фона */
+    border-radius: 50%;
+    background-color: #007bff;
     border: none;
     cursor: pointer;
     display: flex;
     justify-content: center;
     align-items: center;
-    box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1); /* Тень для эффекта объема */
-    z-index: 1000; /* Чтобы кнопка была поверх других элементов */
+    box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+    z-index: 1000;
 }
 
 .chatIcon {
-    width: 30px;
-    height: 30px;
+    width: 32px;
+    height: 32px;
+    color: white;
 }
 
 .chatWindow {
-    position: fixed; /* Фиксированное позиционирование */
-    bottom: 90px; /* Немного выше кнопки */
-    right: 20px; /* Отступ справа */
+    position: fixed;
+    bottom: 90px;
+    right: 20px;
     width: 300px;
     height: 400px;
     background-color: #fff;
@@ -34,16 +33,16 @@
     padding: 15px;
     display: flex;
     flex-direction: column;
-    z-index: 999; /* Чтобы окно было поверх других элементов */
-    transition: filter 0.3s ease; /* Плавный переход для размытия */
+    z-index: 999;
+    transition: filter 0.3s ease;
 }
 
 .blurredChatWindow {
-    filter: blur(2px); /* Размытие окна */
+    filter: blur(2px);
 }
 
 .unauthorizedContent {
-    position: absolute; /* Абсолютное позиционирование внутри окна */
+    position: absolute;
     top: 0;
     left: 0;
     right: 0;
@@ -53,9 +52,9 @@
     justify-content: center;
     align-items: center;
     text-align: center;
-    background-color: rgba(255, 255, 255, 0.8); /* Полупрозрачный фон */
+    background-color: rgba(255, 255, 255, 0.8);
     border-radius: 10px;
-    z-index: 1000; /* Чтобы текст был поверх размытого окна */
+    z-index: 1000;
 }
 
 .loginButton {
@@ -72,10 +71,68 @@
     flex: 1;
     overflow-y: auto;
     margin-bottom: 10px;
+    display: flex;
+    flex-direction: column;
+    gap: 10px;
+}
+
+.message {
+    max-width: 80%;
+    padding: 10px 15px;
+    border-radius: 20px;
+    font-size: 14px;
+    line-height: 1.4;
+    color: #000;
+}
+
+.userMessage {
+    align-self: flex-end;
+    background-color: #dcf8c6;
+    border-bottom-right-radius: 5px;
+}
+
+.serverMessage {
+    align-self: flex-start;
+    background-color: #f1f1f1;
+    border-bottom-left-radius: 5px;
+}
+
+.chatInputContainer {
+    display: flex;
+    padding-top: 10px;
+}
+
+.inputWrapper {
+    position: relative;
+    width: 100%;
+    display: flex;
+    align-items: center;
 }
 
 .chatInput {
-    padding: 10px;
+    width: 100%;
+    padding: 12px 50px 12px 15px;
     border: 1px solid #ccc;
-    border-radius: 5px;
+    border-radius: 25px;
+    font-size: 14px;
+    box-sizing: border-box;
+    outline: none;
+}
+
+.sendButton {
+    position: absolute;
+    right: 10px;
+    background: none;
+    border: none;
+    cursor: pointer;
+    padding: 5px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+
+.sendIcon {
+    width: 24px;
+    height: 24px;
+    color: #007bff;
 }
