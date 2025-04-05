@@ -19,6 +19,7 @@
     <module>image-service</module>
     <module>identity-service</module>
     <module>api-gateway</module>
+    <module>helper-service</module>
   </modules>
 
   <properties>
