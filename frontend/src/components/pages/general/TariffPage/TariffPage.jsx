@@ -19,6 +19,7 @@ export const TariffPage = () => {
     const [powerMode, setPowerMode] = useState('0');
     const [interval, setInterval] = useState('0');
     const [contractType, setContractType] = useState('0');
+    const [category, setCategory] = useState('3');
 
     const [mode, setMode] = useState(0);
 
@@ -99,6 +100,19 @@ export const TariffPage = () => {
                     onChange={setContractType}
                     name="contract-type"
                     label={'Вид договора'}
+                    labelProps={{ style: { backgroundColor: 'var(--bk-color)', color: 'var(--font-color)' } }} />
+
+                <RadioBox className={css.radiopanel}
+                    options={[
+                        { value: '3', label: 'ЦК 3' },
+                        { value: '4', label: 'ЦК 4' },
+                        { value: '5', label: 'ЦК 5' },
+                        { value: '6', label: 'ЦК 6' },
+                    ]}
+                    selectedValue={category}
+                    onChange={setCategory}
+                    name="category"
+                    label={'Ценовая категория'}
                     labelProps={{ style: { backgroundColor: 'var(--bk-color)', color: 'var(--font-color)' } }} />
 
                 <Switch className={`${css.switch} flex row`} value={mode} onSelect={setMode}>
