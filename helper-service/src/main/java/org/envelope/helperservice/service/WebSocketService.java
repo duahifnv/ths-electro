@@ -40,7 +40,7 @@ public class WebSocketService {
         SocketDialog wrapper = sessions.get(userId);
         if (wrapper != null && wrapper.getSession().isOpen()) {
             WebSocketSession session = wrapper.getSession();
-            session.sendMessage(new TextMessage(message));
+            session.sendMessage(new TextMessage("Ответ от администратора: " + message));
             System.out.println("Message sent to userId: " + wrapper.getUserId() + " message: " + message);
             messageService.addMessage(message, "user", userId, tgId);
         } else {

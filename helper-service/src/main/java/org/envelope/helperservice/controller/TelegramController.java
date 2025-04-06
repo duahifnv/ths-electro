@@ -38,7 +38,7 @@ public class TelegramController {
                                                     @RequestParam @Schema(description = "Секретный ключ доступа к сервису",
                                                             example = "g6s75rjhWc6cWxsYf7KSPdl0rO6Rc0RQ")
                                                     String secretKey,
-                                                    DurationDto duration) {
+                                                    @Schema(description = "Сколько секунд назад") DurationDto duration) {
         validateHelper(tgId, secretKey);
         Long userId = webSocketService.findUserIdByHelperId(tgId)
                 .orElseThrow(() ->

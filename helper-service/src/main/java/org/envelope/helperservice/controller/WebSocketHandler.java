@@ -30,7 +30,7 @@ public class WebSocketHandler extends TextWebSocketHandler {
             userId = webSocketService.getUserIdFromQueryParams(queryParams);
             initMessage = webSocketService.getInitMessageFromQueryParams(queryParams);
         } catch (Exception e) {
-            session.sendMessage(new TextMessage("Authentication failed"));
+            session.sendMessage(new TextMessage("Ошибка авторизации"));
             session.close(CloseStatus.NOT_ACCEPTABLE);
             return;
         }
@@ -89,17 +89,17 @@ public class WebSocketHandler extends TextWebSocketHandler {
             }
             webSocketService.sendMessageFromUser(userId, helperId, parsedMessage);
             System.out.println("Server received: " + parsedMessage);
-            session.sendMessage(new TextMessage("Сообщение доставлено и ждет ответа помощника"));
+            session.sendMessage(new TextMessage("Сообщение доставлено и ждет ответа администратора"));
         } catch (IllegalStateException e) {
-            System.err.println("Illegal state exception: " + "Отправка сообщений только после ответа помощника");
-            session.sendMessage(new TextMessage("Отправка сообщений только после ответа помощника"));
+            System.err.println("Illegal state exception: " + "Отправка сообщений только после ответа администратора");
+            session.sendMessage(new TextMessage("Отправка сообщений только после ответа администратора"));
         }
         catch (ResourceNotFoundException e) {
             System.err.println("Resource not found: " + e.getMessage());
-            session.sendMessage(new TextMessage("Requested resource not found"));
+            session.sendMessage(new TextMessage("Технические неполадки"));
         } catch (Exception e) {
             System.err.println("Error parsing JSON: " + e.getMessage());
-            session.sendMessage(new TextMessage("Invalid JSON format"));
+            session.sendMessage(new TextMessage("Неверный формат JSON"));
         }
     }
 }
