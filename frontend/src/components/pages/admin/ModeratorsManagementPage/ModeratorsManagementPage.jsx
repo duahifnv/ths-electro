@@ -20,7 +20,6 @@ export const ModeratorsManagementPage = () => {
     const [newId, setNewId] = useState("");
     const [newLastName, setNewLastName] = useState("");
     const [newFirstName, setNewFirstName] = useState("");
-    const [newMiddleName, setNewMiddleName] = useState("");
     const [editingModerator, setEditingModerator] = useState(null);
     const [isLoading, setIsLoading] = useState(false);
     const [error, setError] = useState(null);
@@ -48,9 +47,7 @@ export const ModeratorsManagementPage = () => {
             const moderatorData = {
                 tgId: newId,
                 lastname: newLastName,
-                firstname: newFirstName,
-                ...(newMiddleName && { middlename: newMiddleName })
-            };
+                firstname: newFirstName            };
 
             if (editingModerator) {
                 // Редактирование существующего модератора
@@ -62,7 +59,6 @@ export const ModeratorsManagementPage = () => {
                                 ...mod,
                                 lastName: newLastName,
                                 firstName: newFirstName,
-                                middleName: newMiddleName,
                             }
                             : mod
                     )
@@ -76,7 +72,6 @@ export const ModeratorsManagementPage = () => {
                         id: newId,
                         lastName: newLastName,
                         firstName: newFirstName,
-                        middleName: newMiddleName,
                     },
                 ]);
             }
@@ -84,7 +79,6 @@ export const ModeratorsManagementPage = () => {
             setNewId("");
             setNewLastName("");
             setNewFirstName("");
-            setNewMiddleName("");
             setEditingModerator(null);
             setIsModalOpen(false);
         } catch (err) {
@@ -142,7 +136,6 @@ export const ModeratorsManagementPage = () => {
             setNewId(moderator.id);
             setNewLastName(moderator.lastName);
             setNewFirstName(moderator.firstName);
-            setNewMiddleName(moderator.middleName);
             setIsModalOpen(true);
         }
     };
@@ -160,7 +153,6 @@ export const ModeratorsManagementPage = () => {
                     setNewId("");
                     setNewLastName("");
                     setNewFirstName("");
-                    setNewMiddleName("");
                     setIsModalOpen(true);
                 }}
                 className={`accent-button start-self`}
@@ -172,10 +164,10 @@ export const ModeratorsManagementPage = () => {
                 {moderators.map((moderator) => (
                     <ModeratorAccessCard
                         key={moderator.id}
-                        id={moderator.id}
-                        lastName={moderator.lastName}
-                        firstName={moderator.firstName}
-                        middleName={moderator.middleName}
+                        id={moderator.tgId}
+                        lastName={moderator.lastname}
+                        firstName={moderator.firstname}
+                        middleName={moderator.middlename}
                         onSave={handleSaveCard}
                         onDelete={handleDeleteCard}
                         onEdit={handleEditClick}
@@ -212,14 +204,6 @@ export const ModeratorsManagementPage = () => {
                             borderType={'fullr'}
                             label={'Имя'}
                             placeholder={'Введите имя'} 
-                        />
-
-                        <TextBox 
-                            value={newMiddleName}
-                            onChange={setNewMiddleName}
-                            borderType={'fullr'}
-                            label={'Отчество'}
-                            placeholder={'Введите отчество'} 
                         />
 
                         <div className={css.modalActions}>
