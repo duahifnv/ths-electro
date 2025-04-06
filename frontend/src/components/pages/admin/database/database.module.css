@@ -2,6 +2,18 @@
     gap: 20px !important;
 }
 
+.body {
+    margin-top: 20px;
+    max-width: 800px;
+    width: 100%;
+    align-self: center;
+}
+
+.switch {
+    justify-content: space-evenly;
+    /* background-color: transparent !important; */
+}
+
 .inputGroup {
     display: flex;
     flex-direction: column;
@@ -11,7 +23,7 @@
 
 .inputGroup select {
     border-radius: 5px;
-    padding: 10px 12px;
+    padding: 11px 12px;
     border: 1px solid var(--disabled-accent-color);
     background-color: var(--bk-color);
     color: var(--font-color);
@@ -80,7 +92,7 @@
 }
 .day.counted {
     background-color: transparent;
-    border: 1px solid var(--accent-color);
+    border: 2px solid var(--accent-color);
     /* color: var(--accent-color); */
 }
 .hours {
@@ -92,6 +104,60 @@
 }
 .hour.counted {
     background-color: transparent;
-    border: 1px solid var(--accent-color);
+    border: 2px solid var(--accent-color);
     /* color: var(--accent-color); */
+}
+
+.legend {
+    left: 0;
+}
+
+.zoneLevel1,
+.zoneLevel2,
+.zoneLevel3 {
+    padding: 10px;
+    border-radius: 5px;
+}
+
+.zoneLevel1 {
+    background-color: rgba(255, 255, 255, 0.1);
+}
+.zoneLevel2 {
+    background-color: rgba(255, 200, 0, 0.1);
+}
+.zoneLevel3 {
+    background-color: rgba(225, 0, 0, 0.1);
+}
+
+.dayzoneWrapper {
+    position: relative;
+}
+
+.dayzoneLabel {
+    position: absolute;
+    top: -8px;
+    left: -8px;
+
+    background-color: var(--bk-color);
+
+    width: 24px;
+    height: 24px;
+
+    padding: 4px;
+
+    box-sizing: border-box;
+
+    display: flex;
+    align-items: center;
+    justify-content: center;
+
+    border-radius: 100%;
+}
+
+@media (max-width: 640px) {
+    .radiopanel {
+        /* flex-direction: column; */
+        display: grid !important;
+        grid-template-columns: repeat(2, 1fr);
+    }
 }

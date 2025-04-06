@@ -12,6 +12,9 @@ import css from '../database.module.css';
 import { CreateEnergyRecordModal } from "../../../../widgets/modals/CreateEnergyRecordModal/modals/CreateEnergyRecordModal";
 import { TNSTitle } from "../../../../dummies/TNSTitle/TNSTitle";
 import { RadioBox } from "../../../../../react-envelope/components/ui/selectors/RadioBox/RadioBox";
+import HBoxPanel from "../../../../../react-envelope/components/layouts/HBoxPanel/HBoxPanel";
+import { Switch } from "../../../../../react-envelope/components/ui/selectors/Switch/Switch";
+import { DragAndDrop } from "../../../../ui/DragAndDrop/DragAndDrop";
 
 export const PowerSupplyDataPage = () => {
     // const [records, setRecords] = useState([]);
@@ -28,6 +31,10 @@ export const PowerSupplyDataPage = () => {
     const [contractType, setContractType] = useState('1');
     const [tarifsData, setTarifsData] = useState({});
     const [category, setCategory] = useState('3');
+
+    // switch mode
+    const [mode, setMode] = useState(0);
+    const [files, setFiles] = useState([]);
 
 
     // const resetContext = () => {
@@ -90,94 +97,105 @@ export const PowerSupplyDataPage = () => {
         <PageBase title={<TNSTitle />} contentClassName={css.content}>
             <Headline>База данных тарифов</Headline>
 
-            <TextBox label={'Год'}
-                placeholder={'Введите год'}
-                value={year}
-                onChange={setYear}
-                type="number"
-                borderType={'fullr'}
-                labelProps={{ style: { backgroundColor: 'var(--bk-color)' } }} />
+            <VBoxPanel className={css.body} gap={'20px'}>
+                <HBoxPanel gap={'20px'} className={'stretch-self'} halign="space-between" valign="start">
+                    <TextBox label={'Год'}
+                        placeholder={'Введите год'}
+                        value={year}
+                        onChange={setYear}
+                        type="number"
+                        borderType={'fullr'}
+                        className={`flex-1`}
+                        labelProps={{ style: { backgroundColor: 'var(--bk-color)' } }} />
 
-            <div className={css.inputGroup}>
-                <select
-                    value={month}
-                    onChange={(e) => setMonth(parseInt(e.target.value))}
-                >
-                    {MONTH_NAMES.map((name, index) => (
-                        <option key={name} value={index}>{name}</option>
-                    ))}
-                </select>
-            </div>
+                    <div className={`${css.inputGroup} flex-1`}>
+                        <select
+                            value={month}
+                            onChange={(e) => setMonth(parseInt(e.target.value))}
+                        >
+                            {MONTH_NAMES.map((name, index) => (
+                                <option key={name} value={index}>{name}</option>
+                            ))}
+                        </select>
+                    </div>
+                </HBoxPanel>
 
-            <RadioBox className={css.radiopanel}
-                options={[
-                    { value: '1', label: 'BH' },
-                    { value: '2', label: 'CH-1' },
-                    { value: '3', label: 'CH-2' },
-                    { value: '4', label: 'HH' },
-                ]}
-                selectedValue={powerMode}
-                onChange={setPowerMode}
-                name="power-mode"
-                label={'Уровень напряжения'}
-                labelProps={{ style: { backgroundColor: 'var(--bk-color)', color: 'var(--font-color)' } }} />
+                <RadioBox className={css.radiopanel}
+                    options={[
+                        { value: '1', label: 'BH' },
+                        { value: '2', label: 'CH-1' },
+                        { value: '3', label: 'CH-2' },
+                        { value: '4', label: 'HH' },
+                    ]}
+                    selectedValue={powerMode}
+                    onChange={setPowerMode}
+                    name="power-mode"
+                    label={'Уровень напряжения'}
+                    labelProps={{ style: { backgroundColor: 'var(--bk-color)', color: 'var(--font-color)' } }} />
 
-            <RadioBox className={css.radiopanel}
-                options={[
-                    { value: '1', label: 'Менее 670 кВт' },
-                    { value: '2', label: '670 кВт — 10 МВт' },
-                    { value: '3', label: 'Более 10 МВт' }
-                ]}
-                selectedValue={interval}
-                onChange={setInterval}
-                name="power-interval"
-                label={'Максимальная мощность'}
-                labelProps={{ style: { backgroundColor: 'var(--bk-color)', color: 'var(--font-color)' } }} />
+                <RadioBox className={css.radiopanel}
+                    options={[
+                        { value: '1', label: 'Менее 670 кВт' },
+                        { value: '2', label: '670 кВт — 10 МВт' },
+                        { value: '3', label: 'Более 10 МВт' }
+                    ]}
+                    selectedValue={interval}
+                    onChange={setInterval}
+                    name="power-interval"
+                    label={'Максимальная мощность'}
+                    labelProps={{ style: { backgroundColor: 'var(--bk-color)', color: 'var(--font-color)' } }} />
 
-            <RadioBox className={css.radiopanel}
-                options={[
-                    { value: '1', label: 'Купля-продажа электроэнергии' },
-                    { value: '2', label: 'Договор электроснабжения' }
-                ]}
-                selectedValue={contractType}
-                onChange={setContractType}
-                name="contract-type"
-                label={'Вид договора'}
-                labelProps={{ style: { backgroundColor: 'var(--bk-color)', color: 'var(--font-color)' } }} />
+                <RadioBox className={css.radiopanel}
+                    options={[
+                        { value: '1', label: 'Купля-продажа электроэнергии' },
+                        { value: '2', label: 'Договор электроснабжения' }
+                    ]}
+                    selectedValue={contractType}
+                    onChange={setContractType}
+                    name="contract-type"
+                    label={'Вид договора'}
+                    labelProps={{ style: { backgroundColor: 'var(--bk-color)', color: 'var(--font-color)' } }} />
 
-            <RadioBox className={css.radiopanel}
-                options={[
-                    { value: '3', label: 'ЦК 3' },
-                    { value: '4', label: 'ЦК 4' },
-                    { value: '5', label: 'ЦК 5' },
-                    { value: '6', label: 'ЦК 6' },
-                ]}
-                selectedValue={category}
-                onChange={setCategory}
-                name="category"
-                label={'Ценовая категория'}
-                labelProps={{ style: { backgroundColor: 'var(--bk-color)', color: 'var(--font-color)' } }} />
+                <RadioBox className={css.radiopanel}
+                    options={[
+                        { value: '3', label: 'ЦК 3' },
+                        { value: '4', label: 'ЦК 4' },
+                        { value: '5', label: 'ЦК 5' },
+                        { value: '6', label: 'ЦК 6' },
+                    ]}
+                    selectedValue={category}
+                    onChange={setCategory}
+                    name="category"
+                    label={'Ценовая категория'}
+                    labelProps={{ style: { backgroundColor: 'var(--bk-color)', color: 'var(--font-color)' } }} />
 
-            <SupplyCalendar year={year} month={month} dailyData={tarifsData} onChange={(day, holiday, hours) => {
-                setTarifsData(prev => {
-                    return {
-                        ...prev,
-                        [day]: {
-                            // holiday: holiday,
-                            hours: hours
+                <Switch className={`${css.switch} flex row`} value={mode} onSelect={setMode}>
+                    <span>Ручное почасовое</span>
+                    <span>Файл почасового рассчета</span>
+                </Switch>
+
+                {mode == 0 && <SupplyCalendar year={year} month={month} dailyData={tarifsData} onChange={(day, holiday, hours) => {
+                    setTarifsData(prev => {
+                        return {
+                            ...prev,
+                            [day]: {
+                                // holiday: holiday,
+                                hours: hours
+                            }
                         }
-                    }
-                })
-            }} className='center-self' />
+                    })
+                }} className='center-self' />}
 
-            <ExButton className={'accent-button'} onClick={() => {
+                {mode == 1 && <DragAndDrop onFilesChange={setFiles} />}
 
-            }}>Отправить</ExButton>
+                <ExButton className={'accent-button'} onClick={() => {
 
-            {/* <ExButton onClick={handleAdd} className={`accent-button start-self`}>Добавить запись</ExButton> */}
+                }}>Отправить</ExButton>
+
+                {/* <ExButton onClick={handleAdd} className={`accent-button start-self`}>Добавить запись</ExButton> */}
 
 
-            {/* <VBoxPanel gap={'10px'}>
+                {/* <VBoxPanel gap={'10px'}>
                 {records.slice().sort((a, b) => {
                     if (a.year !== b.year) {
                         return Number(a.year) - Number(b.year);
@@ -189,7 +207,7 @@ export const PowerSupplyDataPage = () => {
                     dailyData={d.dailyData} />)}
             </VBoxPanel> */}
 
-            {/* <CreateEnergyRecordModal isEnabled={modalActive}
+                {/* <CreateEnergyRecordModal isEnabled={modalActive}
                 onCloseRequested={() => setModalActive(false)}
                 editContext={editContext}
                 setEditContext={setEditContext}
@@ -205,6 +223,7 @@ export const PowerSupplyDataPage = () => {
                 onPrimaryClick={() => handleConfirmedDelete()}>
                 <span>Вы уверены что хотите удалить запись?</span>
             </Modal> */}
+            </VBoxPanel>
         </PageBase>
     );
 };
