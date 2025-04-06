@@ -120,13 +120,13 @@
 }
 
 .zoneLevel1 {
-    background-color: rgba(255, 255, 255, 0.1);
+    background-color: rgba(255, 255, 255, 0.3);
 }
 .zoneLevel2 {
-    background-color: rgba(255, 200, 0, 0.1);
+    background-color: rgba(255, 200, 0, 0.3);
 }
 .zoneLevel3 {
-    background-color: rgba(225, 0, 0, 0.1);
+    background-color: rgba(225, 0, 0, 0.3);
 }
 
 .dayzoneWrapper {

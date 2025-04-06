@@ -6,7 +6,6 @@ export const ModeratorAccessCard = ({
     id,
     lastName,
     firstName,
-    middleName,
     onSave,
     onDelete,
     onEdit,
@@ -14,13 +13,11 @@ export const ModeratorAccessCard = ({
     const [isEditing, setIsEditing] = useState(false);
     const [editedLastName, setEditedLastName] = useState(lastName);
     const [editedFirstName, setEditedFirstName] = useState(firstName);
-    const [editedMiddleName, setEditedMiddleName] = useState(middleName);
 
     const handleSave = () => {
         onSave(id, {
             lastName: editedLastName,
             firstName: editedFirstName,
-            middleName: editedMiddleName,
         });
         setIsEditing(false);
     };
@@ -28,7 +25,6 @@ export const ModeratorAccessCard = ({
     const handleCancel = () => {
         setEditedLastName(lastName);
         setEditedFirstName(firstName);
-        setEditedMiddleName(middleName);
         setIsEditing(false);
     };
 
@@ -68,10 +64,6 @@ export const ModeratorAccessCard = ({
                 <div className={css.field}>
                     <span className={css.label}>Имя</span>
                     <span className={css.value}>{firstName}</span>
-                </div>
-                <div className={css.field}>
-                    <span className={css.label}>Отчество</span>
-                    <span className={css.value}>{middleName}</span>
                 </div>
             </div>
         </div>

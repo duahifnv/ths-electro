@@ -33,7 +33,7 @@ export const PlanHoursDatabasePage = () => {
 
     return (
         <PageBase title={<TNSTitle />} contentClassName={css.content}>
-            <Headline>База данных отчетных часов</Headline>
+            <Headline>База данных плановых часов</Headline>
 
             <VBoxPanel className={css.body} gap={'20px'}>
                 <HBoxPanel gap={'20px'} className={'stretch-self'} halign="space-between" valign="start">
