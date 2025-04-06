@@ -2,8 +2,6 @@ use bb8::{Pool, PooledConnection};
 use bb8_postgres::PostgresConnectionManager;
 use tokio_postgres::NoTls;
 
-use super::repositories::contract_type;
-
 pub type ConnectionPool = Pool<PostgresConnectionManager<NoTls>>;
 pub type Connection = PooledConnection<'static, PostgresConnectionManager<NoTls>>;
 

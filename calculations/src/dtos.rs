@@ -16,3 +16,4 @@ pub mod price_for_under_consuming;
 pub mod price_for_over_consuming;
 pub mod additional_cost;
 pub mod weekend;
+pub mod calculation;

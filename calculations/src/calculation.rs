@@ -1,4 +1,4 @@
-pub fn calculate_cost_category_1(fixed_tariff: u64, total_consumtion: u64) -> u64 {
+pub fn calculate_cost_category_1(fixed_tariff: f64, total_consumtion: f64) -> f64 {
     fixed_tariff * total_consumtion
 }
 
