@@ -33,5 +33,5 @@ springdoc:
   api-docs:
     path: /api-docs
 
-#logging:
-#  config: classpath:logback-local.xml
+logging:
+  config: classpath:logback-local.xml
