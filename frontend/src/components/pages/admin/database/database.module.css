@@ -61,6 +61,16 @@
     height: 30px;
 }
 
+.day,
+.hour {
+    background-color: transparent;
+    border: 1px solid var(--border-color);
+}
+.day:hover,
+.hour:hover {
+    background-color: var(--highlight-light);
+}
+
 .days {
     display: grid;
     grid-template-columns: repeat(7, 50px);
