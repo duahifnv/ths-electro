@@ -24,7 +24,7 @@ server:
 
 client:
   identity-service:
-    url: http://localhost:8080
+    url: http://localhost:8085
     context-path: /api/identity
 
 springdoc:
