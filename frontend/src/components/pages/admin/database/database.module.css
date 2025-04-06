@@ -2,6 +2,18 @@
     gap: 20px !important;
 }
 
+.body {
+    margin-top: 20px;
+    max-width: 800px;
+    width: 100%;
+    align-self: center;
+}
+
+.switch {
+    justify-content: space-evenly;
+    /* background-color: transparent !important; */
+}
+
 .inputGroup {
     display: flex;
     flex-direction: column;

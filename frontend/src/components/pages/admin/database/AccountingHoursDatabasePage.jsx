@@ -9,6 +9,7 @@ import { MONTH_NAMES } from '../../../../constants';
 import { Modal } from '../../../../react-envelope/components/wrappers/Modal/Modal';
 import ExButton from '../../../../react-envelope/components/ui/buttons/ExButton/ExButton';
 import HBoxPanel from '../../../../react-envelope/components/layouts/HBoxPanel/HBoxPanel';
+import VBoxPanel from '../../../../react-envelope/components/layouts/VBoxPanel/VBoxPanel';
 
 export const AccountingHoursDatabasePage = () => {
     const [year, setYear] = useState(new Date().getFullYear());
@@ -34,85 +35,87 @@ export const AccountingHoursDatabasePage = () => {
         <PageBase title={<TNSTitle />} contentClassName={css.content}>
             <Headline>База данных отчетных часов</Headline>
 
-            <HBoxPanel gap={'20px'} className={'stretch-self'} halign="space-between" valign="start">
-                <TextBox label={'Год'}
-                    placeholder={'Введите год'}
-                    value={year}
-                    onChange={setYear}
-                    type="number"
-                    borderType={'fullr'}
-                    className={`flex-1`}
-                    labelProps={{ style: { backgroundColor: 'var(--bk-color)' } }} />
+            <VBoxPanel className={css.body} gap={'20px'}>
+                <HBoxPanel gap={'20px'} className={'stretch-self'} halign="space-between" valign="start">
+                    <TextBox label={'Год'}
+                        placeholder={'Введите год'}
+                        value={year}
+                        onChange={setYear}
+                        type="number"
+                        borderType={'fullr'}
+                        className={`flex-1`}
+                        labelProps={{ style: { backgroundColor: 'var(--bk-color)' } }} />
 
-                <div className={`${css.inputGroup} flex-1`}>
-                    <select
-                        value={month}
-                        onChange={(e) => setMonth(parseInt(e.target.value))}
-                    >
-                        {MONTH_NAMES.map((name, index) => (
-                            <option key={name} value={index}>{name}</option>
-                        ))}
-                    </select>
+                    <div className={`${css.inputGroup} flex-1`}>
+                        <select
+                            value={month}
+                            onChange={(e) => setMonth(parseInt(e.target.value))}
+                        >
+                            {MONTH_NAMES.map((name, index) => (
+                                <option key={name} value={index}>{name}</option>
+                            ))}
+                        </select>
+                    </div>
+                </HBoxPanel>
+
+                <RadioBox className={css.radiopanel}
+                    options={[
+                        { value: '1', label: 'BH' },
+                        { value: '2', label: 'CH-1' },
+                        { value: '3', label: 'CH-2' },
+                        { value: '4', label: 'HH' },
+                    ]}
+                    selectedValue={powerMode}
+                    onChange={setPowerMode}
+                    name="power-mode"
+                    label={'Уровень напряжения'}
+                    labelProps={{ style: { backgroundColor: 'var(--bk-color)', color: 'var(--font-color)' } }} />
+
+                <RadioBox className={css.radiopanel}
+                    options={[
+                        { value: '1', label: 'Менее 670 кВт' },
+                        { value: '2', label: '670 кВт — 10 МВт' },
+                        { value: '3', label: 'Более 10 МВт' }
+                    ]}
+                    selectedValue={interval}
+                    onChange={setInterval}
+                    name="power-interval"
+                    label={'Максимальная мощность'}
+                    labelProps={{ style: { backgroundColor: 'var(--bk-color)', color: 'var(--font-color)' } }} />
+
+                <RadioBox className={css.radiopanel}
+                    options={[
+                        { value: '1', label: 'Купля-продажа электроэнергии' },
+                        { value: '2', label: 'Договор электроснабжения' }
+                    ]}
+                    selectedValue={contractType}
+                    onChange={setContractType}
+                    name="contract-type"
+                    label={'Вид договора'}
+                    labelProps={{ style: { backgroundColor: 'var(--bk-color)', color: 'var(--font-color)' } }} />
+
+                <RadioBox className={css.radiopanel}
+                    options={[
+                        { value: '3', label: 'ЦК 3' },
+                        { value: '5', label: 'ЦК 5' },
+                    ]}
+                    selectedValue={category}
+                    onChange={setCategory}
+                    name="category"
+                    label={'Ценовая категория'}
+                    labelProps={{ style: { backgroundColor: 'var(--bk-color)', color: 'var(--font-color)' } }} />
+
+                <div className={css.days}>
+                    {Array.from({ length: daysInMonth }, (v, k) => k + 1).map((val, i) => (
+                        <ExButton key={i} className={`${css.day} ${Object.keys(hoursData).includes(`${i}`) && css.counted}`}
+                            onClick={() => handleDayClick(i)}>{val}</ExButton>
+                    ))}
                 </div>
-            </HBoxPanel>
 
-            <RadioBox className={css.radiopanel}
-                options={[
-                    { value: '1', label: 'BH' },
-                    { value: '2', label: 'CH-1' },
-                    { value: '3', label: 'CH-2' },
-                    { value: '4', label: 'HH' },
-                ]}
-                selectedValue={powerMode}
-                onChange={setPowerMode}
-                name="power-mode"
-                label={'Уровень напряжения'}
-                labelProps={{ style: { backgroundColor: 'var(--bk-color)', color: 'var(--font-color)' } }} />
+                <ExButton className={'accent-button'} onClick={() => {
 
-            <RadioBox className={css.radiopanel}
-                options={[
-                    { value: '1', label: 'Менее 670 кВт' },
-                    { value: '2', label: '670 кВт — 10 МВт' },
-                    { value: '3', label: 'Более 10 МВт' }
-                ]}
-                selectedValue={interval}
-                onChange={setInterval}
-                name="power-interval"
-                label={'Максимальная мощность'}
-                labelProps={{ style: { backgroundColor: 'var(--bk-color)', color: 'var(--font-color)' } }} />
-
-            <RadioBox className={css.radiopanel}
-                options={[
-                    { value: '1', label: 'Купля-продажа электроэнергии' },
-                    { value: '2', label: 'Договор электроснабжения' }
-                ]}
-                selectedValue={contractType}
-                onChange={setContractType}
-                name="contract-type"
-                label={'Вид договора'}
-                labelProps={{ style: { backgroundColor: 'var(--bk-color)', color: 'var(--font-color)' } }} />
-
-            <RadioBox className={css.radiopanel}
-                options={[
-                    { value: '3', label: 'ЦК 3' },
-                    { value: '5', label: 'ЦК 5' },
-                ]}
-                selectedValue={category}
-                onChange={setCategory}
-                name="category"
-                label={'Ценовая категория'}
-                labelProps={{ style: { backgroundColor: 'var(--bk-color)', color: 'var(--font-color)' } }} />
-
-            <div className={css.days}>
-                {Array.from({ length: daysInMonth }, (v, k) => k + 1).map((val, i) => (
-                    <ExButton key={i} className={`${css.day} ${Object.keys(hoursData).includes(`${i}`) && css.counted}`}
-                        onClick={() => handleDayClick(i)}>{val}</ExButton>
-                ))}
-            </div>
-
-            <ExButton className={'accent-button'} onClick={() => {
-                
-            }}>Отправить</ExButton>
+                }}>Отправить</ExButton>
+            </VBoxPanel>
 
             <Modal isEnabled={modal}
                 onCloseRequested={() => setModal(false)} height='350px'>

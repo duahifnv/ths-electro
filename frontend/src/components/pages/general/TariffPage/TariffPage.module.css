@@ -58,5 +58,5 @@
 
 .switch {
     justify-content: space-between;
-    background-color: transparent !important;
+    /* background-color: transparent !important; */
 }
