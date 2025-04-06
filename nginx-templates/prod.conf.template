@@ -18,10 +18,33 @@ server {
 server {
     listen 80;
     server_name api.${DOMAIN} www.api.${DOMAIN};
-    
+
+    # Перенаправление WebSocket-запросов
+    location /ws/ {
+        # Указываем бэкенд сервер, где запущен WebSocket сервис
+        set $upstream_ws http://helper-service:${HELPER_SERVICE_PORT};
+        proxy_pass $upstream_ws;
+
+        # Настройки для WebSocket
+        proxy_http_version 1.1;
+        proxy_set_header Upgrade $http_upgrade;
+        proxy_set_header Connection "Upgrade";
+        proxy_set_header Host $host;
+
+        # Дополнительные заголовки для безопасности и корректной работы
+        proxy_set_header X-Real-IP $remote_addr;
+        proxy_set_header X-Forwarded-For $proxy_add_x_forwarded_for;
+        proxy_set_header X-Forwarded-Proto $scheme;
+
+        # Таймауты для длительных соединений
+        proxy_read_timeout 86400; # Время жизни соединения (24 часа)
+        proxy_send_timeout 86400;
+    }
+
     location = / {
         proxy_pass http://api-gateway:${API_GATEWAY_PORT}/api/swagger-ui;
     }
+
     location / {
         # Handle OPTIONS requests first
         if ($request_method = 'OPTIONS') {

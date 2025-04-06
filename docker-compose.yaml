@@ -161,7 +161,7 @@ services:
       - ./telegram/.env
     volumes:
       - ./telegram:/app
-#    restart: always
+    restart: always
   react-app-build:
     container_name: react-app-remote-build
     image: react-app-remote-build:dev
@@ -195,6 +195,7 @@ services:
     ports:
       - "80:80"
       - "5999:5999"
+      - "5998:5998"
     volumes:
       - ./nginx-templates/prod.conf.template:/etc/nginx/templates/default.conf.template
       - ./nginx.conf:/etc/nginx/nginx.conf
