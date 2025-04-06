@@ -151,17 +151,18 @@ services:
       - $HELPER_SERVICE_PORT
     networks:
       - dev
-#  telegram-bot:
-#    container_name: telegram-bot
-#    image: telegram-bot:dev
-#    build:
-#      context: .
-#      dockerfile: ./docker/telegram/Dockerfile
-#    env_file:
-#      - ./telegram/.env
-#    volumes:
-#      - ./telegram:/app
-#    restart: always
+  telegram-bot:
+    container_name: telegram-bot
+    image: python:3.10-slim
+    build:
+      context: .
+      dockerfile: ./docker/telegram/Dockerfile
+    env_file:
+      - ./telegram/.env
+    volumes:
+      - ./telegram:/app
+      - ./tele
+    restart: always
   react-app:
     container_name: react-app
     image: react-app:dev
