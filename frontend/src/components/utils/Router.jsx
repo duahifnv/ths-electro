@@ -16,6 +16,7 @@ import { PowerSupplyDataPage } from "../pages/admin/database/PowerSupplyDataPage
 import ChatWidget from "../ui/ChatWidget/ChatWidget";
 import { HolidaysDatabasePage } from "../pages/admin/database/HolidaysDatabasePage";
 import { DayZonesDatabasePage } from "../pages/admin/database/DayZonesDatabasePage";
+import { AccountingHoursDatabasePage } from "../pages/admin/database/AccountingHoursDatabasePage";
 
 export const Router = () => {
     const { routes, add } = useNavigation();
@@ -68,6 +69,14 @@ export const Router = () => {
                 icon: <Database />
             }
         }, {
+            name: 'База данных отчетных часов',
+            to: '/database/acc-hours',
+            requireAuth: true,
+            permissions: 'admin',
+            props: {
+                icon: <Database />
+            }
+        }, {
             name: 'ENVELOPE 2.0',
             to: '/_lab/docs',
             permissions: 'dev',
@@ -106,6 +115,7 @@ export const Router = () => {
                         <Route path="tarifs" element={<PowerSupplyDataPage/>}/>
                         <Route path="holidays" element={<HolidaysDatabasePage/>}/>
                         <Route path="dayzones" element={<DayZonesDatabasePage/>}/>
+                        <Route path="acc-hours" element={<AccountingHoursDatabasePage/>}/>
                     </Route>
                 </Route>
 
