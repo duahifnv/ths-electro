@@ -21,32 +21,18 @@ const ChatWidget = () => {
     const handleSendMessage = async () => {
         if (!inputValue.trim()) return;
 
+        // Создаем новый объект сообщения
         const newMessage = { text: inputValue, isUser: true };
+
+        // Добавляем сообщение в состояние
         setMessages((prevMessages) => [...prevMessages, newMessage]);
         setInputValue('');
 
-        if (!webSocket) {
-            try {
-                const response = await fetch('http://localhost:3001/chat/start', {
-                    method: 'POST',
-                    headers: {
-                        'Content-Type': 'application/json',
-                    },
-                    body: JSON.stringify({ message: inputValue }),
-                });
-
-                if (response.ok) {
-                    console.log('Первое сообщение отправлено через POST');
-                } else {
-                    console.error('Ошибка при отправке первого сообщения');
-                }
-            } catch (error) {
-                console.error('Ошибка сети:', error);
-            }
-        }
-
+        // Создаем JSON-строку из inputValue
+        const jsonMessage = JSON.stringify({ message: inputValue });
+        // Отправляем сообщение через WebSocket
         if (webSocket && webSocket.readyState === WebSocket.OPEN) {
-            webSocket.send(inputValue);
+            webSocket.send(jsonMessage); // Отправляем JSON-строку
         } else {
             console.warn('WebSocket соединение еще не установлено');
         }
@@ -55,7 +41,12 @@ const ChatWidget = () => {
     useEffect(() => {
         let ws;
         const connect = () => {
-            ws = new WebSocket('ws://localhost:3001');
+            if (!auth || !auth.token) {
+                console.error('Токен отсутствует, невозможно подключиться к WebSocket');
+                return;
+            }
+            // Здесь после initMessage должно идти сообщение, которое пользователь написал первым и ПОСЛЕ КОТОРОГО подключился к сокету
+            ws = new WebSocket(`ws://localhost:8082/api/helper/ws?Authorization=Bearer:${encodeURIComponent(auth.token)}&initMessage=вопросик`);
 
             ws.onopen = () => {
                 console.log('WebSocket соединение установлено');
