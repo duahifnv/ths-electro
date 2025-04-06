@@ -8,6 +8,7 @@ import { MONTH_NAMES } from "../../../../constants";
 import StateToggleButton from "../../../../react-envelope/components/ui/buttons/StateToggleButton/StateToggleButton";
 import { Moon, Sun, Sunrise } from "../../../../react-envelope/components/dummies/Icons";
 import { Pair } from "../../../../react-envelope/components/layouts/Pair/Pair";
+import ExButton from "../../../../react-envelope/components/ui/buttons/ExButton/ExButton";
 
 export const DayZonesDatabasePage = () => {
     const [month, setMonth] = useState(new Date().getMonth());
@@ -53,6 +54,10 @@ export const DayZonesDatabasePage = () => {
                     })}/>
                 ))}
             </div>
+
+            <ExButton className={'accent-button'} onClick={() => {
+                
+            }}>Отправить</ExButton>
         </PageBase>
     );
 };

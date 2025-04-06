@@ -170,6 +170,10 @@ export const PowerSupplyDataPage = () => {
                 })
             }} className='center-self' />
 
+            <ExButton className={'accent-button'} onClick={() => {
+
+            }}>Отправить</ExButton>
+
             {/* <ExButton onClick={handleAdd} className={`accent-button start-self`}>Добавить запись</ExButton> */}
 
 

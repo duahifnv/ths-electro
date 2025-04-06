@@ -6,6 +6,7 @@ import { Headline } from "../../../../react-envelope/components/ui/labels/Headli
 import { SupplyCalendar } from "../../../widgets/SupplyCalendar/SupplyCalendar";
 import { TextBox } from "../../../../react-envelope/components/ui/input/text/TextBox/TextBox";
 import { MONTH_NAMES } from "../../../../constants";
+import ExButton from "../../../../react-envelope/components/ui/buttons/ExButton/ExButton";
 
 export const HolidaysDatabasePage = () => {
     const [holidaysData, setHolidaysData] = useState({});
@@ -46,6 +47,10 @@ export const HolidaysDatabasePage = () => {
                     }
                 })
             }} className='center-self' holidays />
+
+            <ExButton className={'accent-button'} onClick={() => {
+
+            }}>Отправить</ExButton>
         </PageBase>
     )
 };

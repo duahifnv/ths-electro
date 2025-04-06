@@ -106,7 +106,9 @@ export const PlanHoursDatabasePage = () => {
                 ))}
             </div>
 
-            <ExButton className={'accent-button'}>Отправить</ExButton>
+            <ExButton className={'accent-button'} onClick={() => {
+                
+            }}>Отправить</ExButton>
 
             <Modal isEnabled={modal}
                 onCloseRequested={() => setModal(false)} height='350px'>

@@ -106,6 +106,10 @@ export const AccountingHoursDatabasePage = () => {
                 ))}
             </div>
 
+            <ExButton className={'accent-button'} onClick={() => {
+                
+            }}>Отправить</ExButton>
+
             <Modal isEnabled={modal}
                 onCloseRequested={() => setModal(false)} height='350px'>
                 <div className={css.hours}>
