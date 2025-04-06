@@ -21,30 +21,28 @@ const ChatWidget = () => {
     const handleSendMessage = async () => {
         if (!inputValue.trim()) return;
 
-        const newMessage = { text: inputValue, isUser: true };
-        setMessages((prevMessages) => [...prevMessages, newMessage]);
-        setInputValue('');
-
-        if (webSocket && webSocket.readyState === WebSocket.OPEN) {
-            webSocket.send(inputValue);
-        } else {
-            console.warn('WebSocket соединение еще не установлено');
-        }
-    };
-
-    useEffect(() => {
-        let ws;
-        const connect = () => {
+        // Если WebSocket еще не создан, создаем его
+        if (!webSocket || webSocket.readyState !== WebSocket.OPEN) {
             if (!auth || !auth.token) {
                 console.error('Токен отсутствует, невозможно подключиться к WebSocket');
                 return;
             }
 
-            ws = new WebSocket(`ws://localhost:3001?token=${encodeURIComponent(auth.token)}`);
+            const initMessage = inputValue; // Начальное сообщение
+            const wsUrl = `ws://localhost:3001/api/helper/ws?Authorization=Bearer:${encodeURIComponent(auth.token)}&initMessage=${encodeURIComponent(initMessage)}`;
+
+            const ws = new WebSocket(wsUrl);
 
             ws.onopen = () => {
                 console.log('WebSocket соединение установлено');
+
+                // Сохраняем WebSocket
                 setWebSocket(ws);
+
+                // Отправляем первое сообщение (уже передано в URL)
+                const firstMessage = { text: initMessage, isUser: true };
+                setMessages((prevMessages) => [...prevMessages, firstMessage]);
+                setInputValue('');
             };
 
             ws.onmessage = (event) => {
@@ -59,19 +57,16 @@ const ChatWidget = () => {
             ws.onclose = () => {
                 console.log('WebSocket соединение закрыто');
                 setWebSocket(null);
-
-                setTimeout(connect, 3000);
             };
-        };
+        } else {
+            // Если WebSocket уже открыт, отправляем сообщение через него
+            const newMessage = { text: inputValue, isUser: true };
+            setMessages((prevMessages) => [...prevMessages, newMessage]);
+            setInputValue('');
 
-        if (isChatOpen && auth) {
-            connect();
+            webSocket.send(inputValue);
         }
-
-        return () => {
-            ws?.close();
-        };
-    }, [isChatOpen, auth]);
+    };
 
     const handleLogin = () => {
         navigate('/user/auth');
