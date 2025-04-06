@@ -162,14 +162,6 @@ services:
     volumes:
       - ./telegram:/app
     restart: always
-  react-app-build:
-    container_name: react-app-remote-build
-    image: react-app-remote-build:dev
-    build:
-      context: .
-      dockerfile: ./docker/react/remote/Dockerfile
-    volumes:
-      - npm-storage-build:/app/build
   react-app:
     container_name: react-app
     image: react-app:dev
@@ -179,10 +171,8 @@ services:
       args:
         port: $REACT_APP_PORT
     volumes:
-      - npm-storage-build:/usr/shage/nginx/html
+      - ./frontend/build:/usr/shage/nginx/html
       - ./docker/react/remote/nginx/nginx.conf:/etc/nginx/conf.d/default.conf
-    depends_on:
-      - react-app-build
     expose:
       - $REACT_APP_PORT
     networks:
