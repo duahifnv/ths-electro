@@ -15,6 +15,7 @@ import { ModeratorsManagementPage } from "../pages/admin/ModeratorsManagementPag
 import { PowerSupplyDataPage } from "../pages/admin/database/PowerSupplyDataPage/PowerSupplyDataPage";
 import ChatWidget from "../ui/ChatWidget/ChatWidget";
 import { HolidaysDatabasePage } from "../pages/admin/database/HolidaysDatabasePage";
+import { DayZonesDatabasePage } from "../pages/admin/database/DayZonesDatabasePage";
 
 export const Router = () => {
     const { routes, add } = useNavigation();
@@ -59,6 +60,14 @@ export const Router = () => {
                 icon: <Database />
             }
         }, {
+            name: 'База данных дневных зон',
+            to: '/database/dayzones',
+            requireAuth: true,
+            permissions: 'admin',
+            props: {
+                icon: <Database />
+            }
+        }, {
             name: 'ENVELOPE 2.0',
             to: '/_lab/docs',
             permissions: 'dev',
@@ -96,6 +105,7 @@ export const Router = () => {
                     <Route path="/database">
                         <Route path="tarifs" element={<PowerSupplyDataPage/>}/>
                         <Route path="holidays" element={<HolidaysDatabasePage/>}/>
+                        <Route path="dayzones" element={<DayZonesDatabasePage/>}/>
                     </Route>
                 </Route>
 
