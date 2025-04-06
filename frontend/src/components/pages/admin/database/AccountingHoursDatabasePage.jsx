@@ -8,6 +8,7 @@ import { RadioBox } from '../../../../react-envelope/components/ui/selectors/Rad
 import { MONTH_NAMES } from '../../../../constants';
 import { Modal } from '../../../../react-envelope/components/wrappers/Modal/Modal';
 import ExButton from '../../../../react-envelope/components/ui/buttons/ExButton/ExButton';
+import HBoxPanel from '../../../../react-envelope/components/layouts/HBoxPanel/HBoxPanel';
 
 export const AccountingHoursDatabasePage = () => {
     const [year, setYear] = useState(new Date().getFullYear());
@@ -33,24 +34,27 @@ export const AccountingHoursDatabasePage = () => {
         <PageBase title={<TNSTitle />} contentClassName={css.content}>
             <Headline>База данных отчетных часов</Headline>
 
-            <TextBox label={'Год'}
-                placeholder={'Введите год'}
-                value={year}
-                onChange={setYear}
-                type="number"
-                borderType={'fullr'}
-                labelProps={{ style: { backgroundColor: 'var(--bk-color)' } }} />
+            <HBoxPanel gap={'20px'} className={'stretch-self'} halign="space-between" valign="start">
+                <TextBox label={'Год'}
+                    placeholder={'Введите год'}
+                    value={year}
+                    onChange={setYear}
+                    type="number"
+                    borderType={'fullr'}
+                    className={`flex-1`}
+                    labelProps={{ style: { backgroundColor: 'var(--bk-color)' } }} />
 
-            <div className={css.inputGroup}>
-                <select
-                    value={month}
-                    onChange={(e) => setMonth(parseInt(e.target.value))}
-                >
-                    {MONTH_NAMES.map((name, index) => (
-                        <option key={name} value={index}>{name}</option>
-                    ))}
-                </select>
-            </div>
+                <div className={`${css.inputGroup} flex-1`}>
+                    <select
+                        value={month}
+                        onChange={(e) => setMonth(parseInt(e.target.value))}
+                    >
+                        {MONTH_NAMES.map((name, index) => (
+                            <option key={name} value={index}>{name}</option>
+                        ))}
+                    </select>
+                </div>
+            </HBoxPanel>
 
             <RadioBox className={css.radiopanel}
                 options={[

@@ -11,7 +11,7 @@
 
 .inputGroup select {
     border-radius: 5px;
-    padding: 10px 12px;
+    padding: 11px 12px;
     border: 1px solid var(--disabled-accent-color);
     background-color: var(--bk-color);
     color: var(--font-color);

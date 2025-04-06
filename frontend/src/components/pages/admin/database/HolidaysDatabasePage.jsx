@@ -7,6 +7,7 @@ import { SupplyCalendar } from "../../../widgets/SupplyCalendar/SupplyCalendar";
 import { TextBox } from "../../../../react-envelope/components/ui/input/text/TextBox/TextBox";
 import { MONTH_NAMES } from "../../../../constants";
 import ExButton from "../../../../react-envelope/components/ui/buttons/ExButton/ExButton";
+import HBoxPanel from "../../../../react-envelope/components/layouts/HBoxPanel/HBoxPanel";
 
 export const HolidaysDatabasePage = () => {
     const [holidaysData, setHolidaysData] = useState({});
@@ -17,24 +18,27 @@ export const HolidaysDatabasePage = () => {
         <PageBase title={<TNSTitle />} contentClassName={css.content}>
             <Headline>База данных выходных</Headline>
 
-            <TextBox label={'Год'}
-                placeholder={'Введите год'}
-                value={year}
-                onChange={setYear}
-                type="number"
-                borderType={'fullr'}
-                labelProps={{ style: { backgroundColor: 'var(--bk-color)' } }} />
+            <HBoxPanel gap={'20px'} className={'stretch-self'} halign="space-between" valign="start">
+                <TextBox label={'Год'}
+                    placeholder={'Введите год'}
+                    value={year}
+                    onChange={setYear}
+                    type="number"
+                    borderType={'fullr'}
+                    className={`flex-1`}
+                    labelProps={{ style: { backgroundColor: 'var(--bk-color)' } }} />
 
-            <div className={css.inputGroup}>
-                <select
-                    value={month}
-                    onChange={(e) => setMonth(parseInt(e.target.value))}
-                >
-                    {MONTH_NAMES.map((name, index) => (
-                        <option key={name} value={index}>{name}</option>
-                    ))}
-                </select>
-            </div>
+                <div className={`${css.inputGroup} flex-1`}>
+                    <select
+                        value={month}
+                        onChange={(e) => setMonth(parseInt(e.target.value))}
+                    >
+                        {MONTH_NAMES.map((name, index) => (
+                            <option key={name} value={index}>{name}</option>
+                        ))}
+                    </select>
+                </div>
+            </HBoxPanel>
 
             <SupplyCalendar year={year} month={month} dailyData={holidaysData} onChange={(day, holiday, hours) => {
                 setHolidaysData(prev => {
