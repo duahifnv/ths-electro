@@ -21,12 +21,18 @@ const ChatWidget = () => {
     const handleSendMessage = async () => {
         if (!inputValue.trim()) return;
 
+        // Создаем новый объект сообщения
         const newMessage = { text: inputValue, isUser: true };
+
+        // Добавляем сообщение в состояние
         setMessages((prevMessages) => [...prevMessages, newMessage]);
         setInputValue('');
 
+        // Создаем JSON-строку из inputValue
+        const jsonMessage = JSON.stringify({ message: inputValue });
+        // Отправляем сообщение через WebSocket
         if (webSocket && webSocket.readyState === WebSocket.OPEN) {
-            webSocket.send(inputValue);
+            webSocket.send(jsonMessage); // Отправляем JSON-строку
         } else {
             console.warn('WebSocket соединение еще не установлено');
         }
@@ -39,8 +45,8 @@ const ChatWidget = () => {
                 console.error('Токен отсутствует, невозможно подключиться к WebSocket');
                 return;
             }
-
-            ws = new WebSocket(`ws://localhost:3001?token=${encodeURIComponent(auth.token)}`);
+            // Здесь после initMessage должно идти сообщение, которое пользователь написал первым и ПОСЛЕ КОТОРОГО подключился к сокету
+            ws = new WebSocket(`ws://localhost:8082/api/helper/ws?Authorization=Bearer:${encodeURIComponent(auth.token)}&initMessage=вопросик`);
 
             ws.onopen = () => {
                 console.log('WebSocket соединение установлено');

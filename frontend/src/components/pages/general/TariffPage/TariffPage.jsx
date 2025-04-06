@@ -16,8 +16,10 @@ import { DragAndDrop } from "../../../ui/DragAndDrop/DragAndDrop";
 // Основная страница
 export const TariffPage = () => {
     const [month, setMonth] = useState(new Date().getMonth());
-    const [powerMode, setPowerMode] = useState('0');
-    const [interval, setInterval] = useState('0');
+    const [powerMode, setPowerMode] = useState('1');
+    const [interval, setInterval] = useState('1');
+    const [contractType, setContractType] = useState('1');
+    const [category, setCategory] = useState('1');
 
     const [mode, setMode] = useState(0);
 
@@ -66,10 +68,10 @@ export const TariffPage = () => {
 
                 <RadioBox className={css.radiopanel}
                     options={[
-                        { value: '0', label: 'BH' },
-                        { value: '1', label: 'CH-1' },
-                        { value: '2', label: 'CH-2' },
-                        { value: '3', label: 'HH' },
+                        { value: '1', label: 'BH' },
+                        { value: '2', label: 'CH-1' },
+                        { value: '3', label: 'CH-2' },
+                        { value: '4', label: 'HH' },
                     ]}
                     selectedValue={powerMode}
                     onChange={setPowerMode}
@@ -79,14 +81,40 @@ export const TariffPage = () => {
 
                 <RadioBox className={css.radiopanel}
                     options={[
-                        { value: '0', label: 'Менее 670 кВт' },
-                        { value: '1', label: '670 кВт — 10 МВт' },
-                        { value: '2', label: 'Более 10 МВт' }
+                        { value: '1', label: 'Менее 670 кВт' },
+                        { value: '2', label: '670 кВт — 10 МВт' },
+                        { value: '3', label: 'Более 10 МВт' }
                     ]}
                     selectedValue={interval}
                     onChange={setInterval}
                     name="power-interval"
                     label={'Максимальная мощность'}
+                    labelProps={{ style: { backgroundColor: 'var(--bk-color)', color: 'var(--font-color)' } }} />
+
+                <RadioBox className={css.radiopanel}
+                    options={[
+                        { value: '1', label: 'Купля-продажа электроэнергии' },
+                        { value: '2', label: 'Договор электроснабжения' }
+                    ]}
+                    selectedValue={contractType}
+                    onChange={setContractType}
+                    name="contract-type"
+                    label={'Вид договора'}
+                    labelProps={{ style: { backgroundColor: 'var(--bk-color)', color: 'var(--font-color)' } }} />
+
+                <RadioBox className={css.radiopanel}
+                    options={[
+                        { value: '1', label: 'ЦК 1' },
+                        { value: '2', label: 'ЦК 2' },
+                        { value: '3', label: 'ЦК 3' },
+                        { value: '4', label: 'ЦК 4' },
+                        { value: '5', label: 'ЦК 5' },
+                        { value: '6', label: 'ЦК 6' },
+                    ]}
+                    selectedValue={category}
+                    onChange={setCategory}
+                    name="category"
+                    label={'Ценовая категория'}
                     labelProps={{ style: { backgroundColor: 'var(--bk-color)', color: 'var(--font-color)' } }} />
 
                 <Switch className={`${css.switch} flex row`} value={mode} onSelect={setMode}>
@@ -130,7 +158,7 @@ export const TariffPage = () => {
                 {mode == 2 && <>
                     {/* Файл */}
 
-                    <DragAndDrop onFilesChange={setFiles}/>
+                    <DragAndDrop onFilesChange={setFiles} />
                 </>}
 
                 <ExButton className={'accent-button'} onClick={handleCalculate}>Расчитать</ExButton>
