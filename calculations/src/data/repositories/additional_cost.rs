@@ -50,7 +50,7 @@ pub async fn read_all_by_params(
     month: u8,
 ) -> Result<Vec<AdditionalCost>, Error> {
     let rows = conn
-    .query("SELECT id, voltage_level_id, price_category_id, power_level_id, contract_type_id, year, month, price, name FROM additional_cost", 
+    .query("SELECT id, voltage_level_id, price_category_id, power_level_id, contract_type_id, year, month, price, name FROM additional_cost WHERE voltage_level_id = $1 AND price_category_id = $2 AND power_level_id = $3 AND contract_type_id = $4 AND year = $5 AND month = $6", 
     &[&voltage_level_id, &price_category_id, &power_level_id, &contract_type_id, &(year as i32), &(month as i16)])
     .await?;
     let mut results = Vec::new();

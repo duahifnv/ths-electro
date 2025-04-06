@@ -1,7 +1,7 @@
 use crate::dtos::weekend;
 use crate::models::Weekend;
 
-pub fn create_dto_to_model(dto: &weekend::Dto) -> Vec<Weekend> {
+pub fn dto_to_model(dto: &weekend::Dto) -> Vec<Weekend> {
     let mut models = Vec::<Weekend>::new();
     for day in dto.days.iter() {
         models.push(Weekend {

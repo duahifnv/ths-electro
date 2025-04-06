@@ -1,9 +1,9 @@
 #[derive(serde::Deserialize)]
 pub struct CreateDto {
-    pub voltage_level_id: i64,
-    pub price_category_id: i64,
-    pub power_level_id: i64,
-    pub contract_type_id: i64,
+    pub voltage_level_id: i32,
+    pub price_category_id: i32,
+    pub power_level_id: i32,
+    pub contract_type_id: i32,
     pub year: u32,
     pub month: u8,
     pub price: f64,

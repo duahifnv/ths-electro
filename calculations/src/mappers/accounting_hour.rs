@@ -1,7 +1,7 @@
 use crate::dtos::accounting_hour;
 use crate::models::AccountingHour;
 
-pub fn create_dto_to_model(dto: &accounting_hour::Dto) -> Vec<AccountingHour> {
+pub fn dto_to_model(dto: &accounting_hour::Dto) -> Vec<AccountingHour> {
     let mut models = Vec::<AccountingHour>::new();
     for unit in dto.units.iter() {
         models.push(AccountingHour {

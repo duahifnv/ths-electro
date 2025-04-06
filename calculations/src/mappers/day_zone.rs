@@ -1,7 +1,7 @@
 use crate::dtos::day_zone;
 use crate::models::DayZone;
 
-pub fn create_dto_to_model(dto: &day_zone::Dto) -> Vec<DayZone> {
+pub fn dto_to_model(dto: &day_zone::Dto) -> Vec<DayZone> {
     let mut models = Vec::<DayZone>::new();
     for unit in dto.units.iter() {
         models.push(DayZone {

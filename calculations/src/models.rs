@@ -13,6 +13,7 @@ pub struct ContractType {
     pub id: i32,
     pub name: String
 }
+#[derive(serde::Serialize)]
 pub struct FixedTariff {
     pub id: i32,
     pub voltage_level_id: i32,
@@ -28,6 +29,7 @@ pub struct DayZone {
     pub month: u8,
     pub hour: u8,
 }
+#[derive(serde::Serialize)]
 pub struct OffPeakTariff {
     pub id: i32,
     pub voltage_level_id: i32,
@@ -37,6 +39,7 @@ pub struct OffPeakTariff {
     pub year: u32,
     pub month: u8,
 }
+#[derive(serde::Serialize)]
 pub struct HalfPeakTariff {
     pub id: i32,
     pub voltage_level_id: i32,
@@ -46,6 +49,7 @@ pub struct HalfPeakTariff {
     pub year: u32,
     pub month: u8,
 }
+#[derive(serde::Serialize)]
 pub struct PeakTariff {
     pub id: i32,
     pub voltage_level_id: i32,
@@ -85,7 +89,7 @@ pub struct AccountingHour {
     pub day: u8,
     pub hour: u8
 }
-
+#[derive(serde::Serialize)]
 pub struct PowerWholesalePrice {
     pub id: i32,
     pub voltage_level_id: i32,
@@ -104,7 +108,7 @@ pub struct NetPowerPlanHours {
     pub day: u8,
     pub hour: u8,
 }
-
+#[derive(serde::Serialize)]
 pub struct NetPowerPrice {
     pub id: i32,
     pub voltage_level_id: i32,
@@ -115,7 +119,7 @@ pub struct NetPowerPrice {
     pub month: u8,
     pub price: f64,
 }
-
+#[derive(serde::Serialize)]
 pub struct PriceForUnderConsuming {
     pub id: i32,
     pub voltage_level_id: i32,
@@ -126,6 +130,7 @@ pub struct PriceForUnderConsuming {
     pub month: u8,
     pub price: f64,
 }
+#[derive(serde::Serialize)]
 pub struct PriceForOverConsuming {
     pub id: i32,
     pub voltage_level_id: i32,
@@ -137,6 +142,7 @@ pub struct PriceForOverConsuming {
     pub price: f64,
 }
 
+#[derive(serde::Serialize)]
 pub struct AdditionalCost {
     pub id: i32,
     pub voltage_level_id: i32,

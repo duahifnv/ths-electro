@@ -1,8 +1,8 @@
 use crate::dtos::half_peak_tariff;
-use crate::models::FixedTariff;
+use crate::models::HalfPeakTariff;
 
-pub fn create_dto_to_model(dto: &half_peak_tariff::CreateDto) -> FixedTariff {
-    FixedTariff {
+pub fn create_dto_to_model(dto: &half_peak_tariff::CreateDto) -> HalfPeakTariff {
+    HalfPeakTariff {
         id: 0,
         voltage_level_id: dto.voltage_level_id as i32,
         power_level_id: dto.power_level_id as i32,
@@ -13,8 +13,8 @@ pub fn create_dto_to_model(dto: &half_peak_tariff::CreateDto) -> FixedTariff {
     }
 }
 
-pub fn update_dto_to_model(dto: &half_peak_tariff::UpdateDto) -> FixedTariff {
-    FixedTariff {
+pub fn update_dto_to_model(dto: &half_peak_tariff::UpdateDto) -> HalfPeakTariff {
+    HalfPeakTariff {
         id: 0,
         voltage_level_id: 0,
         power_level_id: 0,

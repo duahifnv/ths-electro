@@ -10,9 +10,8 @@ pub fn register_routes(
 ) -> Router<bb8::Pool<bb8_postgres::PostgresConnectionManager<tokio_postgres::NoTls>>> {
     app.route(
         "/acounting-hour",
-        get(handlers::voltage_level::get_all)
-            .post(handlers::voltage_level::create)
-            .delete(handlers::voltage_level::delete)
-            .put(handlers::voltage_level::update),
+        get(handlers::accounting_hour::get_all)
+            .post(handlers::accounting_hour::create)
+            .delete(handlers::accounting_hour::delete)
     )
 }

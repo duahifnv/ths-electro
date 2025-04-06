@@ -2,15 +2,18 @@ use bb8::{Pool, PooledConnection};
 use bb8_postgres::PostgresConnectionManager;
 use tokio_postgres::NoTls;
 
+use super::repositories::contract_type;
+
 pub type ConnectionPool = Pool<PostgresConnectionManager<NoTls>>;
 pub type Connection = PooledConnection<'static, PostgresConnectionManager<NoTls>>;
 
 pub async fn create_pool() -> Result<ConnectionPool, Box<dyn std::error::Error>> {
-    let database_url = "host=db user=postgres password=postgres dbname=electricity_hack_calculation_db";
-    
+    let database_url =
+        "host=db user=postgres password=postgres dbname=electricity_hack_calculation_db";
+
     let manager = PostgresConnectionManager::new_from_stringlike(database_url, NoTls)?;
     let pool = Pool::builder().build(manager).await?;
-    
+
     Ok(pool)
 }
 
@@ -204,6 +207,58 @@ pub async fn create_tables(pool: &ConnectionPool) -> Result<(), Box<dyn std::err
 
     for query in queries {
         conn.execute(query, &[]).await.unwrap();
+    }
+
+    let row = conn
+        .query_one("SELECT COUNT(*) FROM contract_type", &[])
+        .await
+        .unwrap();
+    let number: i64 = row.get(0);
+    if number == 0 {
+        let names = ["Купля-продажа электроэнергии", "Договор электроснабжения"];
+        for name in names {
+            conn.execute("INSERT INTO contract_type (name) VALUES ($1)", &[&name])
+                .await?;
+        }
+    }
+
+    let row = conn
+        .query_one("SELECT COUNT(*) FROM power_level", &[])
+        .await
+        .unwrap();
+    let number: i64 = row.get(0);
+    if number == 0 {
+        let names = ["Менее 679 КВт", "670 кВт - 10 МВт", "Более 10 МВт"];
+        for name in names {
+            conn.execute("INSERT INTO power_level (name) VALUES ($1)", &[&name])
+                .await?;
+        }
+    }
+
+    let row = conn
+        .query_one("SELECT COUNT(*) FROM price_category", &[])
+        .await
+        .unwrap();
+    let number: i64 = row.get(0);
+    if number == 0 {
+        let names = ["ЦК1", "ЦК2", "ЦК3", "ЦК4", "ЦК5", "ЦК6"];
+        for name in names {
+            conn.execute("INSERT INTO price_category (name) VALUES ($1)", &[&name])
+                .await?;
+        }
+    }
+
+    let row = conn
+        .query_one("SELECT COUNT(*) FROM voltage_level", &[])
+        .await
+        .unwrap();
+    let number: i64 = row.get(0);
+    if number == 0 {
+        let names = ["ВН", "СН-1", "СН-2", "НН"];
+        for name in names {
+            conn.execute("INSERT INTO voltage_level (name) VALUES ($1)", &[&name])
+                .await?;
+        }
     }
 
     Ok(())

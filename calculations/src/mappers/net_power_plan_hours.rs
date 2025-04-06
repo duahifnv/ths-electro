@@ -3,7 +3,7 @@ use itertools::Itertools;
 use crate::dtos::net_power_plan_hours;
 use crate::models::NetPowerPlanHours;
 
-pub fn create_dto_to_model(dto: &net_power_plan_hours::Dto) -> Vec<NetPowerPlanHours> {
+pub fn dto_to_model(dto: &net_power_plan_hours::Dto) -> Vec<NetPowerPlanHours> {
     let mut models = Vec::<NetPowerPlanHours>::new();
     for unit in dto.units.iter() {
         for hour in unit.hours.iter() {

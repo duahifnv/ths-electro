@@ -1,6 +1,6 @@
 use axum::{
     Json,
-    extract::{Query, State},
+    extract::{Path, Query, State},
     http::StatusCode,
     response::IntoResponse,
 };
@@ -9,7 +9,7 @@ use crate::{
     data::{dbcontext::ConnectionPool, repositories},
     dtos::additional_cost,
     mappers,
-    queries::AccountingHourQuery,
+    queries::AditionalCostQuery,
 };
 
 pub async fn create(
@@ -57,25 +57,6 @@ pub async fn create(
         return Err((StatusCode::NOT_FOUND, "contract type not found".to_string()));
     }
 
-    let exists = repositories::additional_cost::exists(
-        &mut conn,
-        dto.voltage_level_id,
-        dto.price_category_id,
-        dto.power_level_id,
-        dto.contract_type_id,
-        dto.year,
-        dto.month,
-    )
-    .await
-    .unwrap();
-
-    if exists {
-        return Err((
-            StatusCode::NOT_FOUND,
-            "this month of this year already exists".to_string(),
-        ));
-    }
-
     repositories::additional_cost::create(
         &mut conn,
         &mappers::additional_cost::create_dto_to_model(&dto),
@@ -87,6 +68,7 @@ pub async fn create(
 
 pub async fn get_all(
     State(pool): State<ConnectionPool>,
+    Query(query): Query<AditionalCostQuery>,
 ) -> Result<impl IntoResponse, (StatusCode, String)> {
     let mut conn = pool
         .get()
@@ -94,60 +76,7 @@ pub async fn get_all(
         .map_err(|e| (StatusCode::INTERNAL_SERVER_ERROR, e.to_string()))
         .unwrap();
 
-    let results = repositories::additional_cost::read_all(
-        &mut conn,
-    )
-    .await
-    .unwrap();
-    Ok(Json(mappers::additional_cost::(&results)))
-}
-
-pub async fn delete(
-    State(pool): State<ConnectionPool>,
-    Query(query): Query<AccountingHourQuery>,
-) -> Result<impl IntoResponse, (StatusCode, String)> {
-    let mut conn = pool
-        .get()
-        .await
-        .map_err(|e| (StatusCode::INTERNAL_SERVER_ERROR, e.to_string()))
-        .unwrap();
-
-    let voltage_level_exists = repositories::voltage_level::exists(&conn, query.voltage_level_id)
-        .await
-        .unwrap();
-
-    if !voltage_level_exists {
-        return Err((StatusCode::NOT_FOUND, "voltage level not found".to_string()));
-    }
-
-    let price_category_exists =
-        repositories::price_category::exists(&conn, query.price_category_id)
-            .await
-            .unwrap();
-
-    if !price_category_exists {
-        return Err((
-            StatusCode::NOT_FOUND,
-            "price category not found".to_string(),
-        ));
-    }
-
-    let power_level_exists = repositories::power_level::exists(&conn, query.power_level_id)
-        .await
-        .unwrap();
-
-    if !power_level_exists {
-        return Err((StatusCode::NOT_FOUND, "power level not found".to_string()));
-    }
-
-    let contract_type_exists = repositories::voltage_level::exists(&conn, query.contract_type_id)
-        .await
-        .unwrap();
-
-    if !contract_type_exists {
-        return Err((StatusCode::NOT_FOUND, "contract type not found".to_string()));
-    }
-    repositories::additional_cost::delete(
+    let results = repositories::additional_cost::read_all_by_params(
         &mut conn,
         query.voltage_level_id,
         query.price_category_id,
@@ -158,12 +87,12 @@ pub async fn delete(
     )
     .await
     .unwrap();
-    Ok(StatusCode::OK)
+    Ok(Json(results))
 }
 
-pub async fn update(
+pub async fn delete(
     State(pool): State<ConnectionPool>,
-    Json(dto): Json<additional_cost::Dto>,
+    Path(id): Path<i32>,
 ) -> Result<impl IntoResponse, (StatusCode, String)> {
     let mut conn = pool
         .get()
@@ -171,44 +100,47 @@ pub async fn update(
         .map_err(|e| (StatusCode::INTERNAL_SERVER_ERROR, e.to_string()))
         .unwrap();
 
-    let voltage_level_exists = repositories::voltage_level::exists(&conn, dto.voltage_level_id)
+    let exists = repositories::additional_cost::exists_by_id(&mut conn, id)
         .await
         .unwrap();
-
-    if !voltage_level_exists {
-        return Err((StatusCode::NOT_FOUND, "voltage level not found".to_string()));
-    }
-
-    let price_category_exists = repositories::price_category::exists(&conn, dto.price_category_id)
-        .await
-        .unwrap();
-
-    if !price_category_exists {
+    if !exists {
         return Err((
             StatusCode::NOT_FOUND,
-            "price category not found".to_string(),
+            "additional cost not found".to_string(),
         ));
     }
 
-    let power_level_exists = repositories::power_level::exists(&conn, dto.power_level_id)
+    repositories::additional_cost::delete(&mut conn, id)
         .await
         .unwrap();
+    Ok(StatusCode::OK)
+}
 
-    if !power_level_exists {
-        return Err((StatusCode::NOT_FOUND, "power level not found".to_string()));
-    }
-
-    let contract_type_exists = repositories::voltage_level::exists(&conn, dto.contract_type_id)
+pub async fn update(
+    State(pool): State<ConnectionPool>,
+    Path(id): Path<i32>,
+    Json(dto): Json<additional_cost::UpdateDto>,
+) -> Result<impl IntoResponse, (StatusCode, String)> {
+    let mut conn = pool
+        .get()
         .await
+        .map_err(|e| (StatusCode::INTERNAL_SERVER_ERROR, e.to_string()))
         .unwrap();
 
-    if !contract_type_exists {
-        return Err((StatusCode::NOT_FOUND, "contract type not found".to_string()));
+    let exists = repositories::additional_cost::exists_by_id(&mut conn, id)
+        .await
+        .unwrap();
+    if !exists {
+        return Err((
+            StatusCode::NOT_FOUND,
+            "additional cost not found".to_string(),
+        ));
     }
 
     repositories::additional_cost::update(
         &mut conn,
-        &&mappers::additional_cost::create_dto_to_model(&dto),
+        &mappers::additional_cost::update_dto_to_model(&dto),
+        id,
     )
     .await
     .unwrap();

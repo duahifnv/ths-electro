@@ -3,7 +3,7 @@ use itertools::Itertools;
 use crate::dtos::hour_tariff::{self, PriceUnit};
 use crate::models::HourTariff;
 
-pub fn create_dto_to_model(dto: &hour_tariff::Dto) -> Vec<HourTariff> {
+pub fn dto_to_model(dto: &hour_tariff::Dto) -> Vec<HourTariff> {
     let mut models = Vec::<HourTariff>::new();
     for unit in dto.units.iter() {
         for hour_price_unit in unit.hour_price_units.iter() {
