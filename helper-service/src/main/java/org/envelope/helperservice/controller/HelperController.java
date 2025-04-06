@@ -16,6 +16,7 @@ import java.util.List;
 @RestController
 @RequiredArgsConstructor
 @PreAuthorize("hasRole('ADMIN')")
+@RequestMapping("/admin")
 public class HelperController {
     private final HelperService helperService;
     @Operation(summary = "Получить список всех помощников")
