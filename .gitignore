@@ -24,7 +24,6 @@
 !scripts/**
 !nginx-templates
 !nginx-templates/**
-!.htpasswd
 ### STS ###
 .apt_generated
 .classpath
@@ -54,7 +53,8 @@ build/
 .vscode/
 /.mvn/
 /frontend/src/react-envelope/
-/frontend/src/react-envelope/
 /helper-service/.gitattributes
 /helper-service/mvnw
 /helper-service/mvnw.cmd
+/**/target/**
+/**/target

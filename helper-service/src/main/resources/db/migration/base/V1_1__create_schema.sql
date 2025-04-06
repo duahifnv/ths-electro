@@ -9,7 +9,7 @@ create table users_requests(
     request_id bigserial primary key,
     user_id bigint not null,
     message text not null,
-    timestamp timestamp default current_timestamp
+    timestamp timestamp default current_timestamp not null
 );
 
 create table dialog_messages(
@@ -18,5 +18,5 @@ create table dialog_messages(
     user_id bigint not null,
     message_to text check ( message_to in ('helper', 'user') ) not null,
     message text not null,
-    timestamp timestamp default current_timestamp
+    timestamp timestamp default current_timestamp not null
 );

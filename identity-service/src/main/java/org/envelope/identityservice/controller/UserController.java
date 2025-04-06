@@ -3,7 +3,6 @@ package org.envelope.identityservice.controller;
 import io.swagger.v3.oas.annotations.Operation;
 import jakarta.validation.Valid;
 import jakarta.validation.constraints.Min;
-import jakarta.validation.constraints.NotNull;
 import lombok.RequiredArgsConstructor;
 import org.envelope.identityservice.dto.role.RoleDto;
 import org.envelope.identityservice.dto.role.RoleNamesDto;

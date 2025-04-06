@@ -22,10 +22,10 @@ server:
   servlet:
     context-path: /api/helper
 
-#client:
-#  identity-service:
-#    url: http://localhost:8080
-#    context-path: /api/identity
+client:
+  identity-service:
+    url: http://localhost:8085
+    context-path: /api/identity
 
 springdoc:
   swagger-ui:
@@ -33,5 +33,5 @@ springdoc:
   api-docs:
     path: /api-docs
 
-#logging:
-#  config: classpath:logback-local.xml
+logging:
+  config: classpath:logback-local.xml

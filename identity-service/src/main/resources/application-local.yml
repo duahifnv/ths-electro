@@ -17,7 +17,7 @@ jwt:
   duration: 1d
 
 server:
-  port: 8080
+  port: 8085
   error:
     include-message: always
   servlet:

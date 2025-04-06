@@ -37,6 +37,11 @@ secret_key = None
 COMMANDS = ["Начать работу", "Завершить работу", "Следующий диалог", "Завершить диалог"]
 BACKEND_URL = "http://helper-service:8082/api/helper/chat"
 
+import aiohttp
+import logging
+
+logger = logging.getLogger(__name__)
+
 async def verify_key(key: str) -> bool:
     """Проверяет ключ на бекенде"""
     try:
@@ -45,7 +50,11 @@ async def verify_key(key: str) -> bool:
                 f"{BACKEND_URL}/key",
                 params={'key': key}
             ) as response:
+                logger.info(f"Response status: {response.status}")
                 return response.status == 200
+    except aiohttp.ClientConnectorError as e:
+        logger.error(f"Не удалось подключиться к серверу: {e}")
+        return False
     except Exception as e:
         logger.error(f"Ошибка проверки ключа: {e}")
         return False
@@ -58,9 +67,9 @@ async def get_queue_size() -> int:
 
     try:
         async with aiohttp.ClientSession() as session:
-            async with session.get(
+            async with session.post(
                 f"{BACKEND_URL}/queue",
-                params={'tgId': ADMIN_ID, 'key': secret_key},
+                params={'tgId': ADMIN_ID, 'secretKey': secret_key},
                 timeout=5
             ) as response:
                 if response.status == 200:
@@ -77,7 +86,7 @@ async def get_next_dialog() -> str | None:
         async with aiohttp.ClientSession() as session:
             async with session.post(
                 f"{BACKEND_URL}/link",
-                params={'tgId': ADMIN_ID, 'key': secret_key},
+                params={'tgId': ADMIN_ID, 'secretKey': secret_key},
                 timeout=5
             ) as response:
                 if response.status == 200:
@@ -96,10 +105,10 @@ async def send_to_user(message: str) -> bool:
                 f"{BACKEND_URL}/message",
                 params={
                     'tgId': ADMIN_ID,
-                    'key': secret_key
+                    'secretKey': secret_key
                 },
                 json={
-                    'msg': message
+                    'message': message
                 }
             ) as response:
                 return response.status == 200
@@ -119,7 +128,7 @@ async def get_messages_by_time(seconds: int) -> list[str] | None:
                 f"{BACKEND_URL}",  
                 params={
                     'tgId': ADMIN_ID,
-                    'key': secret_key
+                    'secretKey': secret_key
                 },
                 json={
                     'seconds': seconds
@@ -136,7 +145,7 @@ async def get_messages_by_time(seconds: int) -> list[str] | None:
         logger.error(f"Ошибка получения сообщений по времени: {e}")
         return None
 
-2
+
 async def close_dialog() -> bool:
     """Закрывает текущий диалог"""
     global secret_key
@@ -144,7 +153,7 @@ async def close_dialog() -> bool:
         async with aiohttp.ClientSession() as session:
             async with session.post(
                 f"{BACKEND_URL}/close",
-                params={'tgId': ADMIN_ID, 'key': secret_key},
+                params={'tgId': ADMIN_ID, 'secretKey': secret_key},
                 timeout=5
             ) as response:
                 if response.status == 200:

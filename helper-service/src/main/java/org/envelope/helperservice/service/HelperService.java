@@ -10,6 +10,9 @@ import org.springframework.stereotype.Service;
 @RequiredArgsConstructor
 public class HelperService {
     private final HelperRepository helperRepository;
+    public boolean existsByTgId(String tgId) {
+        return helperRepository.existsByTgId(tgId);
+    }
     public Helper findByTgId(String tgId) {
         return helperRepository.findByTgId(tgId)
                 .orElseThrow(ResourceNotFoundException::new);

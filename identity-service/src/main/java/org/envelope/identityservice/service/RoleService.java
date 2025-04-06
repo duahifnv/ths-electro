@@ -1,7 +1,6 @@
 package org.envelope.identityservice.service;
 
 import lombok.RequiredArgsConstructor;
-import org.envelope.identityservice.dto.role.RoleDto;
 import org.envelope.identityservice.dto.role.RoleNamesDto;
 import org.envelope.identityservice.entity.Role;
 import org.envelope.identityservice.entity.User;
