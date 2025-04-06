@@ -19,15 +19,17 @@ export const Router = () => {
     const { routes, add } = useNavigation();
 
     useEffect(() => {
-        add({
-            name: 'Главная',
-            to: '/',
-            props: {
-                icon: <Home />
-            }
-        }, {
+        add(
+        // {
+        //     name: 'Главная',
+        //     to: '/',
+        //     props: {
+        //         icon: <Home />
+        //     }
+        // }, 
+        {
             name: 'Калькулятор',
-            to: '/calc',
+            to: '/',
             props: {
                 icon: <Dollar />
             }
@@ -35,7 +37,7 @@ export const Router = () => {
             name: 'Модерация',
             to: '/mods',
             requireAuth: true,
-            roles: 'admin',
+            permissions: 'admin',
             props: {
                 icon: <Crown />
             }
@@ -43,7 +45,7 @@ export const Router = () => {
             name: 'Сетевая нагрузка',
             to: '/supply',
             requireAuth: true,
-            roles: 'admin',
+            permissions: 'admin',
             props: {
                 icon: <Electricity />
             }
@@ -77,8 +79,8 @@ export const Router = () => {
             <ChatWidget/>
             <ScrollRestoration />
             <Routes>
-                <Route path="/" element={<HomePage />} />
-                <Route path="/calc" element={<TariffPage />} />
+                {/* <Route path="/" element={<HomePage />} /> */}
+                <Route path="/" element={<TariffPage />} />
 
                 <Route element={<PrivateRoute/>}>
                     <Route path="/mods" element={<ModeratorsManagementPage/>}/>

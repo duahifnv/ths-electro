@@ -13,8 +13,11 @@
 
 .home {
     background-color: var(--body-bk-color);
-    width: 400px;
+    max-width: 400px;
+    width: 100%;
     padding: 10px;
+
+    margin: 20px;
 }
 .home:hover {
     background-color: var(--highlight-light);
