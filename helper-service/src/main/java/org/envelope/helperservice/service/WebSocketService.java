@@ -6,6 +6,7 @@ import lombok.RequiredArgsConstructor;
 import org.envelope.helperservice.dto.MessageDto;
 import org.envelope.helperservice.dto.SocketDialog;
 import org.envelope.helperservice.dto.UserResponse;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.http.*;
 import org.springframework.stereotype.Service;
 import org.springframework.web.client.HttpClientErrorException;
@@ -30,6 +31,10 @@ public class WebSocketService {
     private static final String BEARER_PREFIX = "Bearer:";
     private final RestTemplate restTemplate;
     private final MessageService messageService;
+    @Value("${client.identity-service.url}")
+    private String identityServiceUrl;
+    @Value("${client.identity-service.context-path}")
+    private String identityServiceContextPath;
 
     public void sendMessageToUser(Long userId, String tgId, String message) throws IOException {
         SocketDialog wrapper = sessions.get(userId);
@@ -47,12 +52,25 @@ public class WebSocketService {
         messageService.addMessage(message, "helper", userId, tgId);
     }
 
-    public Long getUserIdFromSession(WebSocketSession session) throws Exception {
-        Map<String, String> queryParams = extractQueryParams(session);
+    public Map<String, String> getQueryParams(WebSocketSession session) throws Exception {
+        return extractQueryParams(session);
+
+    }
+    public Long getUserIdFromQueryParams(Map<String, String> queryParams) throws Exception {
         String jwt = extractJwtToken(queryParams);
         System.out.println("Токен пользователя: " + jwt);
         UserResponse userResponse = exchangeUserResponse(jwt);
         return userResponse.id();
+    }
+
+    public Long getUserIdFromSession(WebSocketSession session) throws Exception {
+        Map<String, String> queryParams = getQueryParams(session);
+        return getUserIdFromQueryParams(queryParams);
+    }
+
+    public String getInitMessageFromQueryParams(Map<String, String> queryParams) throws Exception {
+        return Optional.ofNullable(queryParams.get("initMessage"))
+                .orElseThrow(Exception::new);
     }
 
     public void addDialog(Long userId, SocketDialog dialog) {
@@ -80,7 +98,7 @@ public class WebSocketService {
 
     private UserResponse exchangeUserResponse(String token) throws Exception {
         try {
-            String url = "http://localhost:8080/api/identity/users/me";
+            String url = identityServiceUrl + identityServiceContextPath + "/users/me";
             // Настройка заголовков
             HttpHeaders headers = new HttpHeaders();
             headers.setBearerAuth(token);

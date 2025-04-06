@@ -37,7 +37,7 @@ public class TelegramService {
                                  String secretKey) {
         return helperService.existsByTgId(tgId) && isKeyValid(secretKey);
     }
-    public MessageDto pickWaitingUser(String tgId) {
+    public String pickWaitingUser(String tgId) {
         WaitingUserRequest request = requestRepository.findFirstByOrderByTimestampDesc()
                 .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, "Отсуствуют ждущие пользователи"));
         try {
@@ -49,7 +49,7 @@ public class TelegramService {
                     .build();
 
             requestRepository.delete(request);
-            return messageDto;
+            return messageDto.message();
         } catch (Exception e) {
             throw new ServerException(e);
         }

@@ -69,7 +69,7 @@ public class TelegramController {
     @Operation(summary = "Подсоединиться к одному из ждущих пользователей")
     @PostMapping("/link")
     @ResponseStatus(HttpStatus.OK)
-    public MessageDto connectToUser(@RequestParam @Schema(description = "ID помощника в телеграмме",
+    public String connectToUser(@RequestParam @Schema(description = "ID помощника в телеграмме",
                                                        example = "588116881")
                                                String tgId,
                                     @RequestParam @Schema(description = "Секретный ключ доступа к сервису",

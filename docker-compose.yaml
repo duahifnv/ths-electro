@@ -161,10 +161,6 @@ services:
       - ./telegram/.env
     volumes:
       - ./telegram:/app
-    ports:
-      - "5050:5050"
-    networks:
-      - dev
 #    restart: always
   react-app-build:
     container_name: react-app-remote-build
