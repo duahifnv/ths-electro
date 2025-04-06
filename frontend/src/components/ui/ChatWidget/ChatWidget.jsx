@@ -25,26 +25,6 @@ const ChatWidget = () => {
         setMessages((prevMessages) => [...prevMessages, newMessage]);
         setInputValue('');
 
-        if (!webSocket) {
-            try {
-                const response = await fetch('http://localhost:3001/chat/start', {
-                    method: 'POST',
-                    headers: {
-                        'Content-Type': 'application/json',
-                    },
-                    body: JSON.stringify({ message: inputValue }),
-                });
-
-                if (response.ok) {
-                    console.log('Первое сообщение отправлено через POST');
-                } else {
-                    console.error('Ошибка при отправке первого сообщения');
-                }
-            } catch (error) {
-                console.error('Ошибка сети:', error);
-            }
-        }
-
         if (webSocket && webSocket.readyState === WebSocket.OPEN) {
             webSocket.send(inputValue);
         } else {
@@ -55,7 +35,12 @@ const ChatWidget = () => {
     useEffect(() => {
         let ws;
         const connect = () => {
-            ws = new WebSocket('ws://localhost:3001');
+            if (!auth || !auth.token) {
+                console.error('Токен отсутствует, невозможно подключиться к WebSocket');
+                return;
+            }
+
+            ws = new WebSocket(`ws://localhost:3001?token=${encodeURIComponent(auth.token)}`);
 
             ws.onopen = () => {
                 console.log('WebSocket соединение установлено');
