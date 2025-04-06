@@ -13,38 +13,18 @@ function verifyToken(token) {
 
 // Создаем HTTP сервер
 const server = http.createServer((req, res) => {
-    if (req.method === 'POST' && req.url === '/chat/start') {
-        let body = '';
-        req.on('data', (chunk) => {
-            body += chunk.toString();
-        });
-        req.on('end', () => {
-            try {
-                const data = JSON.parse(body);
-                console.log('Получен POST-запрос:', data);
-
-                // Ответ на POST-запрос
-                res.writeHead(200, { 'Content-Type': 'application/json' });
-                res.end(JSON.stringify({ message: 'Первое сообщение успешно отправлено!' }));
-            } catch (error) {
-                console.error('Ошибка при парсинге JSON:', error);
-                res.writeHead(400, { 'Content-Type': 'application/json' });
-                res.end(JSON.stringify({ error: 'Неверный формат JSON' }));
-            }
-        });
-    } else {
-        res.writeHead(200, { 'Content-Type': 'text/plain' });
-        res.end('WebSocket Server is running');
-    }
+    res.writeHead(200, { 'Content-Type': 'text/plain' });
+    res.end('WebSocket Server is running');
 });
 
 // Создаем WebSocket сервер
 const wss = new WebSocket.Server({ server });
 
 wss.on('connection', (ws, req) => {
-    // Извлекаем токен из URL
+    // Извлекаем параметры из URL
     const parsedUrl = url.parse(req.url, true);
-    const token = parsedUrl.query.token;
+    const token = parsedUrl.query.Authorization?.split(' ')[1]; // Извлекаем токен из "Bearer <token>"
+    const initMessage = parsedUrl.query.initMessage;
 
     if (!token) {
         console.error('Токен отсутствует');
@@ -57,13 +37,18 @@ wss.on('connection', (ws, req) => {
         const user = verifyToken(token);
         console.log('Пользователь подключен:', user);
 
-        // Отправляем приветственное сообщение клиенту
-        ws.send('Добро пожаловать в чат!');
+        // Обрабатываем первое сообщение
+        if (initMessage) {
+            console.log(`Получено первое сообщение: ${initMessage}`);
+            ws.send(`Сервер получил ваше первое сообщение: ${initMessage}`);
+        } else {
+            ws.send('Добро пожаловать в чат!');
+        }
 
         // Обработка входящих сообщений
         ws.on('message', (message) => {
             console.log(`Получено сообщение: ${message}`);
-            ws.send(`Сервер получил: ${message}, ${token}`);
+            ws.send(`Сервер получил: ${message}`);
         });
 
         // Обработка закрытия соединения
