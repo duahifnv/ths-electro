@@ -1,0 +1,15 @@
+[package]
+name = "electricity-hack-calculation-service"
+version = "0.1.0"
+edition = "2024"
+
+[dependencies]
+axum = "0.8.3"
+serde = { version = "1.0.219", features = ["derive"]}
+tokio = { version = "1.0", features = ["full"] }
+tokio-postgres = "0.7.13"
+itertools = "0.10"
+bb8 = "0.8"
+bb8-postgres = "0.8"
+tower-http = { version = "0.5", features = ["cors"] }
+chrono = "0.4"
