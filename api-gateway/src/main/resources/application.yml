@@ -10,6 +10,7 @@ server:
 hosts:
   identity-service: http://identity-service:${IDENTITY_SERVICE_PORT}
   image-service: http://image-service:${IMAGE_SERVICE_PORT}
+  helper-service: http://helper-service:${HELPER_SERVICE_PORT}
 springdoc:
   swagger-ui:
     path: /swagger-ui
@@ -18,6 +19,8 @@ springdoc:
         url: /aggregate/identity-service/v1/api-docs
       - name: Сервис изображений
         url: /aggregate/image-service/v1/api-docs
+      - name: Сервис помощи модераторов
+        url: /aggregate/helper-service/v1/api-docs
   api-docs:
     path: /api-docs
 

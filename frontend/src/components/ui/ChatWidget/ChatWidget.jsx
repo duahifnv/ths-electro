@@ -21,36 +21,28 @@ const ChatWidget = () => {
     const handleSendMessage = async () => {
         if (!inputValue.trim()) return;
 
-        // Создаем новый объект сообщения
-        const newMessage = { text: inputValue, isUser: true };
-
-        // Добавляем сообщение в состояние
-        setMessages((prevMessages) => [...prevMessages, newMessage]);
-        setInputValue('');
-
-        // Создаем JSON-строку из inputValue
-        const jsonMessage = JSON.stringify({ message: inputValue });
-        // Отправляем сообщение через WebSocket
-        if (webSocket && webSocket.readyState === WebSocket.OPEN) {
-            webSocket.send(jsonMessage); // Отправляем JSON-строку
-        } else {
-            console.warn('WebSocket соединение еще не установлено');
-        }
-    };
-
-    useEffect(() => {
-        let ws;
-        const connect = () => {
+        // Если WebSocket еще не создан, создаем его
+        if (!webSocket || webSocket.readyState !== WebSocket.OPEN) {
             if (!auth || !auth.token) {
                 console.error('Токен отсутствует, невозможно подключиться к WebSocket');
                 return;
             }
-            // Здесь после initMessage должно идти сообщение, которое пользователь написал первым и ПОСЛЕ КОТОРОГО подключился к сокету
-            ws = new WebSocket(`ws://localhost:8082/api/helper/ws?Authorization=Bearer:${encodeURIComponent(auth.token)}&initMessage=вопросик`);
+
+            const initMessage = inputValue; // Начальное сообщение
+            const wsUrl = `ws://localhost:3001/api/helper/ws?Authorization=Bearer:${encodeURIComponent(auth.token)}&initMessage=${encodeURIComponent(initMessage)}`;
+
+            const ws = new WebSocket(wsUrl);
 
             ws.onopen = () => {
                 console.log('WebSocket соединение установлено');
+
+                // Сохраняем WebSocket
                 setWebSocket(ws);
+
+                // Отправляем первое сообщение (уже передано в URL)
+                const firstMessage = { text: initMessage, isUser: true };
+                setMessages((prevMessages) => [...prevMessages, firstMessage]);
+                setInputValue('');
             };
 
             ws.onmessage = (event) => {
@@ -65,29 +57,23 @@ const ChatWidget = () => {
             ws.onclose = () => {
                 console.log('WebSocket соединение закрыто');
                 setWebSocket(null);
-
-                setTimeout(connect, 3000);
             };
-        };
+        } else {
+            // Если WebSocket уже открыт, отправляем сообщение через него
+            const newMessage = { text: inputValue, isUser: true };
+            setMessages((prevMessages) => [...prevMessages, newMessage]);
+            setInputValue('');
 
-        if (isChatOpen && auth) {
-            connect();
+            webSocket.send(inputValue);
         }
-
-        return () => {
-            ws?.close();
-        };
-    }, [isChatOpen, auth]);
+    };
 
     const handleLogin = () => {
-        setIsChatOpen(false);
         navigate('/user/auth');
     };
 
     return (
-        <div>
-            <div className={styles.kryglyashok}></div>
-
+        <>
             <button onClick={toggleChat} className={styles.chatButton}>
                 <ChatDots className={styles.chatIcon} />
             </button>
@@ -131,7 +117,7 @@ const ChatWidget = () => {
                     )}
                 </div>
             )}
-        </div>
+        </>
     );
 };
 

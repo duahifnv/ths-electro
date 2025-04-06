@@ -17,6 +17,9 @@ public class RoutesConfig {
     private String identityServiceHost;
     @Value("${hosts.image-service}")
     private String imageServiceHost;
+    @Value("${hosts.helper-service}")
+    private String helperServerHost;
+
     @Bean
     public RouterFunction<ServerResponse> identityServiceRoute() {
         return route("identity-service-route")
@@ -27,6 +30,12 @@ public class RoutesConfig {
     public RouterFunction<ServerResponse> imageServiceRoute() {
         return route("image-service-route")
                 .route(path("/images/**"), http(imageServiceHost))
+                .build();
+    }
+    @Bean
+    public RouterFunction<ServerResponse> helperServiceRoute() {
+        return route("helper-service-route")
+                .route(path("/helper/**"), http(helperServerHost))
                 .build();
     }
     @Bean
@@ -41,6 +50,13 @@ public class RoutesConfig {
         return route("image-service-route-swagger")
                 .route(path("/aggregate/image-service/v1/api-docs"), http(imageServiceHost))
                 .filter(setPath("/api/images/api-docs"))
+                .build();
+    }
+    @Bean
+    public RouterFunction<ServerResponse> helperServiceRouteSwagger() {
+        return route("image-service-route-swagger")
+                .route(path("/aggregate/helper-service/v1/api-docs"), http(helperServerHost))
+                .filter(setPath("/api/helper/api-docs"))
                 .build();
     }
 }

@@ -1,4 +1,4 @@
-package org.envelope.identityservice.config;
+package org.envelope.helperservice.config;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
 import io.jsonwebtoken.JwtException;
@@ -7,7 +7,7 @@ import jakarta.servlet.ServletException;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
 import lombok.NonNull;
-import org.envelope.identityservice.service.JwtService;
+import org.envelope.helperservice.service.JwtService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.http.HttpHeaders;
@@ -64,12 +64,14 @@ public class AuthorizationFilter extends OncePerRequestFilter {
             handleException(response, HttpServletResponse.SC_INTERNAL_SERVER_ERROR, "An error occurred while processing the request");
         }
     }
+
     private void handleException(HttpServletResponse response, int statusCode, String message) {
         try {
             response.setStatus(statusCode);
             response.setContentType(MediaType.APPLICATION_JSON_VALUE);
             response.getWriter().write(new ObjectMapper().writeValueAsString(Map.of("error", message)));
         } catch (IOException ex) {
+            // Логирование ошибки записи в ответ
             ex.printStackTrace();
         }
     }

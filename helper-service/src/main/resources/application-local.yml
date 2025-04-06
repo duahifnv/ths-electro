@@ -27,6 +27,9 @@ client:
     url: http://localhost:8085
     context-path: /api/identity
 
+jwt:
+  secret: 3f4b2a7e8f1c3d2a0b5e6c8f2087a4d9c6e5f0bcb16a14f22986f4084e6c6a2d
+
 springdoc:
   swagger-ui:
     path: /swagger-ui
