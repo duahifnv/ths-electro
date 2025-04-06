@@ -153,3 +153,11 @@
 
     border-radius: 100%;
 }
+
+@media (max-width: 640px) {
+    .radiopanel {
+        /* flex-direction: column; */
+        display: grid !important;
+        grid-template-columns: repeat(2, 1fr);
+    }
+}
