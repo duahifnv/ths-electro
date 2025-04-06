@@ -95,3 +95,49 @@
     border: 1px solid var(--accent-color);
     /* color: var(--accent-color); */
 }
+
+.legend {
+    left: 0;
+}
+
+.zoneLevel1,
+.zoneLevel2,
+.zoneLevel3 {
+    padding: 10px;
+    border-radius: 5px;
+}
+
+.zoneLevel1 {
+    background-color: rgba(255, 255, 255, 0.1);
+}
+.zoneLevel2 {
+    background-color: rgba(255, 200, 0, 0.1);
+}
+.zoneLevel3 {
+    background-color: rgba(225, 0, 0, 0.1);
+}
+
+.dayzoneWrapper {
+    position: relative;
+}
+
+.dayzoneLabel {
+    position: absolute;
+    top: -8px;
+    left: -8px;
+
+    background-color: var(--bk-color);
+
+    width: 24px;
+    height: 24px;
+
+    padding: 4px;
+
+    box-sizing: border-box;
+
+    display: flex;
+    align-items: center;
+    justify-content: center;
+
+    border-radius: 100%;
+}
