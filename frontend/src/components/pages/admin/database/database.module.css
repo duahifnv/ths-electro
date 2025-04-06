@@ -92,7 +92,7 @@
 }
 .day.counted {
     background-color: transparent;
-    border: 1px solid var(--accent-color);
+    border: 2px solid var(--accent-color);
     /* color: var(--accent-color); */
 }
 .hours {
@@ -104,7 +104,7 @@
 }
 .hour.counted {
     background-color: transparent;
-    border: 1px solid var(--accent-color);
+    border: 2px solid var(--accent-color);
     /* color: var(--accent-color); */
 }
 
