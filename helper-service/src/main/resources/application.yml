@@ -1,19 +1,9 @@
 spring:
   application:
     name: helper-service
-  datasource:
-    url: ${DB_URL}
-    username: ${DB_USER}
-    password: ${DB_PASSWORD}
-    driver-class-name: org.postgresql.Driver
   jpa:
     hibernate:
       ddl-auto: none
-  flyway:
-    locations: classpath:db/migration/base
-
-telegram:
-  secret-key: ${TG_SECRET_KEY}
 
 server:
   port: ${HELPER_SERVICE_PORT}

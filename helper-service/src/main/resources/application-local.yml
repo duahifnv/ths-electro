@@ -1,19 +1,9 @@
 spring:
   application:
     name: helper-service
-  datasource:
-    url: jdbc:postgresql://localhost:5434/helper_service
-    username: postgres
-    password: secret
-    driver-class-name: org.postgresql.Driver
   jpa:
     hibernate:
       ddl-auto: none
-  flyway:
-    locations: classpath:db/migration/base, classpath:db/migration/dev
-
-telegram:
-  secret-key: g6s75rjhWc6cWxsYf7KSPdl0rO6Rc0RQ
 
 server:
   port: 8082
