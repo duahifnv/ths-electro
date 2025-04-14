@@ -88,7 +88,7 @@ const ChatWidget = () => {
 
     useEffect(() => {
         // Подключаемся к WebSocket при открытии чата
-        if (isChatOpen && auth?.token) {
+        if (auth?.token) {
             connectWebSocket();
         }
 
@@ -96,7 +96,7 @@ const ChatWidget = () => {
         return () => {
             disconnectWebSocket();
         };
-    }, [isChatOpen, auth]);
+    }, [auth]);
 
     return (
         <>
