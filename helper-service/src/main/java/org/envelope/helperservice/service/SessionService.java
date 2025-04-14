@@ -11,15 +11,13 @@ import org.springframework.web.socket.WebSocketSession;
 
 import java.io.IOException;
 import java.util.Map;
-import java.util.Set;
-import java.util.stream.Collectors;
 
 @Service
 @RequiredArgsConstructor
 @Slf4j(topic = "Сервис сессий")
 public class SessionService {
     private final Map<String, WebSocketSession> sessions;
-    private final Map<String, String> dialogSessions;
+    private final DialogMap dialogMap;
     private final Map<String, String> usersPrivateSubscriptions;
     private final Map<String, String> helpersPrivateSubscriptions;
     private final RabbitService rabbitService;
@@ -45,38 +43,38 @@ public class SessionService {
         }
     }
     public void addUserToDialogs(String sessionId) {
-        if (!dialogSessions.containsKey(sessionId)) {
-            dialogSessions.put(sessionId, null);
+        if (!dialogMap.containsKey(sessionId)) {
+            dialogMap.put(sessionId, null);
         }
     }
     private void startPrivateSession(String sessionId) throws RuntimeException {
-        if (dialogSessions.containsValue(sessionId)) {
+        if (dialogMap.containsValue(sessionId)) {
             throw new ClientException("Ошибка подписки: Помощник уже ожидает сообщения");
         }
-        String waitingUserId = getSessionIdByValue(null);
+        String waitingUserId = dialogMap.getSessionIdByValue(null);
         if (waitingUserId == null) {
             throw new ClientException("Ошибка подписки: Отсутствуют ожидающие пользователи");
         }
-        dialogSessions.put(waitingUserId, sessionId);
+        dialogMap.put(waitingUserId, sessionId);
         log.info("Начат диалог [пользователь {}] - [помощник {}]", waitingUserId, sessionId);
     }
     private void stopPrivateSession(String sessionId, @NonNull Role role) {
         switch (role) {
             case USER -> {
-                if (!dialogSessions.containsKey(sessionId)) {
+                if (!dialogMap.containsKey(sessionId)) {
                     return;
                 }
                 rabbitService.deleteQueue(sessionId);
-                String helperId = dialogSessions.get(sessionId);
+                String helperId = dialogMap.get(sessionId);
                 if (helperId != null) {
                     removeClientSession(helperId);
                 }
-                dialogSessions.remove(sessionId);
+                dialogMap.remove(sessionId);
             }
             case HELPER -> {
-                String userId = getSessionIdByValue(sessionId);
+                String userId = dialogMap.getSessionIdByValue(sessionId);
                 if (userId != null) {
-                    dialogSessions.put(userId, null);
+                    dialogMap.put(userId, null);
                 }
             }
         }
@@ -92,10 +90,12 @@ public class SessionService {
         }
     }
     public void unsubscribeFromPrivate(String sessionId, Role role) {
+        stopPrivateSession(sessionId, role);
         switch (role) {
-            case USER -> usersPrivateSubscriptions.remove(sessionId);
+            case USER -> {
+                usersPrivateSubscriptions.remove(sessionId);
+            }
             case HELPER -> {
-                stopPrivateSession(sessionId, role);
                 helpersPrivateSubscriptions.remove(sessionId);
             }
         }
@@ -110,18 +110,5 @@ public class SessionService {
     public <T> T getSessionAttribute(String attributeName, StompHeaderAccessor accessor, Class<T> type)
         throws RuntimeException {
         return (T) accessor.getSessionAttributes().get(attributeName);
-    }
-    public int getUnopenedDialogsCount() {
-        return getSessionIdsByValue(null).size();
-    }
-    public <T> String getSessionIdByValue(T value) {
-        return getSessionIdsByValue(value).stream().findFirst()
-                .orElse(null);
-    }
-    private <T> Set<String> getSessionIdsByValue(T value) {
-        return dialogSessions.entrySet().stream()
-                .filter(e -> e.getValue() == value)
-                .map(Map.Entry::getKey)
-                .collect(Collectors.toSet());
     }
 }

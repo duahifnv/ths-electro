@@ -11,7 +11,6 @@ import org.springframework.stereotype.Service;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
-import java.util.Map;
 
 @Service
 @RequiredArgsConstructor
@@ -19,13 +18,17 @@ import java.util.Map;
 public class ChatService {
     private final SimpMessagingTemplate messagingTemplate;
     private final RabbitService rabbitService;
-    private final Map<String, String> dialogSessions;
     private final SessionService sessionService;
+    private final DialogMap dialogMap;
 
-    public void sendMessage(String message, String senderId, @NonNull Role role) {
+    public void sendMessageToTopic(String topicName, String message) {
+        messagingTemplate.convertAndSend(topicName, message);
+    }
+    public void sendMessageToPrivate(String message, String senderId, @NonNull Role role) {
         String receiverId;
         switch (role) {
             case USER -> {
+                var dialogSessions = dialogMap.getDialogSessions();
                 receiverId = dialogSessions.get(senderId);
                 if (receiverId == null) {
                     if (!dialogSessions.containsKey(senderId)) {
@@ -37,7 +40,7 @@ public class ChatService {
                 }
             }
             case HELPER -> {
-                receiverId = sessionService.getSessionIdByValue(senderId);
+                receiverId = dialogMap.getSessionIdByValue(senderId);
                 if (receiverId == null) {
                     log.warn("Не найден помощник с id: {}", senderId);
                     throw new ClientException("Для отправки сообщений необходимо начать диалог с пользователем");
@@ -45,7 +48,7 @@ public class ChatService {
             }
             default -> throw new IllegalStateException("Unexpected value: " + role);
         }
-        sendMessage(message, receiverId);
+        sendMessageToPrivate(message, receiverId);
     }
     public List<String> receiveAllMessages(String senderId) {
         List<String> messages = new ArrayList<>();
@@ -60,18 +63,15 @@ public class ChatService {
         return messages;
     }
     public void resendUnreadMessagesToHelper(String helperId) {
-        var requestedDialog = dialogSessions.entrySet().stream()
-                .filter(e -> e.getValue() != null && e.getValue().equals(helperId))
-                .findAny()
-                .orElseThrow(() -> new RuntimeException("Не найден диалог с помощником: " + helperId));
+        var requestedDialog = dialogMap.getDialogWithHelper(helperId);
         String userId = requestedDialog.getKey();
         List<String> userMessages = receiveAllMessages(userId);
 
         for (String userMessage : userMessages) {
-            sendMessage(userMessage, userId, Role.USER);
+            sendMessageToPrivate(userMessage, userId, Role.USER);
         }
     }
-    private void sendMessage(String message, String receiverId) {
+    private void sendMessageToPrivate(String message, String receiverId) {
         String queuePath = "/queue/private-user" + receiverId;
         messagingTemplate.convertAndSend(queuePath, message);
         log.info("Сообщение {} отправлено в очередь {}", message, queuePath);

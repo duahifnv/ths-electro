@@ -3,6 +3,7 @@ package org.envelope.helperservice.controller;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.envelope.helperservice.Role;
+import org.envelope.helperservice.event.WaitingCountEvent;
 import org.envelope.helperservice.service.ChatService;
 import org.envelope.helperservice.service.SessionService;
 import org.springframework.context.event.EventListener;
@@ -53,5 +54,10 @@ public class StompHandler {
         StompHeaderAccessor accessor = StompHeaderAccessor.wrap(event.getMessage());
         String sessionId = accessor.getSessionId();
         log.info("Клиент {} отписался от очереди или топика", sessionId);
+    }
+    @EventListener
+    public void handleWaitingCount(WaitingCountEvent event)  {
+        String message = "Текущее количество ожидающих пользователей: %d".formatted(event.getWaitingCount());
+        chatService.sendMessageToTopic("/topic/dialogs", message);
     }
 }

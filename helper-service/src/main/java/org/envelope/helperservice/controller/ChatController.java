@@ -28,7 +28,7 @@ public class ChatController {
         String sessionId = accessor.getSessionId();
         Role role = sessionService.getSessionAttribute("role", accessor, Role.class);
         String payload = message.getPayload().trim();
-        chatService.sendMessage(payload, sessionId, role);
+        chatService.sendMessageToPrivate(payload, sessionId, role);
     }
     @MessageExceptionHandler
     public void handleException(ClientException exception, SimpMessageHeaderAccessor headerAccessor) {
