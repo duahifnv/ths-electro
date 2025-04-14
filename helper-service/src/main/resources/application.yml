@@ -17,15 +17,6 @@ client:
     url: http://identity-service:${IDENTITY_SERVICE_PORT}
     context-path: ${IDENTITY_SERVICE_CONTEXT}
 
-jwt:
-  secret: ${JWT_SECRET}
-
-springdoc:
-  swagger-ui:
-    path: /swagger-ui
-  api-docs:
-    path: /api-docs
-
 logging:
   config: classpath:logback.xml
   loki:
