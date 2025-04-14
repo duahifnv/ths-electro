@@ -3,7 +3,8 @@ package org.envelope.helperservice.config.socket;
 import lombok.NonNull;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
-import org.envelope.helperservice.service.IdentityClientService;
+import org.envelope.helperservice.Role;
+import org.envelope.helperservice.service.IdentityService;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.server.ServerHttpRequest;
 import org.springframework.http.server.ServerHttpResponse;
@@ -21,7 +22,7 @@ import java.util.Set;
 @Slf4j
 public class JwtHandshakeInterceptor implements HandshakeInterceptor {
     private static final String BEARER_PREFIX = "Bearer ";
-    private final IdentityClientService identityClientService;
+    private final IdentityService identityService;
 
     @Override
     public boolean beforeHandshake(ServerHttpRequest request,
@@ -38,16 +39,16 @@ public class JwtHandshakeInterceptor implements HandshakeInterceptor {
 
         }
         else token = authorizationHeader.substring(7);
-
-        log.info("JWT токен клиентского подключения: {}", token);
         try {
-            Set<String> roles = identityClientService.getClientRoles(token);
-            if (roles.contains("helper")) {
-                attributes.put("role", "helper");
-            } else if (roles.contains("user")) {
-                attributes.put("role", "user");
-            } else {
+            Set<Role> roles = identityService.getClientRoles(token);
+            if (roles.isEmpty()) {
                 throw new ResponseStatusException(HttpStatus.UNAUTHORIZED, "Отсутствуют требуемые роли");
+            }
+            if (roles.contains(Role.HELPER)) {
+                attributes.put("role", Role.HELPER);
+            }
+            else if (roles.contains(Role.USER)) {
+                attributes.put("role", Role.USER);
             }
         } catch (Exception e) {
             throw new ResponseStatusException(HttpStatus.UNAUTHORIZED, "Невалидный JWT токен");

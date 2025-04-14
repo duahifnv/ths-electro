@@ -1,66 +1,33 @@
 package org.envelope.helperservice.service;
 
+import lombok.NonNull;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.envelope.helperservice.Role;
+import org.envelope.helperservice.exception.ClientException;
+import org.springframework.messaging.simp.stomp.StompHeaderAccessor;
 import org.springframework.stereotype.Service;
 import org.springframework.web.socket.WebSocketSession;
 
 import java.io.IOException;
 import java.util.Map;
+import java.util.Set;
+import java.util.stream.Collectors;
 
 @Service
 @RequiredArgsConstructor
 @Slf4j(topic = "Сервис сессий")
 public class SessionService {
     private final Map<String, WebSocketSession> sessions;
-    private final Map<String, String> dialogSessions; // key: userId, value: helperId
+    private final Map<String, String> dialogSessions;
+    private final Map<String, String> usersPrivateSubscriptions;
+    private final Map<String, String> helpersPrivateSubscriptions;
     private final RabbitService rabbitService;
 
     public void addClientSession(String sessionId, WebSocketSession session) {
         synchronized (sessions) {
             if (!sessions.containsKey(sessionId) && session.isOpen()) {
                 sessions.put(sessionId, session);
-            }
-        }
-    }
-    public boolean subscribeClient(String sessionId, String role) {
-        if (role.equals("user")) {
-            if (!dialogSessions.containsKey(sessionId)) {
-                dialogSessions.put(sessionId, null);
-            }
-            else return false;
-        }
-        else if (role.equals("helper")) {
-            if (dialogSessions.containsValue(sessionId)) {
-                log.error("Ошибка подписки: Помощник уже ожидает сообщения");
-                return false;
-            }
-            String waitingUserId = getSessionIdByValue(null);
-            if (waitingUserId == null) {
-                log.error("Ошибка подписки: Отсутствуют ожидающие пользователи");
-                return false;
-            }
-            dialogSessions.put(waitingUserId, sessionId);
-            log.info("Начат диалог [пользователь {}] - [помощник {}]", waitingUserId, sessionId);
-        }
-        return true;
-    }
-    public void unsubscribeClient(String sessionId, String role) {
-        if (role.equals("user")) {
-            if (!dialogSessions.containsKey(sessionId)) {
-                return;
-            }
-            rabbitService.deleteQueue(sessionId);
-            String helperId = dialogSessions.get(sessionId);
-            if (helperId != null) {
-                removeClientSession(helperId);
-            }
-            dialogSessions.remove(sessionId);
-        }
-        else if (role.equals("helper")) {
-            String userId = getSessionIdByValue(sessionId);
-            if (userId != null) {
-                dialogSessions.put(userId, null);
             }
         }
     }
@@ -77,11 +44,84 @@ public class SessionService {
             }
         }
     }
+    public void addUserToDialogs(String sessionId) {
+        if (!dialogSessions.containsKey(sessionId)) {
+            dialogSessions.put(sessionId, null);
+        }
+    }
+    private void startPrivateSession(String sessionId) throws RuntimeException {
+        if (dialogSessions.containsValue(sessionId)) {
+            throw new ClientException("Ошибка подписки: Помощник уже ожидает сообщения");
+        }
+        String waitingUserId = getSessionIdByValue(null);
+        if (waitingUserId == null) {
+            throw new ClientException("Ошибка подписки: Отсутствуют ожидающие пользователи");
+        }
+        dialogSessions.put(waitingUserId, sessionId);
+        log.info("Начат диалог [пользователь {}] - [помощник {}]", waitingUserId, sessionId);
+    }
+    private void stopPrivateSession(String sessionId, @NonNull Role role) {
+        switch (role) {
+            case USER -> {
+                if (!dialogSessions.containsKey(sessionId)) {
+                    return;
+                }
+                rabbitService.deleteQueue(sessionId);
+                String helperId = dialogSessions.get(sessionId);
+                if (helperId != null) {
+                    removeClientSession(helperId);
+                }
+                dialogSessions.remove(sessionId);
+            }
+            case HELPER -> {
+                String userId = getSessionIdByValue(sessionId);
+                if (userId != null) {
+                    dialogSessions.put(userId, null);
+                }
+            }
+        }
+    }
+    public void subscribeToPrivate(String sessionId, Role role, String subscriptionId)
+            throws RuntimeException {
+        switch (role) {
+            case USER -> usersPrivateSubscriptions.put(sessionId, subscriptionId);
+            case HELPER -> {
+                startPrivateSession(sessionId);
+                helpersPrivateSubscriptions.put(sessionId, subscriptionId);
+            }
+        }
+    }
+    public void unsubscribeFromPrivate(String sessionId, Role role) {
+        switch (role) {
+            case USER -> usersPrivateSubscriptions.remove(sessionId);
+            case HELPER -> {
+                stopPrivateSession(sessionId, role);
+                helpersPrivateSubscriptions.remove(sessionId);
+            }
+        }
+    }
+    public String getPrivateSubscriptionId(String sessionId, Role role) {
+        return switch (role) {
+            case USER -> usersPrivateSubscriptions.get(sessionId);
+            case HELPER -> helpersPrivateSubscriptions.get(sessionId);
+        };
+    }
+    @SuppressWarnings("unchecked")
+    public <T> T getSessionAttribute(String attributeName, StompHeaderAccessor accessor, Class<T> type)
+        throws RuntimeException {
+        return (T) accessor.getSessionAttributes().get(attributeName);
+    }
+    public int getUnopenedDialogsCount() {
+        return getSessionIdsByValue(null).size();
+    }
     public <T> String getSessionIdByValue(T value) {
+        return getSessionIdsByValue(value).stream().findFirst()
+                .orElse(null);
+    }
+    private <T> Set<String> getSessionIdsByValue(T value) {
         return dialogSessions.entrySet().stream()
                 .filter(e -> e.getValue() == value)
-                .findFirst()
                 .map(Map.Entry::getKey)
-                .orElse(null);
+                .collect(Collectors.toSet());
     }
 }

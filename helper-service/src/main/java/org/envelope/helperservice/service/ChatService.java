@@ -1,7 +1,10 @@
 package org.envelope.helperservice.service;
 
+import lombok.NonNull;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.envelope.helperservice.Role;
+import org.envelope.helperservice.exception.ClientException;
 import org.springframework.messaging.simp.SimpMessagingTemplate;
 import org.springframework.stereotype.Service;
 
@@ -19,24 +22,28 @@ public class ChatService {
     private final Map<String, String> dialogSessions;
     private final SessionService sessionService;
 
-    public void sendMessage(String message, String senderId, String role) {
+    public void sendMessage(String message, String senderId, @NonNull Role role) {
         String receiverId;
-        if (role.equals("user")) {
-            receiverId = dialogSessions.get(senderId);
-            if (receiverId == null) {
-                if (!dialogSessions.containsKey(senderId)) {
-                    log.info("Пользователь {} не был подписан на приватную очередь, подписываем", senderId);
-                    sessionService.subscribeClient(senderId, role);
+        switch (role) {
+            case USER -> {
+                receiverId = dialogSessions.get(senderId);
+                if (receiverId == null) {
+                    if (!dialogSessions.containsKey(senderId)) {
+                        log.info("Пользователь {} не был подписан на приватную очередь, подписываем", senderId);
+                        sessionService.addUserToDialogs(senderId);
+                    }
+                    rabbitService.sendToBuffer(message, senderId);
+                    return;
                 }
-                rabbitService.sendToBuffer(message, senderId);
-                return;
             }
-        }
-        else {
-            receiverId = sessionService.getSessionIdByValue(senderId);
-            if (receiverId == null) {
-                throw new RuntimeException("Не найден помощник с id: " + senderId);
+            case HELPER -> {
+                receiverId = sessionService.getSessionIdByValue(senderId);
+                if (receiverId == null) {
+                    log.warn("Не найден помощник с id: {}", senderId);
+                    throw new ClientException("Для отправки сообщений необходимо начать диалог с пользователем");
+                }
             }
+            default -> throw new IllegalStateException("Unexpected value: " + role);
         }
         sendMessage(message, receiverId);
     }
@@ -47,7 +54,9 @@ public class ChatService {
             if (message == null) break;
             messages.add(message);
         }
-        log.info("От отправителя {} обработаны новые сообщения: {}", senderId, Arrays.stream(messages.toArray()).toArray());
+        if (!messages.isEmpty()) {
+            log.info("От отправителя {} обработаны новые сообщения: {}", senderId, Arrays.stream(messages.toArray()).toArray());
+        }
         return messages;
     }
     public void resendUnreadMessagesToHelper(String helperId) {
@@ -59,7 +68,7 @@ public class ChatService {
         List<String> userMessages = receiveAllMessages(userId);
 
         for (String userMessage : userMessages) {
-            sendMessage(userMessage, userId, "user");
+            sendMessage(userMessage, userId, Role.USER);
         }
     }
     private void sendMessage(String message, String receiverId) {
