@@ -36,7 +36,6 @@ public class JwtHandshakeInterceptor implements HandshakeInterceptor {
                 token = servletRequest.getServletRequest().getParameter("token");
             }
             else throw new ResponseStatusException(HttpStatus.UNAUTHORIZED, "Отсутствует JWT токен");
-
         }
         else token = authorizationHeader.substring(7);
         try {
