@@ -1,76 +1,102 @@
-import { useState, useEffect } from 'react';
-import styles from './ChatWidget.module.css';
+import React, { useState, useEffect } from 'react';
+import { Client } from '@stomp/stompjs';
+import SockJS from 'sockjs-client';
 import { useAuth } from '../../../react-envelope/hooks/useAuth';
 import { ChatDots } from '../../dummies/Icons.jsx';
 import ChatInput from '../../widgets/ChatInput/ChatInput';
 import ExButton from '../../../react-envelope/components/ui/buttons/ExButton/ExButton';
 import { useNavigate } from 'react-router-dom';
 
+import styles from './ChatWidget.module.css';
+
 const ChatWidget = () => {
     const { auth } = useAuth();
     const [isChatOpen, setIsChatOpen] = useState(false);
     const [messages, setMessages] = useState([]);
     const [inputValue, setInputValue] = useState('');
-    const [webSocket, setWebSocket] = useState(null);
+    const [stompClient, setStompClient] = useState(null);
     const navigate = useNavigate();
 
     const toggleChat = () => {
         setIsChatOpen((prev) => !prev);
     };
 
-    const handleSendMessage = async () => {
+    const connectWebSocket = () => {
+        if (!auth || !auth.token) {
+            console.error('Токен отсутствует, невозможно подключиться к WebSocket');
+            return;
+        }
+
+        const client = new Client({
+            webSocketFactory: () => new SockJS(`http://localhost:8082/api/helper/ws?token=${encodeURIComponent(auth.token)}`),
+            onConnect: () => {
+                console.log('STOMP соединение установлено');
+
+                // Подписываемся на приватную очередь
+                client.subscribe('/user/queue/private', (message) => {
+                    const serverMessage = { text: message.body, isUser: false };
+                    setMessages((prevMessages) => [...prevMessages, serverMessage]);
+                });
+
+                // Сохраняем STOMP клиент
+                setStompClient(client);
+            },
+            onStompError: (frame) => {
+                console.error('Ошибка STOMP:', frame);
+            },
+            onDisconnect: () => {
+                console.log('STOMP соединение закрыто');
+                setStompClient(null);
+            },
+        });
+
+        client.activate();
+    };
+
+    const disconnectWebSocket = () => {
+        if (stompClient && stompClient.connected) {
+            stompClient.deactivate();
+        }
+    };
+
+    const handleSendMessage = () => {
         if (!inputValue.trim()) return;
 
-        // Если WebSocket еще не создан, создаем его
-        if (!webSocket || webSocket.readyState !== WebSocket.OPEN) {
-            if (!auth || !auth.token) {
-                console.error('Токен отсутствует, невозможно подключиться к WebSocket');
-                return;
-            }
+        // Если STOMP клиент не подключен, создаем соединение
+        if (!stompClient || !stompClient.connected) {
+            connectWebSocket();
+        }
 
-            const initMessage = inputValue; // Начальное сообщение
-            const wsUrl = `ws://localhost:3001/api/helper/ws?Authorization=Bearer:${encodeURIComponent(auth.token)}&initMessage=${encodeURIComponent(initMessage)}`;
-
-            const ws = new WebSocket(wsUrl);
-
-            ws.onopen = () => {
-                console.log('WebSocket соединение установлено');
-
-                // Сохраняем WebSocket
-                setWebSocket(ws);
-
-                // Отправляем первое сообщение (уже передано в URL)
-                const firstMessage = { text: initMessage, isUser: true };
-                setMessages((prevMessages) => [...prevMessages, firstMessage]);
-                setInputValue('');
-            };
-
-            ws.onmessage = (event) => {
-                const serverMessage = { text: event.data, isUser: false };
-                setMessages((prevMessages) => [...prevMessages, serverMessage]);
-            };
-
-            ws.onerror = (error) => {
-                console.error('WebSocket ошибка:', error);
-            };
-
-            ws.onclose = () => {
-                console.log('WebSocket соединение закрыто');
-                setWebSocket(null);
-            };
-        } else {
-            // Если WebSocket уже открыт, отправляем сообщение через него
+        // Отправляем сообщение через STOMP
+        if (stompClient && stompClient.connected) {
             const newMessage = { text: inputValue, isUser: true };
             setMessages((prevMessages) => [...prevMessages, newMessage]);
             setInputValue('');
 
-            webSocket.send(inputValue);
+            stompClient.publish({
+                destination: '/app/chat',
+                body: inputValue, // Тело сообщения
+            });
+        } else {
+            console.warn('STOMP соединение еще не установлено');
         }
     };
 
     const handleLogin = () => {
         navigate('/user/auth');
     };
+
+    useEffect(() => {
+        // Подключаемся к WebSocket при открытии чата
+        if (isChatOpen && auth?.token) {
+            connectWebSocket();
+        }
+
+        // Отключаемся при закрытии чата или размонтировании компонента
+        return () => {
+            disconnectWebSocket();
+        };
+    }, [isChatOpen, auth]);
 
     return (
         <>
