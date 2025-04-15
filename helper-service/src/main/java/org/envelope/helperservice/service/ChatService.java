@@ -21,10 +21,19 @@ public class ChatService {
     private final SessionService sessionService;
     private final DialogMap dialogMap;
 
-    public void sendMessageToTopic(String topicName, String message) {
+    public void sendMessageToTopic(String message, String topicName) {
         messagingTemplate.convertAndSend(topicName, message);
     }
-    public void sendMessageToPrivate(String message, String senderId, @NonNull Role role) {
+    public void sendMessageToUserQueue(String message, String queueName, String sessionId) {
+        if (sessionId == null) {
+            log.error("Session id не найден, невозможно отправить сообщение в пользовательскую очередь");
+            return;
+        }
+        String queuePath = String.format("%s-user%s", queueName, sessionId);
+        messagingTemplate.convertAndSend(queuePath, message);
+        log.info("Сообщение '{}' отправлено в очередь {}", message, queuePath);
+    }
+    public void sendMessageToPrivateChat(String message, String senderId, @NonNull Role role) {
         String receiverId;
         switch (role) {
             case USER -> {
@@ -48,7 +57,7 @@ public class ChatService {
             }
             default -> throw new IllegalStateException("Unexpected value: " + role);
         }
-        sendMessageToPrivate(message, receiverId);
+        sendMessageToUserQueue(message, "/queue/private", receiverId);
     }
     public List<String> receiveAllMessages(String senderId) {
         List<String> messages = new ArrayList<>();
@@ -68,12 +77,7 @@ public class ChatService {
         List<String> userMessages = receiveAllMessages(userId);
 
         for (String userMessage : userMessages) {
-            sendMessageToPrivate(userMessage, userId, Role.USER);
+            sendMessageToPrivateChat(userMessage, userId, Role.USER);
         }
-    }
-    private void sendMessageToPrivate(String message, String receiverId) {
-        String queuePath = "/queue/private-user" + receiverId;
-        messagingTemplate.convertAndSend(queuePath, message);
-        log.info("Сообщение {} отправлено в очередь {}", message, queuePath);
     }
 }

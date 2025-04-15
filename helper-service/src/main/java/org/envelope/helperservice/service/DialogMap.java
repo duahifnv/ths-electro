@@ -30,9 +30,12 @@ public class DialogMap implements Map<String, String> {
                 .findAny()
                 .orElseThrow(() -> new RuntimeException("Не найден диалог с помощником: " + helperId));
     }
-    private void publishDialogEvent() {
-        int waitingUsersCount = getSessionIdsByValue(null).size();
-        eventPublisher.publishEvent(new WaitingCountEvent(this, waitingUsersCount));
+    public int getWaitingUsersCount() {
+        return getSessionIdsByValue(null).size();
+    }
+    private void publishWaitingCountEvent() {
+        var waitingCountEvent = new WaitingCountEvent(this, getWaitingUsersCount());
+        eventPublisher.publishEvent(waitingCountEvent);
     }
     private <T> Set<String> getSessionIdsByValue(T value) {
         return dialogSessions.entrySet().stream()
@@ -44,13 +47,13 @@ public class DialogMap implements Map<String, String> {
     @Override
     public String put(String key, String value) {
         String added = dialogSessions.put(key, value);
-        publishDialogEvent();
+        publishWaitingCountEvent();
         return added;
     }
     @Override
     public String remove(Object key) {
         String removed = dialogSessions.remove(key);
-        publishDialogEvent();
+        publishWaitingCountEvent();
         return removed;
     }
 

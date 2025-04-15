@@ -10,7 +10,6 @@ import org.springframework.messaging.Message;
 import org.springframework.messaging.handler.annotation.MessageExceptionHandler;
 import org.springframework.messaging.handler.annotation.MessageMapping;
 import org.springframework.messaging.simp.SimpMessageHeaderAccessor;
-import org.springframework.messaging.simp.SimpMessagingTemplate;
 import org.springframework.messaging.simp.stomp.StompHeaderAccessor;
 import org.springframework.stereotype.Controller;
 
@@ -20,7 +19,6 @@ import org.springframework.stereotype.Controller;
 public class ChatController {
     private final ChatService chatService;
     private final SessionService sessionService;
-    private final SimpMessagingTemplate messagingTemplate;
 
     @MessageMapping("/chat")
     public void sendMessageToChat(Message<String> message) {
@@ -28,16 +26,17 @@ public class ChatController {
         String sessionId = accessor.getSessionId();
         Role role = sessionService.getSessionAttribute("role", accessor, Role.class);
         String payload = message.getPayload().trim();
-        chatService.sendMessageToPrivate(payload, sessionId, role);
+        chatService.sendMessageToPrivateChat(payload, sessionId, role);
+    }
+    @MessageMapping("/waiting.size")
+    public void getWaitingUsersCount(SimpMessageHeaderAccessor headerAccessor) {
+        String sessionId = headerAccessor.getSessionId();
+        int waitingCount = sessionService.getWaitingUsersCount();
+        chatService.sendMessageToUserQueue(String.valueOf(waitingCount), "/queue/dialogs", sessionId);
     }
     @MessageExceptionHandler
     public void handleException(ClientException exception, SimpMessageHeaderAccessor headerAccessor) {
         String sessionId = headerAccessor.getSessionId();
-        if (sessionId == null) {
-            log.error("Session id не найден, невозможно отправить сообщение об ошибке");
-            return;
-        }
-        String queuePath = "/queue/errors-user" + sessionId;
-        messagingTemplate.convertAndSend(queuePath, exception.getMessage());
+        chatService.sendMessageToUserQueue(exception.getMessage(), "/queue/errors", sessionId);
     }
 }

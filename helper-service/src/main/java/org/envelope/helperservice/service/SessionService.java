@@ -29,6 +29,7 @@ public class SessionService {
             }
         }
     }
+
     public void removeClientSession(String sessionId) {
         synchronized (sessions) {
             var clientSession = sessions.get(sessionId);
@@ -42,11 +43,13 @@ public class SessionService {
             }
         }
     }
+
     public void addUserToDialogs(String sessionId) {
         if (!dialogMap.containsKey(sessionId)) {
             dialogMap.put(sessionId, null);
         }
     }
+
     private void startPrivateSession(String sessionId) throws RuntimeException {
         if (dialogMap.containsValue(sessionId)) {
             throw new ClientException("Ошибка подписки: Помощник уже ожидает сообщения");
@@ -58,6 +61,7 @@ public class SessionService {
         dialogMap.put(waitingUserId, sessionId);
         log.info("Начат диалог [пользователь {}] - [помощник {}]", waitingUserId, sessionId);
     }
+
     private void stopPrivateSession(String sessionId, @NonNull Role role) {
         switch (role) {
             case USER -> {
@@ -79,6 +83,7 @@ public class SessionService {
             }
         }
     }
+
     public void subscribeToPrivate(String sessionId, Role role, String subscriptionId)
             throws RuntimeException {
         switch (role) {
@@ -89,6 +94,7 @@ public class SessionService {
             }
         }
     }
+
     public void unsubscribeFromPrivate(String sessionId, Role role) {
         stopPrivateSession(sessionId, role);
         switch (role) {
@@ -100,6 +106,9 @@ public class SessionService {
             }
         }
     }
+    public int getWaitingUsersCount() {
+        return dialogMap.getWaitingUsersCount();
+    }
     public String getPrivateSubscriptionId(String sessionId, Role role) {
         return switch (role) {
             case USER -> usersPrivateSubscriptions.get(sessionId);
@@ -108,7 +117,7 @@ public class SessionService {
     }
     @SuppressWarnings("unchecked")
     public <T> T getSessionAttribute(String attributeName, StompHeaderAccessor accessor, Class<T> type)
-        throws RuntimeException {
+            throws RuntimeException {
         return (T) accessor.getSessionAttributes().get(attributeName);
     }
 }
