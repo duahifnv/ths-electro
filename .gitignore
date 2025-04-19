@@ -58,3 +58,4 @@ build/
 /helper-service/mvnw.cmd
 /**/target/**
 /**/target
+/telegram-bot/.env
