@@ -57,7 +57,8 @@ public class StompHandler {
     }
     @EventListener
     public void handleWaitingCount(WaitingCountEvent event)  {
-        String message = "Текущее количество ожидающих пользователей: %d".formatted(event.getWaitingCount());
-        chatService.sendMessageToTopic(message, "/topic/dialogs");
+        int waitingCount = event.getWaitingCount();
+        String jsonMessage = chatService.getWaitingCountJson(waitingCount);
+        chatService.sendMessageToTopic(jsonMessage, "/topic/dialogs");
     }
 }

@@ -32,7 +32,8 @@ public class ChatController {
     public void getWaitingUsersCount(SimpMessageHeaderAccessor headerAccessor) {
         String sessionId = headerAccessor.getSessionId();
         int waitingCount = sessionService.getWaitingUsersCount();
-        chatService.sendMessageToUserQueue(String.valueOf(waitingCount), "/queue/dialogs", sessionId);
+        String jsonMessage = chatService.getWaitingCountJson(waitingCount);
+        chatService.sendMessageToUserQueue(jsonMessage, "/queue/dialogs", sessionId);
     }
     @MessageExceptionHandler
     public void handleException(ClientException exception, SimpMessageHeaderAccessor headerAccessor) {

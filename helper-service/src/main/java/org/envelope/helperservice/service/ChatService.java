@@ -1,5 +1,7 @@
 package org.envelope.helperservice.service;
 
+import com.fasterxml.jackson.core.JsonProcessingException;
+import com.fasterxml.jackson.databind.ObjectMapper;
 import lombok.NonNull;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
@@ -11,6 +13,7 @@ import org.springframework.stereotype.Service;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
+import java.util.Map;
 
 @Service
 @RequiredArgsConstructor
@@ -78,6 +81,17 @@ public class ChatService {
 
         for (String userMessage : userMessages) {
             sendMessageToPrivateChat(userMessage, userId, Role.USER);
+        }
+    }
+    public String getWaitingCountJson(Integer waitingCount) {
+        return getJson(Map.of("size", String.valueOf(waitingCount)));
+    }
+    public String getJson(Map<String, String> properties) {
+        ObjectMapper mapper = new ObjectMapper();
+        try {
+            return mapper.writeValueAsString(properties);
+        } catch (JsonProcessingException e) {
+            throw new RuntimeException(e.getMessage());
         }
     }
 }
