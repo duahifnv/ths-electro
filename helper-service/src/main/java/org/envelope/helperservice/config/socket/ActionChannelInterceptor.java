@@ -3,7 +3,7 @@ package org.envelope.helperservice.config.socket;
 import lombok.NonNull;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
-import org.envelope.helperservice.Role;
+import org.envelope.helperservice.dto.Role;
 import org.envelope.helperservice.exception.ClientException;
 import org.envelope.helperservice.service.SessionService;
 import org.springframework.messaging.Message;

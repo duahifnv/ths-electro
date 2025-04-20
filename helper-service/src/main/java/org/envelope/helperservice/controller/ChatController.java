@@ -2,7 +2,7 @@ package org.envelope.helperservice.controller;
 
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
-import org.envelope.helperservice.Role;
+import org.envelope.helperservice.dto.Role;
 import org.envelope.helperservice.exception.ClientException;
 import org.envelope.helperservice.service.ChatService;
 import org.envelope.helperservice.service.SessionService;

@@ -1,6 +1,6 @@
 package org.envelope.helperservice.service;
 
-import org.envelope.helperservice.Role;
+import org.envelope.helperservice.dto.Role;
 import org.envelope.helperservice.dto.RoleDto;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.core.ParameterizedTypeReference;
