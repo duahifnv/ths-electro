@@ -89,7 +89,7 @@ async def get_password(update: Update, context: ContextTypes.DEFAULT_TYPE):
             jwt_token = auth_response.json().get("token")
             # Инициализация WebSocket менеджера
             global ws_manager
-            ws_manager = initialize_ws_manager(jwt_token)
+            ws_manager = initialize_ws_manager(login, jwt_token)
             # Подключаемся к WebSocket
             if ws_manager.connect():
                 await update.message.reply_text(
@@ -104,7 +104,7 @@ async def get_password(update: Update, context: ContextTypes.DEFAULT_TYPE):
             return ConversationHandler.END
 
         elif auth_response.status_code == 400 or auth_response.status_code == 401:
-            await update.message.reply_text("Неверные логин или пароль. Повторите ввод данных.")
+            await update.message.reply_text("Неверный пароль. Повторите ввод данных.")
             return LOGIN
 
         elif auth_response.status_code == 404:
@@ -143,7 +143,7 @@ def handle_stomp_message(destination: str, body):
     except json.JSONDecodeError:
         logger.warning(f"Не удалось разобрать сообщение: {body}")
 
-def initialize_ws_manager(token):
+def initialize_ws_manager(login, token):
     return wsmanager.WebSocketManager(
         subscribe_topics={
             "sub-1": "/user/queue/errors",
@@ -152,7 +152,7 @@ def initialize_ws_manager(token):
         },
         send_apis_on_connect=["/app/waiting.size"],
         message_handler=handle_stomp_message,
-        ws_url=f"{WEBSOCKET_URL}?token={token}"
+        ws_url=f"{WEBSOCKET_URL}?token={token}&userId={login}"
     )
 
 # Обработка кнопок

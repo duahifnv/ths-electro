@@ -26,6 +26,7 @@ class WebSocketManager:
         try:
             self.ws = websocket.WebSocketApp(
                 self.ws_url,
+                header=["user-agent: python_ws"],
                 on_open=self.on_open,
                 on_message=self.on_message,
                 on_error=self.on_error,

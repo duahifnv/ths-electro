@@ -3,7 +3,9 @@ package org.envelope.helperservice.config.socket;
 import lombok.NonNull;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
-import org.envelope.helperservice.Role;
+import org.envelope.helperservice.dto.Role;
+import org.envelope.helperservice.dto.UserAgent;
+import org.envelope.helperservice.service.DialogMap;
 import org.envelope.helperservice.service.IdentityService;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.server.ServerHttpRequest;
@@ -15,6 +17,7 @@ import org.springframework.web.socket.WebSocketHandler;
 import org.springframework.web.socket.server.HandshakeInterceptor;
 
 import java.util.Map;
+import java.util.Optional;
 import java.util.Set;
 
 @Component
@@ -23,6 +26,7 @@ import java.util.Set;
 public class JwtHandshakeInterceptor implements HandshakeInterceptor {
     private static final String BEARER_PREFIX = "Bearer ";
     private final IdentityService identityService;
+    private final DialogMap dialogMap;
 
     @Override
     public boolean beforeHandshake(ServerHttpRequest request,
@@ -30,32 +34,68 @@ public class JwtHandshakeInterceptor implements HandshakeInterceptor {
                                    @NonNull WebSocketHandler wsHandler,
                                    @NonNull Map<String, Object> attributes) {
         String authorizationHeader = request.getHeaders().getFirst("Authorization");
-        String token;
-        if (authorizationHeader == null || !authorizationHeader.startsWith(BEARER_PREFIX)) {
-            if (request instanceof ServletServerHttpRequest servletRequest) {
-                token = servletRequest.getServletRequest().getParameter("token");
-            }
-            else throw new ResponseStatusException(HttpStatus.UNAUTHORIZED, "Отсутствует JWT токен");
+        String token = extractToken(authorizationHeader, (ServletServerHttpRequest) request);
+        UserAgent userAgent = extractAgent((ServletServerHttpRequest) request);
+        String userId = extractUserId((ServletServerHttpRequest) request);
+        if (dialogMap.containsKey(userId) || dialogMap.containsValue(userId)) {
+            throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "Сессия с данным пользователем уже создана");
         }
-        else token = authorizationHeader.substring(7);
         try {
             Set<Role> roles = identityService.getClientRoles(token);
             if (roles.isEmpty()) {
                 throw new ResponseStatusException(HttpStatus.UNAUTHORIZED, "Отсутствуют требуемые роли");
             }
-            if (roles.contains(Role.HELPER)) {
-                attributes.put("role", Role.HELPER);
-            }
-            else if (roles.contains(Role.USER)) {
-                attributes.put("role", Role.USER);
-            }
+            Role agentRole = getAgentRole(roles, userAgent);
+            attributes.put("role", agentRole);
+            attributes.put("userId", userId);
         } catch (Exception e) {
             throw new ResponseStatusException(HttpStatus.UNAUTHORIZED, "Невалидный JWT токен");
         }
         return true;
     }
+    private Role getAgentRole(Set<Role> userRoles, UserAgent userAgent) {
+        if (userRoles.contains(Role.HELPER)) {
+            return userAgent == UserAgent.BROWSER_WS ? Role.USER : Role.HELPER;
+        }
+        else {
+            if (userAgent == UserAgent.PYTHON_WS) {
+                throw new ResponseStatusException(HttpStatus.UNAUTHORIZED, "Невалидный JWT токен");
+            }
+            return Role.USER;
+        }
+    }
+    private String extractToken(String authorizationHeader, ServletServerHttpRequest servletRequest) {
+        String token;
+        if (authorizationHeader == null || !authorizationHeader.startsWith(BEARER_PREFIX)) {
+            token = servletRequest.getServletRequest().getParameter("token");
+            if (token == null) {
+                throw new ResponseStatusException(HttpStatus.UNAUTHORIZED, "Отсутствует JWT токен");
+            }
+        }
+        else token = authorizationHeader.substring(7);
+        return token;
+    }
+    private String extractUserId(ServletServerHttpRequest request) {
+        return Optional.ofNullable(request.getServletRequest().getParameter("userId"))
+                .orElseThrow(() -> new ResponseStatusException(HttpStatus.UNAUTHORIZED,
+                        "Отсутствует ID пользователя"));
+    }
+    private UserAgent extractAgent(ServletServerHttpRequest request) {
+        try {
+            String userAgentHeader = request.getHeaders().getFirst("user-agent");
+            if (userAgentHeader == null) {
+                throw new IllegalArgumentException();
+            }
+            if (userAgentHeader.contains("Mozilla")) {
+                return UserAgent.BROWSER_WS;
+            }
+            return UserAgent.valueOf(userAgentHeader.toUpperCase());
+        } catch (IllegalArgumentException e) {
+            throw new ResponseStatusException(HttpStatus.UNAUTHORIZED, "Неизвестный клиент");
+        }
+    }
     @Override
     public void afterHandshake(@NonNull ServerHttpRequest request, @NonNull ServerHttpResponse response,
-                               @NonNull WebSocketHandler wsHandler, Exception exception) {
+                                @NonNull WebSocketHandler wsHandler, Exception exception){
     }
 }
