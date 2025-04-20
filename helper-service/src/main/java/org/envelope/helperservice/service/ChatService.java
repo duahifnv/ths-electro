@@ -83,9 +83,6 @@ public class ChatService {
             sendMessageToPrivateChat(userMessage, userId, Role.USER);
         }
     }
-    public String getWaitingCountJson(Integer waitingCount) {
-        return getJson(Map.of("size", String.valueOf(waitingCount)));
-    }
     public String getJson(Map<String, String> properties) {
         ObjectMapper mapper = new ObjectMapper();
         try {

@@ -14,6 +14,8 @@ import org.springframework.web.socket.messaging.SessionDisconnectEvent;
 import org.springframework.web.socket.messaging.SessionSubscribeEvent;
 import org.springframework.web.socket.messaging.SessionUnsubscribeEvent;
 
+import java.util.Map;
+
 @Component
 @RequiredArgsConstructor
 @Slf4j
@@ -58,7 +60,9 @@ public class StompHandler {
     @EventListener
     public void handleWaitingCount(WaitingCountEvent event)  {
         int waitingCount = event.getWaitingCount();
-        String jsonMessage = chatService.getWaitingCountJson(waitingCount);
+        String jsonMessage = chatService.getJson(
+                Map.of("size", String.valueOf(waitingCount))
+        );
         chatService.sendMessageToTopic(jsonMessage, "/topic/dialogs");
     }
 }

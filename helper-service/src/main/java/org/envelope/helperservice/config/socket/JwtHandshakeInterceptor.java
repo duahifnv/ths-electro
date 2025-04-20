@@ -36,10 +36,7 @@ public class JwtHandshakeInterceptor implements HandshakeInterceptor {
         String authorizationHeader = request.getHeaders().getFirst("Authorization");
         String token = extractToken(authorizationHeader, (ServletServerHttpRequest) request);
         UserAgent userAgent = extractAgent((ServletServerHttpRequest) request);
-        String userId = extractUserId((ServletServerHttpRequest) request);
-        if (dialogMap.containsKey(userId) || dialogMap.containsValue(userId)) {
-            throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "Сессия с данным пользователем уже создана");
-        }
+        String username = extractUsername((ServletServerHttpRequest) request);
         try {
             Set<Role> roles = identityService.getClientRoles(token);
             if (roles.isEmpty()) {
@@ -47,7 +44,7 @@ public class JwtHandshakeInterceptor implements HandshakeInterceptor {
             }
             Role agentRole = getAgentRole(roles, userAgent);
             attributes.put("role", agentRole);
-            attributes.put("userId", userId);
+            attributes.put("username", username);
         } catch (Exception e) {
             throw new ResponseStatusException(HttpStatus.UNAUTHORIZED, "Невалидный JWT токен");
         }
@@ -75,8 +72,8 @@ public class JwtHandshakeInterceptor implements HandshakeInterceptor {
         else token = authorizationHeader.substring(7);
         return token;
     }
-    private String extractUserId(ServletServerHttpRequest request) {
-        return Optional.ofNullable(request.getServletRequest().getParameter("userId"))
+    private String extractUsername(ServletServerHttpRequest request) {
+        return Optional.ofNullable(request.getServletRequest().getParameter("username"))
                 .orElseThrow(() -> new ResponseStatusException(HttpStatus.UNAUTHORIZED,
                         "Отсутствует ID пользователя"));
     }
