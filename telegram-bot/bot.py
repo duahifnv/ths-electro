@@ -4,7 +4,6 @@ import requests
 import wsmanager
 import json
 
-from pubsub import pub
 from dotenv import load_dotenv
 from telegram import Update, ReplyKeyboardMarkup
 from telegram.ext import (
@@ -35,18 +34,23 @@ WEBSOCKET_URL = os.getenv("WEBSOCKET_URL")
 ws_manager = None
 ws_connection = None
 ws_thread = None
-chat_id = None
+users_usernames = {}
 
 # Переменная числа ждущих пользователей и обработчик ее обновления
 waiting_count = 0
 
-def handle_count_update(new_count: int):
-    """todo: Вывод события на экран"""
+def handle_count_update(new_count):
     global waiting_count
     waiting_count = new_count
     logger.info(f"Обновлено число ожидающих пользователей: {waiting_count}")
 
-pub.subscribe(handle_count_update, 'count_update')
+def handle_count_message(username, count):
+    user_id = next((k for k, v in users_usernames.items() if v == username), None)
+    if not user_id:
+        logger.error(f"Отсутствует пользователь с именем {username}")
+        return
+    logger.info(f"Имя пользователя: {username}, ID пользователя в телеграм: {user_id}")
+    logger.info(f"Запрошено число ожидающих пользователей: {count}")
 
 LOGIN, PASSWORD = range(2)
 
@@ -56,8 +60,6 @@ AFTER_AUTH_KEYBOARD = [["Ожидающие пользователи", "Найт
 
 # Обработчик команды /start
 async def start(update: Update, context: ContextTypes.DEFAULT_TYPE):
-    global chat_id
-    chat_id = update.effective_chat.id
     await update.message.reply_text(
         "Добро пожаловать! Пожалуйста, авторизуйтесь.",
         reply_markup=ReplyKeyboardMarkup(MAIN_KEYBOARD, resize_keyboard=True),
@@ -70,28 +72,30 @@ async def authorize(update: Update, context: ContextTypes.DEFAULT_TYPE):
 
 # Получение логина
 async def get_login(update: Update, context: ContextTypes.DEFAULT_TYPE):
-    context.user_data["login"] = update.message.text
+    context.user_data["username"] = update.message.text
     await update.message.reply_text("Введите пароль:")
     return PASSWORD
 
 # Получение пароля и отправка на бэкэнд
 async def get_password(update: Update, context: ContextTypes.DEFAULT_TYPE):
+    global users_usernames
     password = update.message.text
-    login = context.user_data.get("login")
+    username = context.user_data.get("username")
 
     try:
         auth_response = requests.post(
             AUTH_URL,
-            json={"username": login, "password": password}
+            json={"username": username, "password": password}
         )
-
         if auth_response.status_code == 200:
             jwt_token = auth_response.json().get("token")
             # Инициализация WebSocket менеджера
             global ws_manager
-            ws_manager = initialize_ws_manager(login, jwt_token)
+            ws_manager = initialize_ws_manager(username, jwt_token)
             # Подключаемся к WebSocket
             if ws_manager.connect():
+                user_id = update.effective_user.id
+                users_usernames[user_id] = username
                 await update.message.reply_text(
                     "Авторизация успешна!",
                     reply_markup=ReplyKeyboardMarkup(AFTER_AUTH_KEYBOARD, resize_keyboard=True),
@@ -108,7 +112,7 @@ async def get_password(update: Update, context: ContextTypes.DEFAULT_TYPE):
             return LOGIN
 
         elif auth_response.status_code == 404:
-            await update.message.reply_text(f"Не найден помощник с логином: {login}")
+            await update.message.reply_text(f"Не найден помощник с логином: {username}")
             return LOGIN
 
         else:
@@ -129,21 +133,25 @@ def handle_stomp_message(destination: str, body):
     logger.info(f"Получено сообщение (destination: {destination}): {body}")
     try:
         if destination.startswith("/queue/errors"):
+            # todo: Выводить ошибки в чат
             logger.error(f"Ошибка от сервера: ${body}")
 
         elif destination.startswith("/queue/dialogs") or destination == "/topic/dialogs":
             data = json.loads(body.rstrip('\x00'))
-            new_waiting_count = data.get("size", 0)
-            # Если сообщение с топика - значит запрашивали не мы, т.е. число обновилось
+            request_count = data.get("size", 0)
             if destination == "/topic/dialogs":
-                pub.sendMessage('count_update', new_count=new_waiting_count)
+                # Если сообщение с топика - значит запрашивали не мы, т.е. число обновилось
+                handle_count_update(request_count)
             else:
-                logger.info(f"Запрошено число ожидающих пользователей: {waiting_count}")
+                username = data.get("username")
+                handle_count_message(username, request_count)
 
     except json.JSONDecodeError:
-        logger.warning(f"Не удалось разобрать сообщение: {body}")
+        logger.warning(f"Не удалось спарсить сообщение: {body}")
+    except Exception as e:
+        logger.error(f"Ошибка обработки STOMP сообщения: {e}")
 
-def initialize_ws_manager(login, token):
+def initialize_ws_manager(username, token):
     return wsmanager.WebSocketManager(
         subscribe_topics={
             "sub-1": "/user/queue/errors",
@@ -152,7 +160,7 @@ def initialize_ws_manager(login, token):
         },
         send_apis_on_connect=["/app/waiting.size"],
         message_handler=handle_stomp_message,
-        ws_url=f"{WEBSOCKET_URL}?token={token}&userId={login}"
+        ws_url=f"{WEBSOCKET_URL}?token={token}&username={username}"
     )
 
 # Обработка кнопок

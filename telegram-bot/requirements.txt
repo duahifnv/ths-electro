@@ -3,4 +3,3 @@ python-telegram-bot~=22.0
 stomp.py==8.2.0
 requests~=2.32.3
 websocket-client~=1.8.0
-Pypubsub~=4.0.3
