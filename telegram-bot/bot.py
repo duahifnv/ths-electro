@@ -4,6 +4,7 @@ import requests
 import wsmanager
 import json
 
+from sender import AsyncMessageSender
 from dotenv import load_dotenv
 from telegram import Update, ReplyKeyboardMarkup
 from telegram.ext import (
@@ -31,6 +32,7 @@ AUTH_URL = os.getenv("AUTH_URL")
 WEBSOCKET_URL = os.getenv("WEBSOCKET_URL")
 
 # Глобальные переменные
+application = None
 ws_manager = None
 ws_connection = None
 ws_thread = None
@@ -39,18 +41,26 @@ users_usernames = {}
 # Переменная числа ждущих пользователей и обработчик ее обновления
 waiting_count = 0
 
+sender = AsyncMessageSender()
+
+async def send_async_message(user_id, text):
+    try:
+        await application.bot.send_message(chat_id=user_id, text=text)
+    except Exception as e:
+        print(f"Ошибка отправки для {user_id}: {e}")
+
 def handle_count_update(new_count):
     global waiting_count
     waiting_count = new_count
-    logger.info(f"Обновлено число ожидающих пользователей: {waiting_count}")
+    for user_id, _ in users_usernames.items():
+        sender.send(application.bot, user_id, f"Обновлено число ожидающих пользователей: {waiting_count}")
 
 def handle_count_message(username, count):
     user_id = next((k for k, v in users_usernames.items() if v == username), None)
     if not user_id:
         logger.error(f"Отсутствует пользователь с именем {username}")
         return
-    logger.info(f"Имя пользователя: {username}, ID пользователя в телеграм: {user_id}")
-    logger.info(f"Запрошено число ожидающих пользователей: {count}")
+    sender.send(application.bot, user_id, f"Число ожидающих пользователей: {count}")
 
 LOGIN, PASSWORD = range(2)
 
@@ -89,13 +99,13 @@ async def get_password(update: Update, context: ContextTypes.DEFAULT_TYPE):
         )
         if auth_response.status_code == 200:
             jwt_token = auth_response.json().get("token")
+            user_id = update.effective_user.id
+            users_usernames[user_id] = username
             # Инициализация WebSocket менеджера
             global ws_manager
             ws_manager = initialize_ws_manager(username, jwt_token)
             # Подключаемся к WebSocket
             if ws_manager.connect():
-                user_id = update.effective_user.id
-                users_usernames[user_id] = username
                 await update.message.reply_text(
                     "Авторизация успешна!",
                     reply_markup=ReplyKeyboardMarkup(AFTER_AUTH_KEYBOARD, resize_keyboard=True),
@@ -116,7 +126,7 @@ async def get_password(update: Update, context: ContextTypes.DEFAULT_TYPE):
             return LOGIN
 
         else:
-            logger.info(f"Authorization failed with status code {auth_response.status_code}")
+            logger.info(f"Ошибка авторизации. Статус {auth_response.status_code}")
             await update.message.reply_text("Ошибка на сервере. Попробуйте позже.")
             return ConversationHandler.END
 
@@ -215,8 +225,8 @@ async def handle_buttons(update: Update, context: ContextTypes.DEFAULT_TYPE):
 
 # Основная функция
 def main():
+    global application
     application = ApplicationBuilder().token(TELEGRAM_BOT_TOKEN).build()
-
     conv_handler = ConversationHandler(
         entry_points=[MessageHandler(filters.Regex("^Авторизоваться в системе$"), authorize)],
         states={
@@ -225,7 +235,6 @@ def main():
         },
         fallbacks=[],
     )
-
     application.add_handler(conv_handler)
     application.add_handler(MessageHandler(
         filters.Regex("^(Ожидающие пользователи|Найти пользователя|Завершить диалог|Выйти из системы)$"),
