@@ -33,7 +33,7 @@ WEBSOCKET_URL = os.getenv("WEBSOCKET_URL")
 
 # Глобальные переменные
 application = None
-ws_manager = None
+ws_manager: wsmanager.WebSocketManager = None
 ws_connection = None
 ws_thread = None
 users_usernames = {}
@@ -43,24 +43,16 @@ waiting_count = 0
 
 sender = AsyncMessageSender()
 
-async def send_async_message(user_id, text):
-    try:
-        await application.bot.send_message(chat_id=user_id, text=text)
-    except Exception as e:
-        print(f"Ошибка отправки для {user_id}: {e}")
-
-def handle_count_update(new_count):
-    global waiting_count
-    waiting_count = new_count
+def message_all(message):
     for user_id, _ in users_usernames.items():
-        sender.send(application.bot, user_id, f"Обновлено число ожидающих пользователей: {waiting_count}")
+        sender.send(application.bot, user_id, message)
 
-def handle_count_message(username, count):
+def message_username(username, message):
     user_id = next((k for k, v in users_usernames.items() if v == username), None)
     if not user_id:
         logger.error(f"Отсутствует пользователь с именем {username}")
         return
-    sender.send(application.bot, user_id, f"Число ожидающих пользователей: {count}")
+    sender.send(application.bot, user_id, message)
 
 LOGIN, PASSWORD = range(2)
 
@@ -142,19 +134,26 @@ def update_waiting_count(new_count):
 def handle_stomp_message(destination: str, body):
     logger.info(f"Получено сообщение (destination: {destination}): {body}")
     try:
-        if destination.startswith("/queue/errors"):
-            # todo: Выводить ошибки в чат
-            logger.error(f"Ошибка от сервера: ${body}")
+        data = json.loads(body.rstrip('\x00'))
 
-        elif destination.startswith("/queue/dialogs") or destination == "/topic/dialogs":
-            data = json.loads(body.rstrip('\x00'))
-            request_count = data.get("size", 0)
+        if destination.startswith("/queue"):
+            username = data.get("username")
+
+            if destination.startswith("/queue/errors"):
+                error = data.get("error")
+                message_username(username, f"Ошибка: {error}")
+
+            if destination.startswith("/queue/dialogs"):
+                request_count = data.get("size", 0)
+                message_username(username, f"Число ожидающих пользователей: {request_count}")
+
+        if destination.startswith("/topic"):
             if destination == "/topic/dialogs":
                 # Если сообщение с топика - значит запрашивали не мы, т.е. число обновилось
-                handle_count_update(request_count)
-            else:
-                username = data.get("username")
-                handle_count_message(username, request_count)
+                global waiting_count
+                request_count = data.get("size", 0)
+                waiting_count = request_count
+                message_all(f"Обновлено число ожидающих пользователей: {waiting_count}")
 
     except json.JSONDecodeError:
         logger.warning(f"Не удалось спарсить сообщение: {body}")
@@ -184,13 +183,12 @@ async def handle_buttons(update: Update, context: ContextTypes.DEFAULT_TYPE):
             if ws_manager is None:
                 raise ConnectionError("Websocket не подключен")
             ws_manager.send("/app/waiting.size", "")
-            await update.message.reply_text(f"Количество ожидающих пользователей: {waiting_count}")
 
         elif text == "Найти пользователя":
             if ws_manager is None:
                 raise ConnectionError("Websocket не подключен")
             if waiting_count > 0:
-                ws_manager.subscribe("/user/queue/private", private_sub_id)
+                ws_manager.subscribe(private_sub_id, "/user/queue/private")
                 ws_manager.unsubscribe("sub-2")  # Отписываемся от /topic/dialogs
                 await update.message.reply_text(
                     "Подключено к пользователю.",
@@ -202,7 +200,7 @@ async def handle_buttons(update: Update, context: ContextTypes.DEFAULT_TYPE):
             if ws_manager is None:
                 raise ConnectionError("Websocket не подключен")
             ws_manager.unsubscribe(private_sub_id) # Отписываемся
-            ws_manager.subscribe("/topic/dialogs", "sub-2")
+            ws_manager.subscribe("sub-2", "/topic/dialogs")
             await update.message.reply_text(
                 "Диалог завершен.",
                 reply_markup=ReplyKeyboardMarkup(AFTER_AUTH_KEYBOARD, resize_keyboard=True))

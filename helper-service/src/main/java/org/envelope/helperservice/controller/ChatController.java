@@ -41,7 +41,11 @@ public class ChatController {
     }
     @MessageExceptionHandler
     public void handleException(ClientException exception, StompHeaderAccessor accessor) {
+        String username = sessionService.getSessionAttribute("username", accessor, String.class);
+        String jsonMessage = chatService.getJson(
+                Map.of("error", exception.getMessage(), "username", username)
+        );
         String sessionId = accessor.getSessionId();
-        chatService.sendMessageToUserQueue(exception.getMessage(), "/queue/errors", sessionId);
+        chatService.sendMessageToUserQueue(jsonMessage, "/queue/errors", sessionId);
     }
 }

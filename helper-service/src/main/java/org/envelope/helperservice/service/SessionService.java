@@ -50,7 +50,7 @@ public class SessionService {
         }
     }
 
-    private void startPrivateSession(String sessionId) throws RuntimeException {
+    private void startPrivateSession(String sessionId) {
         if (dialogMap.containsValue(sessionId)) {
             throw new ClientException("Ошибка подписки: Помощник уже ожидает сообщения");
         }
