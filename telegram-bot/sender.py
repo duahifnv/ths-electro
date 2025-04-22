@@ -1,5 +1,6 @@
 import asyncio
 import threading
+import logging
 
 from telegram import error
 
@@ -28,14 +29,14 @@ class AsyncMessageSender:
 
     async def _send_message(self, bot, chat_id, text):
         try:
-            await bot.send_message(chat_id=chat_id, text=text)
+            await bot.send_message(chat_id=chat_id, text=text, parse_mode="HTML")
         except error.Forbidden:
-            print(f"Пользователь {chat_id} заблокировал бота. Невозможно отправить сообщение")
+            logging.warning(f"Пользователь {chat_id} заблокировал бота. Невозможно отправить сообщение")
         except Exception as e:
-            print(f"Ошибка отправки пользователю {chat_id}: {e}")
+            logging.error(f"Ошибка отправки пользователю {chat_id}: {e}")
 
     def _handle_result(self, future):
         try:
             future.result()
         except Exception as e:
-            print(f"Ошибка асинхронного обработчика: {e}")
+            logging.error(f"Ошибка асинхронного обработчика: {e}")
