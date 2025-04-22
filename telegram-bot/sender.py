@@ -3,9 +3,11 @@ import threading
 import logging
 
 from telegram import error
+from telegram.ext import Application
 
-class AsyncMessageSender:
-    def __init__(self):
+class AsyncBotSender:
+    def __init__(self, application_token):
+        self.application = Application.builder().token(application_token).build()
         self.loop = None
         self.thread = None
         self.start_loop()
@@ -20,16 +22,18 @@ class AsyncMessageSender:
         self.thread = threading.Thread(target=run_loop, daemon=True)
         self.thread.start()
 
-    def send(self, bot, chat_id, text):
+    def send(self, chat_id, text, reply_markup=None):
         future = asyncio.run_coroutine_threadsafe(
-            self._send_message(bot, chat_id, text),
+            self._send_message(chat_id, text, reply_markup),
             self.loop
         )
         future.add_done_callback(self._handle_result)
 
-    async def _send_message(self, bot, chat_id, text):
+    async def _send_message(self, chat_id, text, reply_markup=None):
         try:
-            await bot.send_message(chat_id=chat_id, text=text, parse_mode="HTML")
+            await self.application.bot.send_message(
+                chat_id=chat_id, text=text, parse_mode="HTML", reply_markup=reply_markup
+            )
         except error.Forbidden:
             logging.warning(f"Пользователь {chat_id} заблокировал бота. Невозможно отправить сообщение")
         except Exception as e:

@@ -19,7 +19,7 @@ import java.util.Map;
 @Slf4j(topic = "Сервис сессий")
 public class SessionService {
     private final Map<String, WebSocketSession> sessions;
-    private final DialogMap dialogMap;
+    private final DialogMap dialogs;
     private final Map<String, String> usersPrivateSubscriptions;
     private final Map<String, String> helpersPrivateSubscriptions;
     private final RabbitService rabbitService;
@@ -48,42 +48,43 @@ public class SessionService {
     }
 
     public void addUserToDialogs(String sessionId) {
-        if (!dialogMap.containsKey(sessionId)) {
-            dialogMap.put(sessionId, null);
+        if (!dialogs.containsKey(sessionId)) {
+            dialogs.put(sessionId, null);
         }
     }
 
-    private void startPrivateSession(String sessionId) {
-        if (dialogMap.containsValue(sessionId)) {
-            throw new ClientException("Ошибка подписки: Помощник уже ожидает сообщения");
+    private void startDialogWithUser(String helperId) {
+        if (dialogs.containsValue(helperId)) {
+            throw new ClientException("Невозможно начать диалог: Помощник уже ожидает сообщения");
         }
-        String waitingUserId = dialogMap.getSessionIdByValue(null);
+        String waitingUserId = dialogs.getSessionIdByValue(null);
         if (waitingUserId == null) {
-            throw new ClientException("Ошибка подписки: Отсутствуют ожидающие пользователи");
+            throw new ClientException("Невозможно начать диалог: Отсутствуют ожидающие пользователи");
         }
-        dialogMap.put(waitingUserId, sessionId);
-        log.info("Начат диалог [пользователь {}] - [помощник {}]", waitingUserId, sessionId);
+        dialogs.put(waitingUserId, helperId);
+        log.info("Начат диалог [пользователь {}] - [помощник {}]", waitingUserId, helperId);
     }
 
-    private void stopPrivateSession(String sessionId, @NonNull Role role) {
+    private void stopDialog(String initiatorId, @NonNull Role role) {
         switch (role) {
             case USER -> {
-                if (!dialogMap.containsKey(sessionId)) {
+                if (!dialogs.containsKey(initiatorId)) {
                     return;
                 }
-                rabbitService.deleteQueue(sessionId);
-                String helperId = dialogMap.get(sessionId);
-                if (helperId != null) {
-                    var dialogEndedEvent = new DialogEndedEvent(this, sessionId, helperId);
+                rabbitService.deleteQueue(initiatorId);
+                String companionId = dialogs.get(initiatorId);
+                if (companionId != null) {
+                    var dialogEndedEvent = new DialogEndedEvent(this, initiatorId, companionId);
                     eventPublisher.publishEvent(dialogEndedEvent);
-//                    removeClientSession(helperId);
                 }
-                dialogMap.remove(sessionId);
+                dialogs.remove(initiatorId);
             }
             case HELPER -> {
-                String userId = dialogMap.getSessionIdByValue(sessionId);
-                if (userId != null) {
-                    dialogMap.put(userId, null);
+                String companionId = dialogs.getSessionIdByValue(initiatorId);
+                if (companionId != null) {
+                    var dialogEndedEvent = new DialogEndedEvent(this, initiatorId, companionId);
+                    eventPublisher.publishEvent(dialogEndedEvent);
+                    dialogs.put(companionId, null);
                 }
             }
         }
@@ -94,25 +95,21 @@ public class SessionService {
         switch (role) {
             case USER -> usersPrivateSubscriptions.put(sessionId, subscriptionId);
             case HELPER -> {
-                startPrivateSession(sessionId);
+                startDialogWithUser(sessionId);
                 helpersPrivateSubscriptions.put(sessionId, subscriptionId);
             }
         }
     }
 
     public void unsubscribeFromPrivate(String sessionId, Role role) {
-        stopPrivateSession(sessionId, role);
+        stopDialog(sessionId, role);
         switch (role) {
-            case USER -> {
-                usersPrivateSubscriptions.remove(sessionId);
-            }
-            case HELPER -> {
-                helpersPrivateSubscriptions.remove(sessionId);
-            }
+            case USER -> usersPrivateSubscriptions.remove(sessionId);
+            case HELPER -> helpersPrivateSubscriptions.remove(sessionId);
         }
     }
     public int getWaitingUsersCount() {
-        return dialogMap.getWaitingUsersCount();
+        return dialogs.getWaitingUsersCount();
     }
     public String getPrivateSubscriptionId(String sessionId, Role role) {
         return switch (role) {

@@ -3,6 +3,8 @@ import time
 import logging
 import websocket
 
+from pubsub import pub
+
 # Настройка логирования
 logging.basicConfig(
     format='%(asctime)s - %(name)s - %(levelname)s - %(message)s',
@@ -11,14 +13,13 @@ logging.basicConfig(
 logger = logging.getLogger(__name__)
 
 class WebSocketManager:
-    def __init__(self, subscribe_topics, ws_url, message_handler=None, send_apis_on_connect=None):
+    def __init__(self, subscribe_topics, ws_url, message_handler=None):
         self.ws = None
         self.ws_url = ws_url
         self.subscriptions = {}
         self.token = None
         self.connected = False
         self.subscribe_topics = subscribe_topics
-        self.send_apis_on_connect = send_apis_on_connect
         self.message_handler = message_handler
 
     def connect(self):
@@ -78,8 +79,6 @@ class WebSocketManager:
                 logger.info("STOMP соединение установлено")
                 for sub_id, topic in self.subscribe_topics.items():
                     self.subscribe(sub_id, topic)
-                for api in self.send_apis_on_connect:
-                    self.send(api, "")
 
             elif command == "MESSAGE":
                 destination = headers.get("destination", "")
@@ -91,7 +90,7 @@ class WebSocketManager:
     def on_error(self, ws, error):
         """Обработчик ошибок"""
         logger.error(f"WebSocket error: {error}")
-        self.connected = False
+        pub.sendMessage('ws_close')
 
     def on_close(self, ws, close_status_code, close_msg):
         """Обработчик закрытия соединения"""

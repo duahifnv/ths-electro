@@ -6,7 +6,8 @@ from requests import Response
 import wsmanager
 import json
 
-from sender import AsyncMessageSender
+from sender import AsyncBotSender
+from pubsub import pub
 from dotenv import load_dotenv
 from telegram import Update, ReplyKeyboardMarkup
 from telegram.ext import (
@@ -50,6 +51,7 @@ DIALOG_END_QUEUE_SUB_ID = "sub-5"
 
 # Глобальные переменные
 application = None
+sender = AsyncBotSender(TELEGRAM_BOT_TOKEN)
 ws_manager: wsmanager.WebSocketManager = None
 ws_connection = None
 ws_thread = None
@@ -60,18 +62,16 @@ waiting_count = 0
 # Переменная состояния диалога с пользователем
 is_dialog_open = False
 
-sender = AsyncMessageSender()
-
-def message_all(message):
+def message_all(message, reply_markup=None):
     for user_id, _ in users_usernames.items():
-        sender.send(application.bot, user_id, message)
+        sender.send(user_id, message, reply_markup)
 
-def message_send(receiver, message):
+def message_send(receiver, message, reply_markup=None):
     user_id = next((k for k, v in users_usernames.items() if v == receiver), None)
     if not user_id:
         logger.error(f"Отсутствует пользователь с именем {receiver}")
         return
-    sender.send(application.bot, user_id, message)
+    sender.send(user_id, message, reply_markup)
 
 # Обработчик команды /start
 async def start(update: Update, context: ContextTypes.DEFAULT_TYPE):
@@ -118,24 +118,26 @@ async def get_password(update: Update, context: ContextTypes.DEFAULT_TYPE):
                 return ConversationHandler.END
             if username in users_usernames.values():
                 await update.message.reply_text(
-                    "⚠️ Данный пользователь находится в системе с другого устройства. Попробуйте позже",
+                    "⚠️ Данный пользователь находится в системе с другого устройства.",
                     reply_markup=ReplyKeyboardMarkup(MAIN_KEYBOARD, resize_keyboard=True),
                 )
                 return ConversationHandler.END
-            user_id = update.effective_user.id
-            users_usernames[user_id] = username
             # Инициализация WebSocket менеджера
             global ws_manager
             ws_manager = initialize_ws_manager(username, jwt_token)
+
             # Подключаемся к WebSocket
             if ws_manager.connect():
+                user_id = update.effective_user.id
+                users_usernames[user_id] = username
                 await update.message.reply_text(
                     "🔐 Авторизация успешна!",
                     reply_markup=ReplyKeyboardMarkup(AFTER_AUTH_KEYBOARD, resize_keyboard=True),
                 )
+                ws_manager.send("/app/waiting.size", "")
             else:
                 await update.message.reply_text(
-                    "⚠️ Ошибка на сервере. Попробуйте позже.",
+                    "⚠️ Сервер недоступен. Попробуйте позже.",
                     reply_markup=ReplyKeyboardMarkup(MAIN_KEYBOARD, resize_keyboard=True),
                 )
             return ConversationHandler.END
@@ -222,7 +224,6 @@ def initialize_ws_manager(username, token):
             DIALOGS_TOPIC_SUB_ID: "/topic/dialogs",
             DIALOGS_QUEUE_SUB_ID: "/user/queue/dialogs"
         },
-        send_apis_on_connect=["/app/waiting.size"],
         message_handler=handle_stomp_message,
         ws_url=f"{WEBSOCKET_URL}?token={token}&username={username}"
     )
@@ -289,6 +290,13 @@ async def handle_buttons(update: Update, context: ContextTypes.DEFAULT_TYPE):
         logger.error(f"Ошибка обработки команды: {e}")
         # await update.message.reply_text("Произошла ошибка. Попробуйте позже.")
 
+def handle_ws_close():
+    message_all(f"⚠️ Соединение с сервером разорвано",
+                reply_markup=ReplyKeyboardMarkup(MAIN_KEYBOARD, resize_keyboard=True))
+    users_usernames.clear()
+
+pub.subscribe(handle_ws_close, 'ws_close')
+
 # Основная функция
 def main():
     global application
@@ -304,7 +312,6 @@ def main():
     ))
     application.add_handler(MessageHandler(
         None,
-        # filters.Regex("^(Ожидающие пользователи|Найти пользователя|Завершить диалог|Выйти из системы)$"),
         callback=handle_buttons
     ))
     application.run_polling()
