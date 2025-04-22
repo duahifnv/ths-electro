@@ -3,6 +3,7 @@ package org.envelope.helperservice.controller;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.envelope.helperservice.dto.Role;
+import org.envelope.helperservice.event.DialogEndedEvent;
 import org.envelope.helperservice.event.WaitingCountEvent;
 import org.envelope.helperservice.service.ChatService;
 import org.envelope.helperservice.service.SessionService;
@@ -30,9 +31,10 @@ public class StompHandler {
     }
     @EventListener
     public void handleDisconnect(SessionDisconnectEvent event) {
-        var headerAccessor = StompHeaderAccessor.wrap(event.getMessage());
+        var accessor = StompHeaderAccessor.wrap(event.getMessage());
+        String sessionId = accessor.getSessionId();
         log.info("Клиент отсоединен от веб-сокета. Session ID: {}, Команда отключения: {}",
-                headerAccessor.getSessionId(), headerAccessor.getCommand());
+                sessionId, accessor.getCommand());
     }
     @EventListener
     public void handleSessionSubscribe(SessionSubscribeEvent event) {
@@ -58,11 +60,21 @@ public class StompHandler {
         log.info("Клиент {} отписался от очереди или топика", sessionId);
     }
     @EventListener
-    public void handleWaitingCount(WaitingCountEvent event)  {
+    public void handleWaitingCount(WaitingCountEvent event) {
         int waitingCount = event.getWaitingCount();
         String jsonMessage = chatService.getJson(
                 Map.of("size", String.valueOf(waitingCount))
         );
         chatService.sendMessageToTopic(jsonMessage, "/topic/dialogs");
+    }
+    @EventListener
+    public void handleUserEndedDialog(DialogEndedEvent event) {
+        String initiator = sessionService.getSessionAttribute("username", event.getInitiatorId(), String.class);
+        String companion = sessionService.getSessionAttribute("username", event.getCompanionId(), String.class);
+        String jsonMessage = chatService.getJson(Map.of(
+                "initiator", initiator,
+                "receiver", companion)
+        );
+        chatService.sendJsonToUserQueue(jsonMessage, "/queue/dialog.end", event.getCompanionId());
     }
 }
