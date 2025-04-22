@@ -28,13 +28,15 @@ const ChatWidget = () => {
         }
 
         const client = new Client({
-            webSocketFactory: () => new SockJS(`http://localhost:8082/api/helper/ws?token=${encodeURIComponent(auth.token)}`),
+            webSocketFactory: () =>
+                new SockJS(`http://localhost:8082/api/helper/ws?token=${encodeURIComponent(auth.token)}&username=${encodeURIComponent(auth.login)}`),
             onConnect: () => {
                 console.log('STOMP соединение установлено');
 
                 // Подписываемся на приватную очередь
                 client.subscribe('/user/queue/private', (message) => {
-                    const serverMessage = { text: message.body, isUser: false };
+                    let jsonMessage = JSON.parse(message.body);
+                    const serverMessage = { text: jsonMessage.message, isUser: false };
                     setMessages((prevMessages) => [...prevMessages, serverMessage]);
                 });
 
@@ -43,11 +45,13 @@ const ChatWidget = () => {
             },
             onStompError: (frame) => {
                 console.error('Ошибка STOMP:', frame);
+                setStompClient(null);
             },
             onDisconnect: () => {
                 console.log('STOMP соединение закрыто');
                 setStompClient(null);
             },
+            reconnectDelay: 30000 // 30s
         });
 
         client.activate();
