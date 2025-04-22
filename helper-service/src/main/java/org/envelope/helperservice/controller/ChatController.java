@@ -2,7 +2,6 @@ package org.envelope.helperservice.controller;
 
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
-import org.envelope.helperservice.dto.Role;
 import org.envelope.helperservice.exception.ClientException;
 import org.envelope.helperservice.service.ChatService;
 import org.envelope.helperservice.service.SessionService;
@@ -23,29 +22,25 @@ public class ChatController {
 
     @MessageMapping("/chat")
     public void sendMessageToChat(Message<String> message) {
-        StompHeaderAccessor accessor = StompHeaderAccessor.wrap(message);
-        String sessionId = accessor.getSessionId();
-        Role role = sessionService.getSessionAttribute("role", accessor, Role.class);
-        String payload = message.getPayload().trim();
-        chatService.sendMessageToPrivateChat(payload, sessionId, role);
+        chatService.sendMessageToPrivateChat(message);
     }
     @MessageMapping("/waiting.size")
     public void getWaitingUsersCount(StompHeaderAccessor accessor) {
-        String username = sessionService.getSessionAttribute("username", accessor, String.class);
+        String receiver = sessionService.getSessionAttribute("username", accessor, String.class);
         int waitingCount = sessionService.getWaitingUsersCount();
-        String jsonMessage = chatService.getJson(
-                Map.of("size", String.valueOf(waitingCount), "username", username)
+        String json = chatService.getJson(
+                Map.of("size", String.valueOf(waitingCount), "receiver", receiver)
         );
         String sessionId = accessor.getSessionId();
-        chatService.sendMessageToUserQueue(jsonMessage, "/queue/dialogs", sessionId);
+        chatService.sendJsonToUserQueue(json, "/queue/dialogs", sessionId);
     }
     @MessageExceptionHandler
     public void handleException(ClientException exception, StompHeaderAccessor accessor) {
-        String username = sessionService.getSessionAttribute("username", accessor, String.class);
-        String jsonMessage = chatService.getJson(
-                Map.of("error", exception.getMessage(), "username", username)
+        String receiver = sessionService.getSessionAttribute("username", accessor, String.class);
+        String json = chatService.getJson(
+                Map.of("error", exception.getMessage(), "receiver", receiver)
         );
         String sessionId = accessor.getSessionId();
-        chatService.sendMessageToUserQueue(jsonMessage, "/queue/errors", sessionId);
+        chatService.sendJsonToUserQueue(json, "/queue/errors", sessionId);
     }
 }

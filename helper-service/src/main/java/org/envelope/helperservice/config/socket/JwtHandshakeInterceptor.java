@@ -5,7 +5,6 @@ import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.envelope.helperservice.dto.Role;
 import org.envelope.helperservice.dto.UserAgent;
-import org.envelope.helperservice.service.DialogMap;
 import org.envelope.helperservice.service.IdentityService;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.server.ServerHttpRequest;
@@ -26,7 +25,6 @@ import java.util.Set;
 public class JwtHandshakeInterceptor implements HandshakeInterceptor {
     private static final String BEARER_PREFIX = "Bearer ";
     private final IdentityService identityService;
-    private final DialogMap dialogMap;
 
     @Override
     public boolean beforeHandshake(ServerHttpRequest request,

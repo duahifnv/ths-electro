@@ -4,7 +4,9 @@ import lombok.NonNull;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.envelope.helperservice.dto.Role;
+import org.envelope.helperservice.event.DialogEndedEvent;
 import org.envelope.helperservice.exception.ClientException;
+import org.springframework.context.ApplicationEventPublisher;
 import org.springframework.messaging.simp.stomp.StompHeaderAccessor;
 import org.springframework.stereotype.Service;
 import org.springframework.web.socket.WebSocketSession;
@@ -21,6 +23,7 @@ public class SessionService {
     private final Map<String, String> usersPrivateSubscriptions;
     private final Map<String, String> helpersPrivateSubscriptions;
     private final RabbitService rabbitService;
+    private final ApplicationEventPublisher eventPublisher;
 
     public void addClientSession(String sessionId, WebSocketSession session) {
         synchronized (sessions) {
@@ -71,7 +74,9 @@ public class SessionService {
                 rabbitService.deleteQueue(sessionId);
                 String helperId = dialogMap.get(sessionId);
                 if (helperId != null) {
-                    removeClientSession(helperId);
+                    var dialogEndedEvent = new DialogEndedEvent(this, sessionId, helperId);
+                    eventPublisher.publishEvent(dialogEndedEvent);
+//                    removeClientSession(helperId);
                 }
                 dialogMap.remove(sessionId);
             }
@@ -119,5 +124,11 @@ public class SessionService {
     public <T> T getSessionAttribute(String attributeName, StompHeaderAccessor accessor, Class<T> type)
             throws RuntimeException {
         return (T) accessor.getSessionAttributes().get(attributeName);
+    }
+    @SuppressWarnings("unchecked")
+    public <T> T getSessionAttribute(String attributeName, String sessionId, Class<T> type)
+            throws RuntimeException {
+        WebSocketSession session = sessions.get(sessionId);
+        return (T) session.getAttributes().get(attributeName);
     }
 }

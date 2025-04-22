@@ -2,12 +2,15 @@ package org.envelope.helperservice.service;
 
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
-import lombok.NonNull;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.envelope.helperservice.dto.Role;
 import org.envelope.helperservice.exception.ClientException;
+import org.springframework.messaging.Message;
 import org.springframework.messaging.simp.SimpMessagingTemplate;
+import org.springframework.messaging.simp.stomp.StompCommand;
+import org.springframework.messaging.simp.stomp.StompHeaderAccessor;
+import org.springframework.messaging.support.MessageBuilder;
 import org.springframework.stereotype.Service;
 
 import java.util.ArrayList;
@@ -27,16 +30,21 @@ public class ChatService {
     public void sendMessageToTopic(String message, String topicName) {
         messagingTemplate.convertAndSend(topicName, message);
     }
-    public void sendMessageToUserQueue(String message, String queueName, String sessionId) {
+    public void sendJsonToUserQueue(String json, String queueName, String sessionId) {
         if (sessionId == null) {
             log.error("Session id не найден, невозможно отправить сообщение в пользовательскую очередь");
             return;
         }
         String queuePath = String.format("%s-user%s", queueName, sessionId);
-        messagingTemplate.convertAndSend(queuePath, message);
-        log.info("Сообщение '{}' отправлено в очередь {}", message, queuePath);
+        messagingTemplate.convertAndSend(queuePath, json);
+        log.info("Сообщение '{}' отправлено в очередь {}", json, queuePath);
     }
-    public void sendMessageToPrivateChat(String message, String senderId, @NonNull Role role) {
+    public void sendMessageToPrivateChat(Message<String> message) {
+        StompHeaderAccessor accessor = StompHeaderAccessor.wrap(message);
+        String payload = message.getPayload().trim();
+        String senderId = accessor.getSessionId();
+        Role role = sessionService.getSessionAttribute("role", accessor, Role.class);
+
         String receiverId;
         switch (role) {
             case USER -> {
@@ -47,7 +55,7 @@ public class ChatService {
                         log.info("Пользователь {} не был подписан на приватную очередь, подписываем", senderId);
                         sessionService.addUserToDialogs(senderId);
                     }
-                    rabbitService.sendToBuffer(message, senderId);
+                    rabbitService.sendToBuffer(payload, senderId);
                     return;
                 }
             }
@@ -60,7 +68,12 @@ public class ChatService {
             }
             default -> throw new IllegalStateException("Unexpected value: " + role);
         }
-        sendMessageToUserQueue(message, "/queue/private", receiverId);
+        String senderUsername = sessionService.getSessionAttribute("username", senderId, String.class);
+        String receiverUsername = sessionService.getSessionAttribute("username", receiverId, String.class);
+        String json = getJson(
+                Map.of("message", payload, "sender", senderUsername, "receiver", receiverUsername)
+        );
+        sendJsonToUserQueue(json, "/queue/private", receiverId);
     }
     public List<String> receiveAllMessages(String senderId) {
         List<String> messages = new ArrayList<>();
@@ -80,7 +93,12 @@ public class ChatService {
         List<String> userMessages = receiveAllMessages(userId);
 
         for (String userMessage : userMessages) {
-            sendMessageToPrivateChat(userMessage, userId, Role.USER);
+            StompHeaderAccessor headerAccessor = StompHeaderAccessor.create(StompCommand.MESSAGE);
+            headerAccessor.setSessionId(userId);
+            headerAccessor.setSessionAttributes(Map.of("role", Role.USER));
+            Message<String> message = MessageBuilder.createMessage(userMessage,
+                    headerAccessor.getMessageHeaders());
+            sendMessageToPrivateChat(message);
         }
     }
     public String getJson(Map<String, String> properties) {
