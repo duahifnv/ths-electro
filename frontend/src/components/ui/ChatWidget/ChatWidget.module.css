@@ -130,6 +130,43 @@
     border: 1px solid var(--border-color);
 }
 
+.endedMessage {
+    background-color: #b9b9b9;
+    color: #666;
+}
+
+.dialogEndModal {
+    position: absolute;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    background-color: rgba(0, 0, 0, 0.5);
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    z-index: 100;
+}
+
+.dialogEndContent {
+    background-color: var(--body-bk-color);
+    padding: 20px;
+    border-radius: 8px;
+    text-align: center;
+    max-width: 80%;
+}
+
+.dialogEndButtons {
+    display: flex;
+    justify-content: center;
+    gap: 10px;
+    margin-top: 15px;
+}
+
+.dialogEndButton {
+    min-width: 80px;
+}
+
 /* Размытый контент для неавторизованных */
 /* Размытие ТОЛЬКО контента чата */
 .blurredContent {
